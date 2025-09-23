@@ -1,21 +1,18 @@
 
-export type HookFunction = (context: any) => void | Promise<void> | string | Promise<string>;
+export type HookFunction = (context: unknown) => void | Promise<void> | string | Promise<string>;
 
-export interface HookRegistry {
-  [hookName: string]: HookFunction;
-}
+export type HookRegistry = Record<string, HookFunction>;
 
 export class HookManager {
   private hooks: HookRegistry = {};
 
-  constructor() {
-  }
+
 
   register(name: string, hook: HookFunction): void {
     this.hooks[name] = hook;
   }
 
-  async execute(name: string, context: any): Promise<string | void> {
+  async execute(name: string, context: unknown): Promise<string | void> {
     const hook = this.hooks[name];
     if (!hook) {
       console.warn(`Hook '${name}' not found`);

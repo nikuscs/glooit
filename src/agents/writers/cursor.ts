@@ -2,6 +2,10 @@ import { basename } from 'path';
 import { existsSync, readFileSync } from 'fs';
 import type { Rule, ResolvedMcp } from '../../types';
 
+interface McpConfigFile {
+  mcpServers?: Record<string, unknown>;
+}
+
 export class CursorWriter {
   formatContent(content: string, rule: Rule): string {
     const ruleName = this.extractRuleName(rule.file);
@@ -19,7 +23,7 @@ export class CursorWriter {
   }
 
   formatMcp(mcp: ResolvedMcp, merge: boolean): string {
-    let existingConfig: any = {};
+    let existingConfig: McpConfigFile = {};
 
     if (merge && existsSync(mcp.outputPath)) {
       try {

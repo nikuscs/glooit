@@ -298,7 +298,7 @@ describe('AIRulesCore', () => {
       expect(existsSync('CLAUDE.md')).toBe(true);
 
       // Manually create backup with known files
-      const backupManager = (core as any).backupManager;
+      const backupManager = (core as unknown as { backupManager: { createBackup: (files: string[]) => Promise<string> } }).backupManager;
       const backupId = await backupManager.createBackup(['CLAUDE.md']);
 
       expect(backupId).toBeTruthy();

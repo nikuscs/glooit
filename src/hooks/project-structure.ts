@@ -7,10 +7,10 @@ export const replaceStructure = async (context: SyncContext): Promise<string> =>
   return context.content.replace(/__STRUCTURE__/g, structure);
 };
 
-async function getProjectStructure(maxDepth: number = 3): Promise<string> {
+async function getProjectStructure(maxDepth = 3): Promise<string> {
   try {
 
-    const buildTree = (dir: string, depth: number = 0, prefix: string = ''): string[] => {
+    const buildTree = (dir: string, depth = 0, prefix = ''): string[] => {
       if (depth > maxDepth) return [];
 
       try {

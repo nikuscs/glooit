@@ -68,7 +68,7 @@ export class BackupManager {
     }
   }
 
-  listBackups(): Array<{ timestamp: string; fileCount: number }> {
+  listBackups(): { timestamp: string; fileCount: number }[] {
     if (!existsSync(this.backupDir)) {
       return [];
     }

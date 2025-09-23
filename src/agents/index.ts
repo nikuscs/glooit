@@ -26,7 +26,7 @@ export const AGENT_MAPPINGS: Record<Agent, AgentMapping> = {
   }
 };
 
-export function getAgentPath(agent: Agent, name: string = 'global'): string {
+export function getAgentPath(agent: Agent, name = 'global'): string {
   const mapping = AGENT_MAPPINGS[agent];
   return mapping.path.replace('{name}', name);
 }

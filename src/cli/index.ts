@@ -225,7 +225,7 @@ async function initCommand(force: boolean): Promise<void> {
   console.log('3. Run `glooit sync` to distribute rules');
 }
 
-async function syncCommand(configPath?: string, createBackup: boolean = true): Promise<void> {
+async function syncCommand(configPath?: string, createBackup = true): Promise<void> {
   const config = await ConfigLoader.load(configPath);
   const core = new AIRulesCore(config);
 
@@ -311,7 +311,7 @@ async function resetCommand(force: boolean): Promise<void> {
     const config = await ConfigLoader.load();
     customConfigDir = config.configDir;
     const core = new AIRulesCore(config);
-    generatedPaths = (core as any).collectAllGeneratedPaths();
+    generatedPaths = core.collectAllGeneratedPaths();
   } catch {
     // Config doesn't exist or can't be loaded, use default
     generatedPaths = ['.glooit']; // Default config directory
@@ -374,8 +374,8 @@ async function resetCommand(force: boolean): Promise<void> {
 
   // Clean .gitignore
   try {
-    const config = { configDir: '.glooit', rules: [], commands: [] };
-    const gitIgnoreManager = new GitIgnoreManager(config as any);
+    const config = { configDir: '.glooit', rules: [], commands: [], mcps: [], backup: { enabled: true, retention: 10 }, mergeMcps: false };
+    const gitIgnoreManager = new GitIgnoreManager(config);
     await gitIgnoreManager.cleanupGitIgnore();
     console.log('   Cleaned .gitignore');
   } catch {

@@ -1,6 +1,10 @@
 import { existsSync, readFileSync } from 'fs';
 import type { Rule, ResolvedMcp } from '../../types';
 
+interface McpConfigFile {
+  mcpServers?: Record<string, unknown>;
+}
+
 export interface GenericWriter {
   formatContent(content: string, rule: Rule): string;
 }
@@ -11,7 +15,7 @@ export class MarkdownWriter implements GenericWriter {
   }
 
   formatMcp(mcp: ResolvedMcp, merge: boolean): string {
-    let existingConfig: any = {};
+    let existingConfig: McpConfigFile = {};
 
     if (merge && existsSync(mcp.outputPath)) {
       try {

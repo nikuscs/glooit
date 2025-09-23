@@ -1,4 +1,15 @@
-import type { Config } from '../types';
+import type { Config, Agent, McpConfig } from '../types';
+
+interface McpGroupItem {
+  name: string;
+  config: McpConfig;
+  agent: string;
+  outputPath: string;
+}
+
+interface McpConfigFile {
+  mcpServers?: Record<string, unknown>;
+}
 import { AgentDistributor } from '../agents/distributor';
 import { BackupManager } from './backup';
 import { GitIgnoreManager } from './gitignore';
@@ -35,7 +46,7 @@ export class AIRulesCore {
 
       if (this.config.commands) {
         for (const command of this.config.commands) {
-            const commandRule = {
+          const commandRule = {
             file: command.file,
             to: './',
             targets: command.targets
@@ -73,7 +84,7 @@ export class AIRulesCore {
     await this.backupManager.restoreBackup(timestamp);
   }
 
-  listBackups(): Array<{ timestamp: string; fileCount: number }> {
+  listBackups(): { timestamp: string; fileCount: number }[] {
     return this.backupManager.listBackups();
   }
 
@@ -92,7 +103,7 @@ export class AIRulesCore {
 
       if (this.config.commands) {
         for (const command of this.config.commands) {
-            if (!existsSync(command.file)) {
+          if (!existsSync(command.file)) {
             throw new Error(`Command file not found: ${command.file}`);
           }
         }
@@ -110,7 +121,7 @@ export class AIRulesCore {
     this.validateMcpNames();
 
     // Expand MCPs for each target agent and group by output path
-    const mcpGroups = new Map<string, Array<{ name: string, config: any, agent: string, outputPath: string }>>();
+    const mcpGroups = new Map<string, McpGroupItem[]>();
 
     for (const mcp of this.config.mcps) {
       for (const agent of mcp.targets) {
@@ -118,12 +129,15 @@ export class AIRulesCore {
         if (!mcpGroups.has(outputPath)) {
           mcpGroups.set(outputPath, []);
         }
-        mcpGroups.get(outputPath)!.push({
-          name: mcp.name,
-          config: mcp.config,
-          agent,
-          outputPath
-        });
+        const group = mcpGroups.get(outputPath);
+        if (group) {
+          group.push({
+            name: mcp.name,
+            config: mcp.config,
+            agent,
+            outputPath
+          });
+        }
       }
     }
 
@@ -131,7 +145,7 @@ export class AIRulesCore {
       const agent = mcps[0]?.agent;
       if (!agent) continue;
 
-      const writer = AgentWriterFactory.createWriter(agent as any);
+      const writer = AgentWriterFactory.createWriter(agent as Agent);
 
       if (writer.formatMcp) {
         const dir = dirname(outputPath);
@@ -139,14 +153,14 @@ export class AIRulesCore {
           mkdirSync(dir, { recursive: true });
         }
 
-        let existingConfig: any = {};
+        let existingConfig: McpConfigFile = {};
         if (this.config.mergeMcps) {
           if (existsSync(outputPath)) {
             try {
               const content = readFileSync(outputPath, 'utf-8');
               existingConfig = JSON.parse(content);
             } catch {
-              }
+            }
           }
         }
 
@@ -183,7 +197,7 @@ export class AIRulesCore {
     }
   }
 
-  private collectAllGeneratedPaths(): string[] {
+  collectAllGeneratedPaths(): string[] {
     const paths: string[] = [];
 
     for (const rule of this.config.rules) {
@@ -201,7 +215,7 @@ export class AIRulesCore {
     if (this.config.commands) {
       for (const command of this.config.commands) {
         for (const agent of command.targets) {
-            const agentPath = getAgentPath(agent, command.command);
+          const agentPath = getAgentPath(agent, command.command);
           paths.push(agentPath);
         }
       }

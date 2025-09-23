@@ -126,7 +126,8 @@ export default {
       // Extract timestamp from the list output
       const timestampMatch = listResult.match(/(\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-\d{3}Z)/);
       expect(timestampMatch).toBeTruthy();
-      const timestamp = timestampMatch![1];
+      const timestamp = timestampMatch?.[1];
+      expect(timestamp).toBeDefined();
 
       // Modify the file
       writeFileSync('CLAUDE.md', '# Modified content');

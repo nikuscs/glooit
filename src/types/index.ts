@@ -87,10 +87,10 @@ export interface SyncContext {
 
 export interface BackupEntry {
   timestamp: string;
-  files: Array<{
+  files: {
     path: string;
     content: string;
-  }>;
+  }[];
 }
 
 export function defineRules(config: Config): Config {
