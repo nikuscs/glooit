@@ -149,8 +149,40 @@ export class AIRulesCore {
   private collectAllGeneratedPaths(): string[] {
     const paths: string[] = [];
 
-    // Add rule paths (this logic would be similar to GitIgnoreManager)
-    // Implementation would collect all paths that will be generated
+    // Collect rule-generated paths
+    for (const rule of this.config.rules) {
+      for (const agent of rule.targets) {
+        const { getAgentPath } = require('../agents');
+        const ruleName = rule.file.split('/').pop()?.replace('.md', '') || 'rule';
+        const agentPath = getAgentPath(agent, ruleName);
+        let fullPath = `${rule.to}/${agentPath}`.replace(/\/+/g, '/');
+        // Remove leading "./" to match actual file paths
+        if (fullPath.startsWith('./')) {
+          fullPath = fullPath.substring(2);
+        }
+        paths.push(fullPath);
+      }
+    }
+
+    // Collect command-generated paths
+    if (this.config.commands) {
+      for (const command of this.config.commands) {
+        for (const agent of command.targets) {
+          const { getAgentPath } = require('../agents');
+          const agentPath = getAgentPath(agent, command.command);
+          paths.push(agentPath);
+        }
+      }
+    }
+
+    // Collect MCP output paths
+    if (this.config.mcps) {
+      for (const mcp of this.config.mcps) {
+        if (mcp.outputPath) {
+          paths.push(mcp.outputPath);
+        }
+      }
+    }
 
     return paths;
   }

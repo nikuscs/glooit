@@ -25,6 +25,8 @@ export class BackupManager {
         } catch (error) {
           console.warn(`Failed to backup ${filePath}: ${error}`);
         }
+      } else {
+        console.warn(`File not found for backup: ${filePath}`);
       }
     }
 

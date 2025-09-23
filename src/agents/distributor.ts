@@ -67,14 +67,15 @@ export class AgentDistributor {
     // Apply rule-specific hooks
     if (context.rule.hooks) {
       for (const hookName of context.rule.hooks) {
-        content = await this.executeHook(hookName, content, context);
+        content = await this.executeHook(hookName, content, { ...context, content });
       }
     }
 
     // Apply global after hooks
     if (this.config.hooks?.after) {
       for (const hook of this.config.hooks.after) {
-        const result = await hook(context);
+        const updatedContext = { ...context, content };
+        const result = await hook(updatedContext);
         if (typeof result === 'string') {
           content = result;
         }

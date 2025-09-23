@@ -230,13 +230,32 @@ async function resetCommand(force: boolean): Promise<void> {
     '.cursor/rules',
     '.roo/rules',
     'CLAUDE.md',
-    'AGENTS.md'
+    'AGENTS.md',
+    'claude_desktop_config.json'  // Common MCP config file
   ];
 
   for (const path of generatedPaths) {
     if (existsSync(path)) {
       rmSync(path, { recursive: true, force: true });
       console.log(`   Removed ${path}`);
+    }
+  }
+
+  // Clean up empty parent directories
+  const { readdirSync } = await import('fs');
+  const dirsToCheck = ['.cursor', '.roo', 'config', 'custom-rules', 'custom-ai-rules'];
+
+  for (const dir of dirsToCheck) {
+    try {
+      if (existsSync(dir)) {
+        const contents = readdirSync(dir);
+        if (contents.length === 0) {
+          rmSync(dir, { recursive: true, force: true });
+          console.log(`   Removed empty directory ${dir}`);
+        }
+      }
+    } catch {
+      // Ignore errors when checking/removing directories
     }
   }
 
