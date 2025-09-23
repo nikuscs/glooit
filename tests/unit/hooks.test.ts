@@ -5,7 +5,8 @@ describe('Built-in Hooks', () => {
   const mockContext: SyncContext = {
     config: {
       configDir: '.ai-rules',
-      rules: []
+      rules: [],
+      mergeMcps: true
     },
     rule: {
       file: 'test.md',

@@ -121,7 +121,7 @@ export class AIRulesCore {
     this.validateMcpNames();
 
     const { AgentWriterFactory } = await import('../agents/writers');
-    const { getMcpPath } = await import('../agents/mcp-paths');
+    const { getAgentMcpPath } = await import('../agents');
     const { writeFileSync, mkdirSync } = await import('fs');
     const { dirname } = await import('path');
 
@@ -130,7 +130,7 @@ export class AIRulesCore {
 
     for (const mcp of this.config.mcps) {
       for (const agent of mcp.targets) {
-        const outputPath = getMcpPath(agent, mcp.outputPath);
+        const outputPath = mcp.outputPath || getAgentMcpPath(agent);
         if (!mcpGroups.has(outputPath)) {
           mcpGroups.set(outputPath, []);
         }
@@ -237,10 +237,10 @@ export class AIRulesCore {
 
     // Collect MCP output paths
     if (this.config.mcps) {
-      const { getMcpPath } = require('../agents/mcp-paths');
+      const { getAgentMcpPath } = require('../agents');
       for (const mcp of this.config.mcps) {
         for (const agent of mcp.targets) {
-          const outputPath = getMcpPath(agent, mcp.outputPath);
+          const outputPath = mcp.outputPath || getAgentMcpPath(agent);
           if (!paths.includes(outputPath)) {
             paths.push(outputPath);
           }

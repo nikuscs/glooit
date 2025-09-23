@@ -30,7 +30,8 @@ describe('ConfigValidator', () => {
           to: './',
           targets: ['claude'],
           globs: '**/*'
-        }]
+        }],
+        mergeMcps: true
       };
 
       const errors = await ConfigValidator.validate(config);
@@ -44,7 +45,8 @@ describe('ConfigValidator', () => {
           file: 'non-existent-file.md',
           to: './',
           targets: ['claude']
-        }]
+        }],
+        mergeMcps: true
       };
 
       const errors = await ConfigValidator.validate(config);
@@ -63,7 +65,8 @@ describe('ConfigValidator', () => {
           file: testFile,
           to: './',
           targets: []
-        }]
+        }],
+        mergeMcps: true
       };
 
       const errors = await ConfigValidator.validate(config);
@@ -81,7 +84,8 @@ describe('ConfigValidator', () => {
           file: testFile,
           to: 'invalid-path',
           targets: ['claude']
-        }]
+        }],
+        mergeMcps: true
       };
 
       const errors = await ConfigValidator.validate(config);
@@ -96,6 +100,7 @@ describe('ConfigValidator', () => {
       const config: Config = {
         configDir: '.ai-rules',
         rules: [],
+        mergeMcps: true,
         commands: [{
           command: 'test',
           file: testFile,

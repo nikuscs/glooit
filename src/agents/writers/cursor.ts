@@ -1,6 +1,6 @@
 import { basename } from 'path';
 import { existsSync, readFileSync } from 'fs';
-import type { Rule, Mcp } from '../../types';
+import type { Rule, ResolvedMcp } from '../../types';
 
 export class CursorWriter {
   formatContent(content: string, rule: Rule): string {
@@ -18,7 +18,7 @@ export class CursorWriter {
     return frontmatter + content;
   }
 
-  formatMcp(mcp: Mcp, merge: boolean): string {
+  formatMcp(mcp: ResolvedMcp, merge: boolean): string {
     let existingConfig: any = {};
 
     // Read existing config if merge is enabled and file exists

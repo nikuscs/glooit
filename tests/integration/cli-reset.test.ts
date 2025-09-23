@@ -85,7 +85,7 @@ export default {
         command: 'npx',
         args: ['pg-mcp-server']
       },
-      outputPath: 'claude_desktop_config.json'
+      outputPath: '.mcp.json'
     }
   ]
 } satisfies Config;
@@ -98,7 +98,7 @@ export default {
 
     // Verify files were created
     expect(existsSync('CLAUDE.md')).toBe(true);
-    expect(existsSync('claude_desktop_config.json')).toBe(true);
+    expect(existsSync('.mcp.json')).toBe(true);
 
     const result = execSync(`bun run ${cliPath} reset --force`, {
       encoding: 'utf-8'
@@ -108,7 +108,7 @@ export default {
 
     // Verify files are removed
     expect(existsSync('CLAUDE.md')).toBe(false);
-    expect(existsSync('claude_desktop_config.json')).toBe(false);
+    expect(existsSync('.mcp.json')).toBe(false);
   });
 
   it('should handle reset when no generated files exist', () => {

@@ -62,6 +62,10 @@ export type Rule = z.infer<typeof RuleSchema>;
 export type Command = z.infer<typeof CommandSchema>;
 export type McpConfig = z.infer<typeof McpConfigSchema>;
 export type Mcp = z.infer<typeof McpSchema>;
+
+export interface ResolvedMcp extends Omit<Mcp, 'outputPath'> {
+  outputPath: string; // Always defined after resolution
+}
 export type BackupConfig = z.infer<typeof BackupConfigSchema>;
 export type Hooks = z.infer<typeof HooksSchema>;
 export type Config = z.infer<typeof ConfigSchema>;
@@ -70,6 +74,7 @@ export interface AgentMapping {
   path: string;
   format: 'markdown' | 'frontmatter';
   directory?: string;
+  mcpPath: string;
 }
 
 export interface SyncContext {

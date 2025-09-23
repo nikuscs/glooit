@@ -47,10 +47,10 @@ export default {
     execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
 
     // Should create files for both targets
-    expect(existsSync('claude_desktop_config.json')).toBe(true);
+    expect(existsSync('.mcp.json')).toBe(true);
     expect(existsSync('.cursor/mcp.json')).toBe(true);
 
-    const claudeConfig = JSON.parse(readFileSync('claude_desktop_config.json', 'utf-8'));
+    const claudeConfig = JSON.parse(readFileSync('.mcp.json', 'utf-8'));
     const cursorConfig = JSON.parse(readFileSync('.cursor/mcp.json', 'utf-8'));
 
     expect(claudeConfig.mcpServers['shared-server']).toEqual({
@@ -219,8 +219,8 @@ export default {
     execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
 
     // Check Claude config
-    expect(existsSync('claude_desktop_config.json')).toBe(true);
-    const claudeConfig = JSON.parse(readFileSync('claude_desktop_config.json', 'utf-8'));
+    expect(existsSync('.mcp.json')).toBe(true);
+    const claudeConfig = JSON.parse(readFileSync('.mcp.json', 'utf-8'));
     expect(claudeConfig.mcpServers['search-server']).toBeDefined();
     expect(claudeConfig.mcpServers['remote-api']).toBeUndefined(); // Not targeted to claude
 
@@ -269,8 +269,8 @@ export default {
     const cliPath = `${originalCwd}/src/cli/index.ts`;
     execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
 
-    expect(existsSync('claude_desktop_config.json')).toBe(true);
-    const claudeConfig = JSON.parse(readFileSync('claude_desktop_config.json', 'utf-8'));
+    expect(existsSync('.mcp.json')).toBe(true);
+    const claudeConfig = JSON.parse(readFileSync('.mcp.json', 'utf-8'));
 
     // Both servers should be in the same file
     expect(claudeConfig.mcpServers['server1']).toEqual({ command: 'server1-cmd' });

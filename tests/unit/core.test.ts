@@ -33,6 +33,7 @@ describe('AIRulesCore', () => {
           to: './',
           targets: ['claude']
         }],
+        mergeMcps: true,
         hooks: {
           before: [beforeHookExecuted]
         }
@@ -58,6 +59,7 @@ describe('AIRulesCore', () => {
           to: './',
           targets: ['claude']
         }],
+        mergeMcps: true,
         hooks: {
           after: [afterHook]
         }
@@ -83,7 +85,8 @@ describe('AIRulesCore', () => {
           to: './',
           targets: ['claude'],
           hooks: ['addTimestamp', 'replaceEnv']
-        }]
+        }],
+        mergeMcps: true
       };
 
       // Set environment variable for testing
@@ -114,6 +117,7 @@ describe('AIRulesCore', () => {
           to: './',
           targets: ['claude']
         }],
+        mergeMcps: true,
         hooks: {
           error: [errorHook]
         }
@@ -135,6 +139,7 @@ describe('AIRulesCore', () => {
       const config: Config = {
         configDir: '.ai-rules',
         rules: [],
+        mergeMcps: true,
         mcps: [
           {
             name: 'postgres',
@@ -144,14 +149,16 @@ describe('AIRulesCore', () => {
               env: { DATABASE_URL: 'postgresql://localhost/test' },
               type: 'stdio'
             },
-            outputPath: 'claude_desktop_config.json'
+            targets: ['claude'],
+            outputPath: '.mcp.json'
           },
           {
             name: 'redis',
             config: {
               command: 'redis-cli',
               type: 'stdio'
-            }
+            },
+            targets: ['claude']
           }
         ]
       };
@@ -160,8 +167,8 @@ describe('AIRulesCore', () => {
       await core.sync();
 
       // Check custom output path
-      expect(existsSync('claude_desktop_config.json')).toBe(true);
-      const mcpConfig = JSON.parse(readFileSync('claude_desktop_config.json', 'utf-8'));
+      expect(existsSync('.mcp.json')).toBe(true);
+      const mcpConfig = JSON.parse(readFileSync('.mcp.json', 'utf-8'));
 
       expect(mcpConfig.mcpServers).toBeDefined();
       expect(mcpConfig.mcpServers.postgres).toEqual({
@@ -189,24 +196,26 @@ describe('AIRulesCore', () => {
           someValue: 'preserved'
         }
       };
-      writeFileSync('claude_desktop_config.json', JSON.stringify(existingConfig, null, 2));
+      writeFileSync('.mcp.json', JSON.stringify(existingConfig, null, 2));
 
       const config: Config = {
         configDir: '.ai-rules',
         rules: [],
+        mergeMcps: true,
         mcps: [{
           name: 'new-server',
           config: {
             command: 'new-command'
           },
-          outputPath: 'claude_desktop_config.json'
+          targets: ['claude'],
+          outputPath: '.mcp.json'
         }]
       };
 
       const core = new AIRulesCore(config);
       await core.sync();
 
-      const mcpConfig = JSON.parse(readFileSync('claude_desktop_config.json', 'utf-8'));
+      const mcpConfig = JSON.parse(readFileSync('.mcp.json', 'utf-8'));
 
       // Should preserve existing config
       expect(mcpConfig.mcpServers.existing).toEqual({ command: 'existing-server' });
@@ -226,6 +235,7 @@ describe('AIRulesCore', () => {
           to: './',
           targets: ['claude']
         }],
+        mergeMcps: true,
         backup: {
           enabled: true,
           retention: 5
@@ -249,6 +259,7 @@ describe('AIRulesCore', () => {
       const config: Config = {
         configDir: '.ai-rules',
         rules: [],
+        mergeMcps: true,
         backup: {
           enabled: false,
           retention: 5
@@ -268,7 +279,8 @@ describe('AIRulesCore', () => {
           file: 'test.md',
           to: './',
           targets: ['claude']
-        }]
+        }],
+        mergeMcps: true
       };
 
       writeFileSync('test.md', '# Test content');
@@ -308,6 +320,7 @@ describe('AIRulesCore', () => {
           to: './',
           targets: ['claude']
         }],
+        mergeMcps: true,
         commands: [{
           command: 'build',
           file: 'build.md',
@@ -331,7 +344,8 @@ describe('AIRulesCore', () => {
           file: 'missing.md',
           to: './',
           targets: ['claude']
-        }]
+        }],
+        mergeMcps: true
       };
 
       const core = new AIRulesCore(config);

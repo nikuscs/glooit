@@ -56,8 +56,8 @@ export default {
     const cliPath = `${originalCwd}/src/cli/index.ts`;
     execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
 
-    expect(existsSync('claude_desktop_config.json')).toBe(true);
-    const mcpConfig = JSON.parse(readFileSync('claude_desktop_config.json', 'utf-8'));
+    expect(existsSync('.mcp.json')).toBe(true);
+    const mcpConfig = JSON.parse(readFileSync('.mcp.json', 'utf-8'));
 
     expect(mcpConfig.mcpServers).toBeDefined();
     expect(mcpConfig.mcpServers.postgres).toEqual({
@@ -85,7 +85,7 @@ export default {
         someValue: 'preserved'
       }
     };
-    writeFileSync('claude_desktop_config.json', JSON.stringify(existingConfig, null, 2));
+    writeFileSync('.mcp.json', JSON.stringify(existingConfig, null, 2));
 
     const config = `
 import { Config } from '@ai-rules/types';
@@ -110,7 +110,7 @@ export default {
     const cliPath = `${originalCwd}/src/cli/index.ts`;
     execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
 
-    const mcpConfig = JSON.parse(readFileSync('claude_desktop_config.json', 'utf-8'));
+    const mcpConfig = JSON.parse(readFileSync('.mcp.json', 'utf-8'));
 
     // Should preserve existing config
     expect(mcpConfig.mcpServers['existing-server']).toEqual({ command: 'existing-command' });
@@ -132,7 +132,7 @@ export default {
         someValue: 'preserved'
       }
     };
-    writeFileSync('claude_desktop_config.json', JSON.stringify(existingConfig, null, 2));
+    writeFileSync('.mcp.json', JSON.stringify(existingConfig, null, 2));
 
     const config = `
 import { Config } from '@ai-rules/types';
@@ -157,7 +157,7 @@ export default {
     const cliPath = `${originalCwd}/src/cli/index.ts`;
     execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
 
-    const mcpConfig = JSON.parse(readFileSync('claude_desktop_config.json', 'utf-8'));
+    const mcpConfig = JSON.parse(readFileSync('.mcp.json', 'utf-8'));
 
     // Should NOT preserve existing config
     expect(mcpConfig.mcpServers['existing-server']).toBeUndefined();
@@ -235,12 +235,12 @@ export default {
     execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
 
     // Verify MCP file was created
-    expect(existsSync('claude_desktop_config.json')).toBe(true);
+    expect(existsSync('.mcp.json')).toBe(true);
 
     // Reset should remove MCP files
     execSync(`bun run ${cliPath} reset --force`, { encoding: 'utf-8' });
 
-    expect(existsSync('claude_desktop_config.json')).toBe(false);
+    expect(existsSync('.mcp.json')).toBe(false);
   });
 
   it('should validate MCP configuration', () => {

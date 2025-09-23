@@ -1,10 +1,10 @@
-import type { Agent, Rule, Mcp } from '../../types';
+import type { Agent, Rule, ResolvedMcp } from '../../types';
 import { MarkdownWriter } from './generic';
 import { CursorWriter } from './cursor';
 
 export interface AgentWriter {
   formatContent(content: string, rule: Rule): string;
-  formatMcp?(mcp: Mcp, merge: boolean): string;
+  formatMcp?(mcp: ResolvedMcp, merge: boolean): string;
 }
 
 export class AgentWriterFactory {

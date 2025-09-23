@@ -318,7 +318,7 @@ mcps: [
 
 Each agent has its own default MCP configuration path:
 
-- **Claude**: `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
+- **Claude Code**: `.mcp.json` (project-relative)
 - **Cursor**: `~/.cursor/mcp.json`
 - **Roo Code/Cline**: `.roo/mcp.json` (project-relative)
 - **Codex**: `codex_mcp.json` (project-relative)
