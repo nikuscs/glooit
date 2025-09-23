@@ -13,7 +13,7 @@ const program = new Command();
 program
   .name('gloo')
   .description('🧴 Sync your AI agent configurations and rules across platforms with ease')
-  .version('1.0.0');
+  .version('0.1.0');
 
 program
   .command('init')
