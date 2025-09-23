@@ -8,5 +8,6 @@
   "tag": true,
   "commit": "chore: release v%s",
   "no-verify": true,
-  "release": "patch"
+  "release": "patch",
+  "yes": true
 }
