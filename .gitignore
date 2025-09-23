@@ -13,7 +13,12 @@ coverage
 
 # logs
 logs
-_.log
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # dotenv environment variable files
@@ -28,11 +33,24 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .cache
 *.tsbuildinfo
 
-# IntelliJ based IDEs
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
 .idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
-# Finder (MacOS) folder config
+# OS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
 # ai-rules generated files
 ./.cursor/rules/
