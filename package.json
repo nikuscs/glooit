@@ -24,7 +24,7 @@
     "lint:fix": "oxlint src tests --fix",
     "format": "oxlint src tests --fix",
     "check": "bun run typecheck && bun run lint && bun run test:run",
-    "prepare": "bun run check && bun run build && bun run build:cli",
+    "taze": "bunx taze",
     "prepublishOnly": "bun run check && bun run build && bun run build:cli",
     "install:local": "bun run build:binary && sudo mv bin/glooit /usr/local/bin/"
   },
@@ -61,16 +61,16 @@
     "@types/bun": "latest",
     "@types/node": "^24.5.2",
     "@vitest/ui": "^3.2.4",
+    "bumpp": "^10.2.3",
     "oxlint": "^1.17.0",
-    "vitest": "^3.2.4",
-    "bumpp": "^9.2.0"
+    "vitest": "^3.2.4"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "dependencies": {
     "commander": "^14.0.1",
-    "package-manager-detector": "^0.2.0",
+    "package-manager-detector": "^1.3.0",
     "zod": "^4.1.11"
   }
 }
