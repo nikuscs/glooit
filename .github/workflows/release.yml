@@ -71,7 +71,7 @@ jobs:
           npm install -g bumpp
 
           # Bump version and create tag
-          bumpp --commit --tag --push
+          bumpp --yes
 
           # Publish to NPM
           npm publish --provenance

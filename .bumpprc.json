@@ -6,5 +6,7 @@
   "all": true,
   "push": true,
   "tag": true,
-  "commit": "chore: release v%s"
+  "commit": "chore: release v%s",
+  "no-verify": true,
+  "release": "patch"
 }
