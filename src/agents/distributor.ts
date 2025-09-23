@@ -1,22 +1,21 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join, dirname, basename } from 'path';
-import { Agent, Rule, Config, SyncContext } from '../types';
-import { AGENT_MAPPINGS, getAgentPath, getAgentDirectory } from './index';
+import type { Agent, Rule, Config, SyncContext } from '../types';
+import { getAgentPath, getAgentDirectory } from './index';
+import { AgentWriterFactory } from './writers';
 
 export class AgentDistributor {
   constructor(private config: Config) {}
 
   async distributeRule(rule: Rule): Promise<void> {
     const content = this.loadRuleContent(rule.file);
-    const agents = rule.agents || this.config.agents;
 
-    for (const agent of agents) {
+    for (const agent of rule.targets) {
       await this.distributeToAgent(agent, rule, content);
     }
   }
 
   private async distributeToAgent(agent: Agent, rule: Rule, content: string): Promise<void> {
-    const mapping = AGENT_MAPPINGS[agent];
     const ruleName = this.extractRuleName(rule.file);
     const agentPath = getAgentPath(agent, ruleName);
     const targetPath = join(rule.to, agentPath);
@@ -31,7 +30,8 @@ export class AgentDistributor {
     }
 
     // Format content based on agent requirements
-    const formattedContent = this.formatContent(agent, content, rule);
+    const writer = AgentWriterFactory.createWriter(agent);
+    const formattedContent = writer.formatContent(content, rule);
 
     // Apply hooks if configured
     const context: SyncContext = {
@@ -60,28 +60,6 @@ export class AgentDistributor {
     return basename(filePath, '.md');
   }
 
-  private formatContent(agent: Agent, content: string, rule: Rule): string {
-    const mapping = AGENT_MAPPINGS[agent];
-
-    if (mapping.format === 'frontmatter') {
-      return this.addFrontmatter(content, rule);
-    }
-
-    return content;
-  }
-
-  private addFrontmatter(content: string, rule: Rule): string {
-    const frontmatter = [
-      '---',
-      `description: AI Rules - ${this.extractRuleName(rule.file)}`,
-      `globs: ${rule.globs || '**/*'}`,
-      'alwaysApply: true',
-      '---',
-      ''
-    ].join('\n');
-
-    return frontmatter + content;
-  }
 
   private async applyHooks(context: SyncContext): Promise<string> {
     let content = context.content;
@@ -93,9 +71,9 @@ export class AgentDistributor {
       }
     }
 
-    // Apply global afterRule hooks
-    if (this.config.hooks?.afterRule) {
-      for (const hook of this.config.hooks.afterRule) {
+    // Apply global after hooks
+    if (this.config.hooks?.after) {
+      for (const hook of this.config.hooks.after) {
         const result = await hook(context);
         if (typeof result === 'string') {
           content = result;
@@ -107,18 +85,23 @@ export class AgentDistributor {
   }
 
   private async executeHook(hookName: string, content: string, context: SyncContext): Promise<string> {
-    // Built-in hooks
+    // Import built-in hooks dynamically if needed
     switch (hookName) {
-      case 'replaceStructure':
-        return content.replace('__STRUCTURE__', await this.getProjectStructure());
+      case 'replaceStructure': {
+        const { replaceStructure } = await import('../hooks/project-structure');
+        return await replaceStructure(context);
+      }
+      case 'replaceEnv': {
+        const { replaceEnv } = await import('../hooks/env-variables');
+        return replaceEnv(context);
+      }
+      case 'addTimestamp': {
+        const { addTimestamp } = await import('../hooks/timestamp');
+        return addTimestamp(context);
+      }
       default:
         // Custom hooks would be resolved here
         return content;
     }
-  }
-
-  private async getProjectStructure(): Promise<string> {
-    // Simple implementation - could be enhanced
-    return '```\nProject structure placeholder\n```';
   }
 }

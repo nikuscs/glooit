@@ -1,6 +1,7 @@
 # AI Rules - Implementation Plan
 
 ## Overview
+
 A tool to reconcile AI rules across different agents/platforms (Cursor, Claude, Codex, Roo Code) using a single TypeScript configuration file.
 
 ## Core Architecture
@@ -22,11 +23,13 @@ ai-rules/
 ## Key Features
 
 ### 1. Flexible Configuration
+
 - Support `ai-rules.config.ts`, `config/ai-rules.ts`, or custom paths
 - Type-safe configuration with Zod validation
 - Environment variable interpolation
 
 ### 2. Agent Distribution System
+
 ```typescript
 const agentMappings = {
   'claude': { path: 'CLAUDE.md', format: 'markdown' },
@@ -37,16 +40,19 @@ const agentMappings = {
 ```
 
 ### 3. Smart Backup System
+
 - Timestamp-based backups in `.ai-rules/backups/`
 - Incremental backups (only changed files)
 - Restore functionality
 
 ### 4. GitIgnore Management
+
 - Auto-add generated paths to `.gitignore`
 - Clean removal when rules are deleted
 - Respect existing gitignore structure
 
 ### 5. Hooks System
+
 ```typescript
 hooks: {
   beforeSync: [(context) => { /* custom logic */ }],
@@ -56,6 +62,7 @@ hooks: {
 ```
 
 ### 6. CLI Commands
+
 - `bunx ai-rules init` - Create initial config
 - `bunx ai-rules sync` - Distribute rules to agents
 - `bunx ai-rules validate` - Validate configuration
@@ -67,10 +74,9 @@ hooks: {
 ```typescript
 defineRules({
   configDir: '.ai-rules', // customizable
-  agents: ['claude', 'cursor', 'codex', 'roocode'],
-
   rules: [
     {
+      targets: ['claude', 'cursor'],
       file: '.ai-rules/main.md',
       to: './',
       globs: '**/*',
@@ -125,17 +131,21 @@ defineRules({
 ## Agent-Specific Requirements
 
 ### Cursor
+
 - Frontmatter with `description`, `globs`, `alwaysApply`
 - Files in `.cursor/rules/`
 
 ### Claude Code
+
 - Plain markdown files named `CLAUDE.md`
 - Commands support
 
 ### Codex
+
 - Plain markdown files named `AGENTS.md`
 
 ### Roo Code (Cline)
+
 - Files in `.roo/rules/`
 - Plain markdown format
 

@@ -1,4 +1,4 @@
-import { Agent, AgentMapping } from '../types';
+import type { Agent, AgentMapping } from '../types';
 
 export const AGENT_MAPPINGS: Record<Agent, AgentMapping> = {
   claude: {

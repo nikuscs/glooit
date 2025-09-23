@@ -1,11 +1,44 @@
 {
   "name": "ai-rules",
-  "module": "index.ts",
+  "version": "0.1.0",
+  "description": "Reconcile AI agent configurations across platforms",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
   "type": "module",
-  "private": true,
+  "bin": {
+    "ai-rules": "dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "bun build src/index.ts --outdir dist --target node",
+    "build:cli": "bun build src/cli/index.ts --outdir dist/cli --target node",
+    "dev": "bun run src/cli/index.ts",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "prepare": "bun run build && bun run build:cli"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "ai",
+    "claude",
+    "cursor",
+    "codex",
+    "roo",
+    "cline",
+    "configuration",
+    "rules"
+  ],
+  "author": "",
+  "license": "MIT",
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/node": "^24.5.2"
+    "@types/node": "^24.5.2",
+    "@vitest/ui": "^3.2.4",
+    "vitest": "^3.2.4"
   },
   "peerDependencies": {
     "typescript": "^5"

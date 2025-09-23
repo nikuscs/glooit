@@ -58,20 +58,21 @@ export class ConfigLoader {
 
 export default defineRules({
   configDir: '.ai-rules',
-  agents: ['claude', 'cursor', 'codex', 'roocode'],
 
   rules: [
     {
       file: '.ai-rules/main.md',
       to: './',
-      globs: '**/*'
+      globs: '**/*',
+      targets: ['claude', 'cursor', 'codex', 'roocode']
     }
   ],
 
   commands: [
     {
       command: 'cleanup',
-      file: '.ai-rules/commands/cleanup.md'
+      file: '.ai-rules/commands/cleanup.md',
+      targets: ['claude', 'cursor']
     }
   ],
 

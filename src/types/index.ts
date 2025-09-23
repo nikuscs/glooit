@@ -3,22 +3,20 @@ import { z } from 'zod';
 export const AgentSchema = z.enum(['claude', 'cursor', 'codex', 'roocode']);
 export type Agent = z.infer<typeof AgentSchema>;
 
-export const HookFunctionSchema = z.function()
-  .args(z.any())
-  .returns(z.union([z.void(), z.promise(z.void()), z.string(), z.promise(z.string())]));
+export const HookFunctionSchema = z.function();
 
 export const RuleSchema = z.object({
   file: z.string(),
   to: z.string(),
   globs: z.string().optional(),
-  agents: z.array(AgentSchema).optional(),
+  targets: z.array(AgentSchema),
   hooks: z.array(z.string()).optional(),
 });
 
 export const CommandSchema = z.object({
   command: z.string(),
   file: z.string(),
-  agents: z.array(AgentSchema).optional(),
+  targets: z.array(AgentSchema),
 });
 
 export const McpConfigSchema = z.object({
@@ -40,14 +38,13 @@ export const BackupConfigSchema = z.object({
 });
 
 export const HooksSchema = z.object({
-  beforeSync: z.array(HookFunctionSchema).optional(),
-  afterRule: z.array(HookFunctionSchema).optional(),
-  onError: z.array(HookFunctionSchema).optional(),
+  before: z.array(HookFunctionSchema).optional(),
+  after: z.array(HookFunctionSchema).optional(),
+  error: z.array(HookFunctionSchema).optional(),
 });
 
 export const ConfigSchema = z.object({
   configDir: z.string().default('.ai-rules'),
-  agents: z.array(AgentSchema).default(['claude', 'cursor', 'codex', 'roocode']),
   rules: z.array(RuleSchema),
   commands: z.array(CommandSchema).optional(),
   mcps: z.array(McpSchema).optional(),
