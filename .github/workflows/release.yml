@@ -75,7 +75,7 @@ jobs:
           bumpp minor --yes --no-verify
 
           # Publish to NPM
-          npm publish --provenance
+          npm publish --provenance --access public
 
       - name: Create GitHub Release
         env:

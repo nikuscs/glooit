@@ -26,7 +26,8 @@
     "format": "oxlint src tests --fix",
     "check": "bun run typecheck && bun run lint && bun run test:run",
     "prepare": "bun run check && bun run build && bun run build:cli",
-    "prepublishOnly": "bun run check && bun run build && bun run build:cli"
+    "prepublishOnly": "bun run check && bun run build && bun run build:cli",
+    "install:local": "bun run build:binary && sudo mv bin/gloo /usr/local/bin/"
   },
   "files": [
     "dist",
@@ -51,12 +52,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/username/gloo.git"
+    "url": "https://github.com/nikuscs/gloo.git"
   },
   "bugs": {
-    "url": "https://github.com/username/gloo/issues"
+    "url": "https://github.com/nikuscs/gloo/issues"
   },
-  "homepage": "https://github.com/username/gloo#readme",
+  "homepage": "https://github.com/nikuscs/gloo#readme",
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "^24.5.2",
