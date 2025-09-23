@@ -4,16 +4,20 @@ import { Command } from 'commander';
 import { AIRulesCore } from '../core';
 import { ConfigLoader } from '../core/config-loader';
 import { ConfigValidator } from '../core/validation';
-import { existsSync, writeFileSync, rmSync, readdirSync } from 'fs';
-import { dirname } from 'path';
+import { existsSync, writeFileSync, rmSync, readdirSync, readFileSync } from 'fs';
+import { dirname, join } from 'path';
 import { GitIgnoreManager } from '../core/gitignore';
-
+import { detect } from 'package-manager-detector/detect';
+import { resolveCommand } from 'package-manager-detector/commands';
+import { execSync } from 'child_process';
+import { createInterface } from 'readline';
+import { fileURLToPath } from 'url';
 const program = new Command();
 
 program
   .name('gloo')
   .description('🧴 Sync your AI agent configurations and rules across platforms with ease')
-  .version('0.1.0');
+  .version('0.4.0');
 
 program
   .command('init')
@@ -112,18 +116,103 @@ program
 
 // Command implementations
 
-async function initCommand(force: boolean): Promise<void> {
+function promptUser(question: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const rl = createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
 
+    rl.question(question, (answer) => {
+      rl.close();
+      resolve(answer.toLowerCase().startsWith('y'));
+    });
+  });
+}
+
+async function initCommand(force: boolean): Promise<void> {
   const configPath = 'gloo.config.ts';
 
   if (existsSync(configPath) && !force) {
     throw new Error(`Configuration file ${configPath} already exists. Use --force to overwrite.`);
   }
 
-  const initialConfig = ConfigLoader.createInitialConfig();
-  writeFileSync(configPath, initialConfig, 'utf-8');
+  // Check if this is a JS/TS project
+  if (!existsSync('package.json')) {
+    // Non-JS project - create plain config
+    const plainConfig = ConfigLoader.createPlainConfig();
+    writeFileSync(configPath, plainConfig, 'utf-8');
 
-  console.log(`✅ Created ${configPath}`);
+    console.log(`✅ Created ${configPath}`);
+    console.log('💡 For TypeScript support, create a package.json and add glooit to devDependencies');
+    console.log('Next steps:');
+    console.log('1. Edit the configuration file to match your project');
+    console.log('2. Create your rule files in .gloo/');
+    console.log('3. Run `gloo sync` to distribute rules');
+    return;
+  }
+
+  // JS/TS project detected - try to add TypeScript support
+  try {
+    const pm = await detect();
+
+    if (pm) {
+      const resolved = resolveCommand(pm.agent, 'install', []);
+      const installCmd = resolved ? `${resolved.command} ${resolved.args.join(' ')}` : `${pm.agent} install`;
+
+      const shouldInstall = await promptUser(
+        `📦 Add glooit to devDependencies and install for TypeScript support? (${pm.name}) [y/N]: `
+      );
+
+      if (shouldInstall) {
+        // Add to devDependencies
+        const pkg = JSON.parse(readFileSync('package.json', 'utf-8'));
+        pkg.devDependencies = pkg.devDependencies || {};
+        // Use current package version
+        const currentPkg = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../../package.json'), 'utf-8'));
+        pkg.devDependencies.glooit = `^${currentPkg.version}`;
+        writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+
+        // Create typed config
+        const typedConfig = ConfigLoader.createTypedConfig();
+        writeFileSync(configPath, typedConfig, 'utf-8');
+
+        console.log(`✅ Created ${configPath}`);
+        console.log('📦 Added glooit to devDependencies');
+
+        // Auto-install
+        try {
+          console.log(`🔄 Installing dependencies with ${pm.name}...`);
+          execSync(installCmd, { stdio: 'inherit' });
+          console.log('✅ TypeScript support enabled!');
+        } catch (error) {
+          console.log(`❌ Installation failed. Please run '${installCmd}' manually.`);
+        }
+      } else {
+        // User declined - create plain config
+        const plainConfig = ConfigLoader.createPlainConfig();
+        writeFileSync(configPath, plainConfig, 'utf-8');
+
+        console.log(`✅ Created ${configPath}`);
+        console.log(`💡 Run 'npm install --save-dev glooit' later for TypeScript support`);
+      }
+    } else {
+      // Couldn't detect package manager - create plain config
+      const plainConfig = ConfigLoader.createPlainConfig();
+      writeFileSync(configPath, plainConfig, 'utf-8');
+
+      console.log(`✅ Created ${configPath}`);
+      console.log('💡 Add glooit to devDependencies for TypeScript support');
+    }
+  } catch (error) {
+    // Fallback to plain config on any error
+    const plainConfig = ConfigLoader.createPlainConfig();
+    writeFileSync(configPath, plainConfig, 'utf-8');
+
+    console.log(`✅ Created ${configPath}`);
+    console.log('💡 Add glooit to devDependencies for TypeScript support');
+  }
+
   console.log('Next steps:');
   console.log('1. Edit the configuration file to match your project');
   console.log('2. Create your rule files in .gloo/');

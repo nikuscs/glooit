@@ -54,24 +54,56 @@ export class ConfigLoader {
   }
 
   static createInitialConfig(): string {
-    return `import { Config } from 'gloo/types';
+    return this.createTypedConfig();
+  }
+
+  static createTypedConfig(): string {
+    return `import type { Config } from 'glooit';
 
 export default {
   configDir: '.gloo',
+  targets: ['claude', 'cursor'],
 
   rules: [
     {
+      name: 'main',
       file: '.gloo/main.md',
-      to: './',
       targets: ['claude', 'cursor']
     }
   ],
 
-  backup: {
-    enabled: true,
-    retention: 10
-  }
+  mcps: [
+    // {
+    //   name: 'example-server',
+    //   file: '.gloo/mcp.json',
+    //   targets: ['claude']
+    // }
+  ]
 } satisfies Config;
+`;
+  }
+
+  static createPlainConfig(): string {
+    return `export default {
+  configDir: '.gloo',
+  targets: ['claude', 'cursor'],
+
+  rules: [
+    {
+      name: 'main',
+      file: '.gloo/main.md',
+      targets: ['claude', 'cursor']
+    }
+  ],
+
+  mcps: [
+    // {
+    //   name: 'example-server',
+    //   file: '.gloo/mcp.json',
+    //   targets: ['claude']
+    // }
+  ]
+};
 `;
   }
 }
