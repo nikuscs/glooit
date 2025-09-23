@@ -27,7 +27,7 @@ describe('CLI - Backup Commands', () => {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.ai-rules',
+  configDir: '.gloo',
   rules: [
     {
       file: 'test.md',
@@ -41,7 +41,7 @@ export default {
   }
 } satisfies Config;
 `;
-      writeFileSync('ai-rules.config.ts', config);
+      writeFileSync('gloo.config.ts', config);
       writeFileSync('test.md', '# Test content');
 
       const cliPath = `${originalCwd}/src/cli/index.ts`;
@@ -69,11 +69,11 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.ai-rules',
+  configDir: '.gloo',
   rules: []
 } satisfies Config;
 `;
-      writeFileSync('ai-rules.config.ts', config);
+      writeFileSync('gloo.config.ts', config);
 
       const cliPath = `${originalCwd}/src/cli/index.ts`;
       const result = execSync(`bun run ${cliPath} backup list`, {
@@ -90,7 +90,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.ai-rules',
+  configDir: '.gloo',
   rules: [
     {
       file: 'test.md',
@@ -104,7 +104,7 @@ export default {
   }
 } satisfies Config;
 `;
-      writeFileSync('ai-rules.config.ts', config);
+      writeFileSync('gloo.config.ts', config);
       writeFileSync('test.md', '# Original content');
 
       const cliPath = `${originalCwd}/src/cli/index.ts`;
@@ -148,11 +148,11 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.ai-rules',
+  configDir: '.gloo',
   rules: []
 } satisfies Config;
 `;
-      writeFileSync('ai-rules.config.ts', config);
+      writeFileSync('gloo.config.ts', config);
 
       const cliPath = `${originalCwd}/src/cli/index.ts`;
 
@@ -168,11 +168,11 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.ai-rules',
+  configDir: '.gloo',
   rules: []
 } satisfies Config;
 `;
-      writeFileSync('ai-rules.config.ts', config);
+      writeFileSync('gloo.config.ts', config);
 
       const cliPath = `${originalCwd}/src/cli/index.ts`;
 

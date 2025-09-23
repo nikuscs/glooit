@@ -1,0 +1,10 @@
+{
+  "files": [
+    "package.json",
+    "src/cli/index.ts"
+  ],
+  "all": true,
+  "push": true,
+  "tag": true,
+  "commit": "chore: release v%s"
+}

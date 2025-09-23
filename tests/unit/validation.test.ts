@@ -24,7 +24,7 @@ describe('ConfigValidator', () => {
       writeFileSync(testFile, '# Test rule');
 
       const config: Config = {
-        configDir: '.ai-rules',
+        configDir: '.gloo',
         rules: [{
           file: testFile,
           to: './',
@@ -40,7 +40,7 @@ describe('ConfigValidator', () => {
 
     it('should detect missing rule files', async () => {
       const config: Config = {
-        configDir: '.ai-rules',
+        configDir: '.gloo',
         rules: [{
           file: 'non-existent-file.md',
           to: './',
@@ -60,7 +60,7 @@ describe('ConfigValidator', () => {
       writeFileSync(testFile, '# Test rule');
 
       const config: Config = {
-        configDir: '.ai-rules',
+        configDir: '.gloo',
         rules: [{
           file: testFile,
           to: './',
@@ -79,7 +79,7 @@ describe('ConfigValidator', () => {
       writeFileSync(testFile, '# Test rule');
 
       const config: Config = {
-        configDir: '.ai-rules',
+        configDir: '.gloo',
         rules: [{
           file: testFile,
           to: 'invalid-path',
@@ -98,7 +98,7 @@ describe('ConfigValidator', () => {
       writeFileSync(testFile, '# Test command');
 
       const config: Config = {
-        configDir: '.ai-rules',
+        configDir: '.gloo',
         rules: [],
         mergeMcps: true,
         commands: [{

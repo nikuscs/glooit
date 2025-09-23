@@ -1,16 +1,20 @@
 {
-  "name": "ai-rules",
-  "version": "0.1.0",
-  "description": "Reconcile AI agent configurations across platforms",
+  "name": "gloo",
+  "version": "1.0.0",
+  "description": "🧴 Sync your AI agent configurations and rules across platforms with ease",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "type": "module",
   "bin": {
-    "ai-rules": "dist/cli/index.js"
+    "gloo": "dist/cli/index.js"
   },
   "scripts": {
     "build": "bun run typecheck && bun run lint && bun build src/index.ts --outdir dist --target node",
     "build:cli": "bun build src/cli/index.ts --outdir dist/cli --target node",
+    "build:binary": "bun build src/cli/index.ts --compile --outfile bin/gloo",
+    "build:binary:linux": "bun build src/cli/index.ts --compile --target=bun-linux-x64 --outfile bin/gloo-linux",
+    "build:binary:macos": "bun build src/cli/index.ts --compile --target=bun-darwin-arm64 --outfile bin/gloo-macos",
+    "build:binary:windows": "bun build src/cli/index.ts --compile --target=bun-windows-x64 --outfile bin/gloo-windows.exe",
     "dev": "bun run src/cli/index.ts",
     "test": "vitest",
     "test:ui": "vitest --ui",
@@ -21,30 +25,45 @@
     "lint:fix": "oxlint src tests --fix",
     "format": "oxlint src tests --fix",
     "check": "bun run typecheck && bun run lint && bun run test:run",
-    "prepare": "bun run check && bun run build && bun run build:cli"
+    "prepare": "bun run check && bun run build && bun run build:cli",
+    "prepublishOnly": "bun run check && bun run build && bun run build:cli"
   },
   "files": [
     "dist",
+    "bin",
     "README.md"
   ],
   "keywords": [
     "ai",
-    "claude",
+    "claude-code",
     "cursor",
     "codex",
     "roo",
     "cline",
     "configuration",
-    "rules"
+    "rules",
+    "sync",
+    "cli",
+    "mcp",
+    "model-context-protocol"
   ],
-  "author": "",
+  "author": "Pedro Martins <hi@nikuscs.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/username/gloo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/username/gloo/issues"
+  },
+  "homepage": "https://github.com/username/gloo#readme",
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "^24.5.2",
     "@vitest/ui": "^3.2.4",
     "oxlint": "^1.17.0",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "bumpp": "^9.2.0"
   },
   "peerDependencies": {
     "typescript": "^5"

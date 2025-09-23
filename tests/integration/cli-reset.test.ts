@@ -27,7 +27,7 @@ describe('CLI - Reset Command', () => {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.ai-rules',
+  configDir: '.gloo',
   rules: [
     {
       file: 'test.md',
@@ -37,7 +37,7 @@ export default {
   ]
 } satisfies Config;
 `;
-    writeFileSync('ai-rules.config.ts', config);
+    writeFileSync('gloo.config.ts', config);
     writeFileSync('test.md', '# Test content');
 
     // First sync to generate files
@@ -47,7 +47,7 @@ export default {
     // Verify files were created
     expect(existsSync('CLAUDE.md')).toBe(true);
     expect(existsSync('.cursor/rules')).toBe(true);
-    expect(existsSync('.ai-rules')).toBe(true);
+    expect(existsSync('.gloo')).toBe(true);
 
     // Now reset
     const result = execSync(`bun run ${cliPath} reset --force`, {
@@ -60,9 +60,9 @@ export default {
     expect(existsSync('CLAUDE.md')).toBe(false);
     expect(existsSync('.cursor/rules')).toBe(false);
     expect(existsSync('.cursor')).toBe(false); // Should be removed if empty
-    expect(existsSync('.ai-rules')).toBe(false);
+    expect(existsSync('.gloo')).toBe(false);
     expect(existsSync('test.md')).toBe(true); // Source file should remain
-    expect(existsSync('ai-rules.config.ts')).toBe(false); // Config file is removed by reset
+    expect(existsSync('gloo.config.ts')).toBe(false); // Config file is removed by reset
   });
 
   it('should reset with MCP configurations', () => {
@@ -70,7 +70,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.ai-rules',
+  configDir: '.gloo',
   rules: [
     {
       file: 'test.md',
@@ -90,7 +90,7 @@ export default {
   ]
 } satisfies Config;
 `;
-    writeFileSync('ai-rules.config.ts', config);
+    writeFileSync('gloo.config.ts', config);
     writeFileSync('test.md', '# Test content');
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
@@ -116,11 +116,11 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.ai-rules',
+  configDir: '.gloo',
   rules: []
 } satisfies Config;
 `;
-    writeFileSync('ai-rules.config.ts', config);
+    writeFileSync('gloo.config.ts', config);
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
     const result = execSync(`bun run ${cliPath} reset --force`, {
@@ -145,7 +145,7 @@ export default {
   ]
 } satisfies Config;
 `;
-    writeFileSync('ai-rules.config.ts', config);
+    writeFileSync('gloo.config.ts', config);
     writeFileSync('test.md', '# Test content');
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
@@ -179,7 +179,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.ai-rules',
+  configDir: '.gloo',
   rules: [
     {
       file: 'test.md',
@@ -193,7 +193,7 @@ export default {
   }
 } satisfies Config;
 `;
-    writeFileSync('ai-rules.config.ts', config);
+    writeFileSync('gloo.config.ts', config);
     writeFileSync('test.md', '# Test content');
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
@@ -201,7 +201,7 @@ export default {
 
     // Verify files and backup directory were created
     expect(existsSync('CLAUDE.md')).toBe(true);
-    expect(existsSync('.ai-rules')).toBe(true);
+    expect(existsSync('.gloo')).toBe(true);
 
     const result = execSync(`bun run ${cliPath} reset --force`, {
       encoding: 'utf-8'
@@ -211,6 +211,6 @@ export default {
 
     // Verify all generated files are removed
     expect(existsSync('CLAUDE.md')).toBe(false);
-    expect(existsSync('.ai-rules')).toBe(false);
+    expect(existsSync('.gloo')).toBe(false);
   });
 });

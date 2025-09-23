@@ -27,7 +27,7 @@ describe('CLI - Clean Command', () => {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.ai-rules',
+  configDir: '.gloo',
   rules: [
     {
       file: 'test.md',
@@ -37,7 +37,7 @@ export default {
   ]
 } satisfies Config;
 `;
-    writeFileSync('ai-rules.config.ts', config);
+    writeFileSync('gloo.config.ts', config);
     writeFileSync('test.md', '# Test content');
 
     // First sync to generate files
@@ -46,7 +46,7 @@ export default {
 
     // Verify files were created
     expect(existsSync('CLAUDE.md')).toBe(true);
-    expect(existsSync('.ai-rules')).toBe(true);
+    expect(existsSync('.gloo')).toBe(true);
 
     // Create a gitignore to test cleanup
     writeFileSync('.gitignore', 'some-file\n# ai-rules generated files\nCLAUDE.md\nother-file\n');
@@ -71,11 +71,11 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.ai-rules',
+  configDir: '.gloo',
   rules: []
 } satisfies Config;
 `;
-    writeFileSync('ai-rules.config.ts', config);
+    writeFileSync('gloo.config.ts', config);
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
     const result = execSync(`bun run ${cliPath} clean`, {
@@ -101,7 +101,7 @@ export default {
   ]
 } satisfies Config;
 `;
-    writeFileSync('ai-rules.config.ts', config);
+    writeFileSync('gloo.config.ts', config);
     writeFileSync('test.md', '# Test content');
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
@@ -122,7 +122,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.ai-rules',
+  configDir: '.gloo',
   rules: [
     {
       file: 'shared.md',
@@ -132,7 +132,7 @@ export default {
   ]
 } satisfies Config;
 `;
-    writeFileSync('ai-rules.config.ts', config);
+    writeFileSync('gloo.config.ts', config);
     writeFileSync('shared.md', '# Shared content');
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;

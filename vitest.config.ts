@@ -5,7 +5,7 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     include: ['tests/**/*.{test,spec}.{js,ts}'],
-    exclude: ['node_modules', 'dist', '.cursor', '.roo', '.ai-rules'],
+    exclude: ['node_modules', 'dist', '.cursor', '.roo', '.gloo'],
     coverage: {
       reporter: ['text', 'json', 'html'],
       exclude: [

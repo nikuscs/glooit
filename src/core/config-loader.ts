@@ -5,10 +5,10 @@ import { ConfigSchema } from '../types';
 
 export class ConfigLoader {
   private static readonly DEFAULT_CONFIG_PATHS = [
-    'ai-rules.config.ts',
-    'ai-rules.config.js',
-    'config/ai-rules.ts',
-    'config/ai-rules.js',
+    'gloo.config.ts',
+    'gloo.config.js',
+    'config/gloo.ts',
+    'config/gloo.js',
   ];
 
   static async load(customPath?: string): Promise<Config> {
@@ -54,24 +54,15 @@ export class ConfigLoader {
   }
 
   static createInitialConfig(): string {
-    return `import { defineRules } from 'ai-rules';
+    return `import { Config } from 'gloo/types';
 
-export default defineRules({
-  configDir: '.ai-rules',
+export default {
+  configDir: '.gloo',
 
   rules: [
     {
-      file: '.ai-rules/main.md',
+      file: '.gloo/main.md',
       to: './',
-      globs: '**/*',
-      targets: ['claude', 'cursor', 'codex', 'roocode']
-    }
-  ],
-
-  commands: [
-    {
-      command: 'cleanup',
-      file: '.ai-rules/commands/cleanup.md',
       targets: ['claude', 'cursor']
     }
   ],
@@ -80,7 +71,7 @@ export default defineRules({
     enabled: true,
     retention: 10
   }
-});
+} satisfies Config;
 `;
   }
 }

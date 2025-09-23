@@ -11,13 +11,13 @@ import { GitIgnoreManager } from '../core/gitignore';
 const program = new Command();
 
 program
-  .name('ai-rules')
-  .description('AI Rules - Reconcile AI agent configurations across platforms')
+  .name('gloo')
+  .description('🧴 Sync your AI agent configurations and rules across platforms with ease')
   .version('1.0.0');
 
 program
   .command('init')
-  .description('Initialize ai-rules configuration')
+  .description('Initialize gloo configuration')
   .option('-f, --force', 'overwrite existing configuration')
   .action(async (options) => {
     try {
@@ -99,7 +99,7 @@ program
 
 program
   .command('reset')
-  .description('Remove all generated files, backups, and config (start fresh)')
+  .description('Remove all gloo generated files, backups, and config (start fresh)')
   .option('--force', 'skip confirmation prompt')
   .action(async (options) => {
     try {
@@ -114,7 +114,7 @@ program
 
 async function initCommand(force: boolean): Promise<void> {
 
-  const configPath = 'ai-rules.config.ts';
+  const configPath = 'gloo.config.ts';
 
   if (existsSync(configPath) && !force) {
     throw new Error(`Configuration file ${configPath} already exists. Use --force to overwrite.`);
@@ -126,8 +126,8 @@ async function initCommand(force: boolean): Promise<void> {
   console.log(`✅ Created ${configPath}`);
   console.log('Next steps:');
   console.log('1. Edit the configuration file to match your project');
-  console.log('2. Create your rule files in .ai-rules/');
-  console.log('3. Run `ai-rules sync` to distribute rules');
+  console.log('2. Create your rule files in .gloo/');
+  console.log('3. Run `gloo sync` to distribute rules');
 }
 
 async function syncCommand(configPath?: string, createBackup: boolean = true): Promise<void> {
@@ -219,15 +219,15 @@ async function resetCommand(force: boolean): Promise<void> {
     generatedPaths = (core as any).collectAllGeneratedPaths();
   } catch {
     // Config doesn't exist or can't be loaded, use default
-    generatedPaths = ['.ai-rules']; // Default config directory
+    generatedPaths = ['.gloo']; // Default config directory
   }
 
   // Remove config files
   const configPaths = [
-    'ai-rules.config.ts',
-    'ai-rules.config.js',
-    'config/ai-rules.ts',
-    'config/ai-rules.js'
+    'gloo.config.ts',
+    'gloo.config.js',
+    'config/gloo.ts',
+    'config/gloo.js'
   ];
 
   for (const path of configPaths) {
@@ -279,7 +279,7 @@ async function resetCommand(force: boolean): Promise<void> {
 
   // Clean .gitignore
   try {
-    const config = { configDir: '.ai-rules', rules: [], commands: [] };
+    const config = { configDir: '.gloo', rules: [], commands: [] };
     const gitIgnoreManager = new GitIgnoreManager(config as any);
     await gitIgnoreManager.cleanupGitIgnore();
     console.log('   Cleaned .gitignore');
@@ -287,7 +287,7 @@ async function resetCommand(force: boolean): Promise<void> {
     // Ignore errors if gitignore cleanup fails
   }
 
-  console.log('✅ Reset completed! Run `ai-rules init` to start fresh.');
+  console.log('✅ Reset completed! Run `gloo init` to start fresh.');
 }
 
 program.parse();

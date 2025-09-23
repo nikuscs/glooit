@@ -4,7 +4,7 @@ import type { SyncContext } from '../../src/types';
 
 describe('Compact Hook', () => {
   const mockContext: SyncContext = {
-    config: { configDir: '.ai-rules', rules: [], mergeMcps: true },
+    config: { configDir: '.gloo', rules: [], mergeMcps: true },
     rule: { file: 'test.md', to: './', targets: ['claude'] },
     content: '',
     targetPath: './test.md',

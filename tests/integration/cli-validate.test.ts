@@ -26,7 +26,7 @@ describe('CLI - Validate Command', () => {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.ai-rules',
+  configDir: '.gloo',
   rules: [
     {
       file: 'test.md',
@@ -43,7 +43,7 @@ export default {
   ]
 } satisfies Config;
 `;
-    writeFileSync('ai-rules.config.ts', config);
+    writeFileSync('gloo.config.ts', config);
     writeFileSync('test.md', '# Test content');
     writeFileSync('build.md', '# Build command');
 
@@ -60,7 +60,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.ai-rules',
+  configDir: '.gloo',
   rules: [
     {
       file: 'missing.md',
@@ -70,7 +70,7 @@ export default {
   ]
 } satisfies Config;
 `;
-    writeFileSync('ai-rules.config.ts', config);
+    writeFileSync('gloo.config.ts', config);
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
 
@@ -84,7 +84,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.ai-rules',
+  configDir: '.gloo',
   rules: [],
   commands: [
     {
@@ -95,7 +95,7 @@ export default {
   ]
 } satisfies Config;
 `;
-    writeFileSync('ai-rules.config.ts', config);
+    writeFileSync('gloo.config.ts', config);
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
 
@@ -109,11 +109,11 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.ai-rules',
+  configDir: '.gloo',
   rules: []
 } satisfies Config;
 `;
-    writeFileSync('ai-rules.config.ts', config);
+    writeFileSync('gloo.config.ts', config);
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
     const result = execSync(`bun run ${cliPath} validate`, {
@@ -128,7 +128,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.ai-rules',
+  configDir: '.gloo',
   rules: [
     {
       file: 'rule1.md',
@@ -155,7 +155,7 @@ export default {
   ]
 } satisfies Config;
 `;
-    writeFileSync('ai-rules.config.ts', config);
+    writeFileSync('gloo.config.ts', config);
     writeFileSync('rule1.md', '# Rule 1');
     writeFileSync('rule2.md', '# Rule 2');
     writeFileSync('build.md', '# Build command');

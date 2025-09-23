@@ -15,8 +15,9 @@ describe('ConfigLoader', () => {
     it('should create a valid initial configuration', () => {
       const config = ConfigLoader.createInitialConfig();
 
-      expect(config).toContain('import { defineRules }');
-      expect(config).toContain('export default defineRules');
+      expect(config).toContain('import { Config }');
+      expect(config).toContain('export default {');
+      expect(config).toContain('} satisfies Config;');
       expect(config).toContain('targets: [');
       expect(config).toContain('claude');
       expect(config).toContain('cursor');
@@ -33,7 +34,7 @@ describe('ConfigLoader', () => {
       const validConfig = `
         export default {
           rules: [{
-            file: '.ai-rules/test.md',
+            file: '.gloo/test.md',
             to: './',
             targets: ['claude']
           }]
