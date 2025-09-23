@@ -1,10 +1,9 @@
 name: Release
 
 on:
+  workflow_dispatch: # Manual trigger
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    tags: ['v*'] # Only on version tags
 
 permissions:
   contents: write
@@ -29,7 +28,7 @@ jobs:
   release:
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
 
     steps:
       - uses: actions/checkout@v4
