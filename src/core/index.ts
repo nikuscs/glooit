@@ -13,7 +13,6 @@ interface McpConfigFile {
 import { AgentDistributor } from '../agents/distributor';
 import { BackupManager } from './backup';
 import { GitIgnoreManager } from './gitignore';
-import { HookManager } from '../hooks';
 import { getAgentPath, getAgentMcpPath } from '../agents';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { dirname } from 'path';
@@ -23,13 +22,11 @@ export class AIRulesCore {
   private distributor: AgentDistributor;
   private backupManager: BackupManager;
   private gitIgnoreManager: GitIgnoreManager;
-  private hookManager: HookManager;
 
   constructor(private config: Config) {
     this.distributor = new AgentDistributor(config);
     this.backupManager = new BackupManager(config);
     this.gitIgnoreManager = new GitIgnoreManager(config);
-    this.hookManager = new HookManager();
   }
 
   async sync(): Promise<void> {
