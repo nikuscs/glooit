@@ -1,0 +1,93 @@
+name: Release
+
+on:
+  workflow_dispatch: # Manual trigger
+  push:
+    tags: ['v*'] # Only on version tags
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run tests
+        run: bun run check
+
+  release:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build
+        run: bun run build
+
+      - name: Build binaries
+        run: |
+          bun run build:binary:linux
+          bun run build:binary:macos
+          bun run build:binary:windows
+
+      - name: Setup Node.js for NPM
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Version bump and publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Configure git
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Install bumpp for version management
+          npm install -g bumpp
+
+          # Bump version and create tag
+          bumpp minor --yes --no-verify
+
+          # Publish to NPM (without provenance for private repos)
+          npm publish --access public
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get the latest tag
+          TAG=$(git describe --tags --abbrev=0)
+
+          # Create release with binaries
+          gh release create $TAG \
+            --title "Release $TAG" \
+            --notes "Auto-generated release" \
+            --latest \
+            bin/glooit-linux \
+            bin/glooit-macos \
+            bin/glooit-windows.exe

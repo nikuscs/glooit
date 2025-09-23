@@ -1,0 +1,120 @@
+{
+  "rules": {
+    "typescript": "warn",
+    "unicorn": "warn",
+    "import": "warn",
+    "jsdoc": "off",
+    "jsx-a11y": "off",
+    "nextjs": "off",
+    "react": "off",
+    "react-hooks": "off",
+    "typescript/array-type": [
+      "error",
+      {
+        "default": "array"
+      }
+    ],
+    "typescript/adjacent-overload-signatures": "error",
+    "typescript/ban-tslint-comment": "error",
+    "typescript/ban-ts-comment": "warn",
+    "typescript/consistent-indexed-object-style": "error",
+    "typescript/consistent-type-assertions": [
+      "error",
+      {
+        "assertionStyle": "as"
+      }
+    ],
+    "typescript/consistent-type-definitions": [
+      "error",
+      "interface"
+    ],
+    "typescript/no-array-constructor": "error",
+    "typescript/no-confusing-non-null-assertion": "error",
+    "typescript/no-duplicate-enum-values": "error",
+    "typescript/no-empty-function": "error",
+    "typescript/no-empty-interface": "error",
+    "typescript/no-explicit-any": "warn",
+    "typescript/no-extra-non-null-assertion": "error",
+    "typescript/no-inferrable-types": "error",
+    "typescript/no-misused-new": "error",
+    "typescript/no-namespace": "error",
+    "typescript/no-non-null-asserted-optional-chain": "error",
+    "typescript/no-non-null-assertion": "warn",
+    "typescript/no-this-alias": "error",
+    "typescript/no-unnecessary-type-assertion": "error",
+    "typescript/no-unnecessary-type-constraint": "error",
+    "typescript/no-unsafe-declaration-merging": "error",
+    "typescript/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "typescript/no-useless-constructor": "error",
+    "typescript/prefer-as-const": "error",
+    "typescript/prefer-for-of": "error",
+    "typescript/prefer-function-type": "error",
+    "typescript/prefer-namespace-keyword": "error",
+    "typescript/prefer-ts-expect-error": "error",
+    "typescript/triple-slash-reference": "error",
+    "typescript/ban-types": [
+      "error",
+      {
+        "types": {
+          "String": {
+            "message": "Use 'string' instead",
+            "fixWith": "string"
+          },
+          "Number": {
+            "message": "Use 'number' instead",
+            "fixWith": "number"
+          },
+          "Boolean": {
+            "message": "Use 'boolean' instead",
+            "fixWith": "boolean"
+          },
+          "Object": {
+            "message": "Use 'object' instead, or be more specific"
+          },
+          "{}": {
+            "message": "Use 'object' instead, or be more specific"
+          }
+        }
+      }
+    ],
+    "typescript/consistent-type-imports": [
+      "error",
+      {
+        "prefer": "type-imports",
+        "disallowTypeAnnotations": false
+      }
+    ],
+    "typescript/no-var-requires": "error",
+    "typescript/prefer-includes": "error",
+    "typescript/prefer-string-starts-ends-with": "error",
+    "typescript/prefer-optional-chain": "error",
+    "typescript/prefer-nullish-coalescing": "error",
+    "typescript/no-require-imports": "error",
+    "typescript/no-import-type-side-effects": "error"
+  },
+  "env": {
+    "node": true,
+    "es2022": true
+  },
+  "globals": {
+    "console": "readonly",
+    "process": "readonly"
+  },
+  "ignore": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "*.config.js",
+    "*.config.ts",
+    ".cursor",
+    ".roo",
+    ".ai-rules",
+    "test-*"
+  ]
+}
