@@ -9,12 +9,13 @@ interface McpConfigFile {
 export class CursorWriter {
   formatContent(content: string, rule: Rule): string {
     const ruleName = this.extractRuleName(rule.file);
+    const hasGlobs = rule.globs && rule.globs.length > 0;
 
     const frontmatter = [
       '---',
       `description: AI Rules - ${ruleName}`,
-      `globs: ${rule.globs || '**/*'}`,
-      'alwaysApply: true',
+      `globs: ${hasGlobs ? rule.globs : '**/*'}`,
+      'alwaysApply: ' + (hasGlobs ? 'false' : 'true'),
       '---',
       ''
     ].join('\n');

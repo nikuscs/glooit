@@ -126,136 +126,31 @@ export class ConfigLoader {
   static createTypedConfig(): string {
     return `import { defineRules } from 'glooit';
 
-// defineRules() provides TypeScript IntelliSense and validation
 export default defineRules({
-  // Directory where glooit stores configuration files
   configDir: '.glooit',
-
-  // Default targets for all rules (can be overridden per rule)
-  targets: ['claude', 'cursor'],
-
-  // Rules define how to sync your files to different AI agents
   rules: [
     {
       name: 'main',
-      file: '.glooit/main.md',         // Source file to sync
-      to: './',                        // Destination directory
-      targets: ['claude', 'cursor']    // Which agents to sync to
+      file: '.glooit/main.md',
+      to: './',
+      targets: ['claude', 'cursor']
     }
-    // Add more rules here:
-    // {
-    //   name: 'coding-standards',
-    //   file: '.glooit/coding-rules.md',
-    //   to: './',
-    //   targets: [
-    //     'claude',
-    //     { name: 'cursor', to: './custom/cursor-rules.mdc' }, // Custom path override
-    //     { name: 'generic', to: './docs/coding-standards.md' } // Generic agent with custom path
-    //   ],
-    //   globs: '**/*.{ts,js,tsx,jsx}' // Optional: only apply to certain file patterns
-    // }
   ],
-
-  // MCP (Model Context Protocol) server configurations
-  mcps: [
-    // Example MCP server configurations:
-    // {
-    //   name: 'database',
-    //   config: {
-    //     command: 'npx',
-    //     args: ['@modelcontextprotocol/server-postgres'],
-    //     env: { DATABASE_URL: process.env.DATABASE_URL }
-    //   },
-    //   targets: ['claude']
-    // },
-    // {
-    //   name: 'filesystem',
-    //   config: {
-    //     command: 'npx',
-    //     args: ['@modelcontextprotocol/server-filesystem', process.cwd()]
-    //   },
-    //   targets: ['claude', 'cursor']
-    // }
-  ],
-
-  // Additional options:
-  // mergeMcps: true,        // Merge with existing MCP configs (default: true)
-  // backup: {               // Backup settings
-  //   enabled: true,         // Create backups before syncing (default: true)
-  //   retention: 10          // Keep last 10 backups (default: 10)
-  // },
-  // hooks: {                // Custom hooks for advanced workflows
-  //   before: [],           // Run before sync
-  //   after: [],            // Run after sync
-  //   error: []             // Run on error
-  // }
 });
 `;
   }
 
   static createPlainConfig(): string {
     return `export default {
-  // Directory where glooit stores configuration files
   configDir: '.glooit',
-
-  // Default targets for all rules (can be overridden per rule)
-  targets: ['claude', 'cursor'],
-
-  // Rules define how to sync your files to different AI agents
   rules: [
     {
       name: 'main',
-      file: '.glooit/main.md',         // Source file to sync
-      to: './',                        // Destination directory
-      targets: ['claude', 'cursor']    // Which agents to sync to
+      file: '.glooit/main.md',
+      to: './',
+      targets: ['claude', 'cursor']
     }
-    // Add more rules here:
-    // {
-    //   name: 'coding-standards',
-    //   file: '.glooit/coding-rules.md',
-    //   to: './',
-    //   targets: [
-    //     'claude',
-    //     { name: 'cursor', to: './custom/cursor-rules.mdc' }, // Custom path override
-    //     { name: 'generic', to: './docs/coding-standards.md' } // Generic agent with custom path
-    //   ],
-    //   globs: '**/*.{ts,js,tsx,jsx}' // Optional: only apply to certain file patterns
-    // }
   ],
-
-  // MCP (Model Context Protocol) server configurations
-  mcps: [
-    // Example MCP server configurations:
-    // {
-    //   name: 'database',
-    //   config: {
-    //     command: 'npx',
-    //     args: ['@modelcontextprotocol/server-postgres'],
-    //     env: { DATABASE_URL: process.env.DATABASE_URL }
-    //   },
-    //   targets: ['claude']
-    // },
-    // {
-    //   name: 'filesystem',
-    //   config: {
-    //     command: 'npx',
-    //     args: ['@modelcontextprotocol/server-filesystem', process.cwd()]
-    //   },
-    //   targets: ['claude', 'cursor']
-    // }
-  ]
-
-  // Additional options:
-  // mergeMcps: true,        // Merge with existing MCP configs (default: true)
-  // backup: {               // Backup settings
-  //   enabled: true,         // Create backups before syncing (default: true)
-  //   retention: 10          // Keep last 10 backups (default: 10)
-  // },
-  // hooks: {                // Custom hooks for advanced workflows
-  //   before: [],           // Run before sync
-  //   after: [],            // Run after sync
-  //   error: []             // Run on error
-  // }
 };
 `;
   }
