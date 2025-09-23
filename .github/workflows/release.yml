@@ -72,10 +72,10 @@ jobs:
           npm install -g bumpp
 
           # Bump version and create tag
-          bumpp patch --yes --no-verify
+          bumpp minor --yes --no-verify
 
-          # TODO: Add NPM publishing when NPM_TOKEN secret is configured
-          # npm publish --provenance
+          # Publish to NPM
+          npm publish --provenance
 
       - name: Create GitHub Release
         env:
