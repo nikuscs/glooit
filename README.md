@@ -7,11 +7,15 @@
 ## Quick Start
 
 ```bash
-# Install globally
-npm install -g glooitit
+# Install 
+npm install -g glooit
+bun install -g glooit
+pnpm install -g glooit
 
-# Or run directly
-npx glooitit init
+#  Run
+npx glooit init
+bunx glooit init
+pnpx glooit init
 ```
 
 ## Basic Usage
@@ -30,9 +34,9 @@ import { Config } from 'glooit';
 export default {
   rules: [
     {
-      file: 'my-coding-rules.md',
+      file: 'main.md',
       to: './',
-      targets: ['claude', 'cursor']
+      targets: ['claude', 'cursor', 'codex']
     }
   ]
 } satisfies Config;
@@ -45,8 +49,10 @@ glooit sync
 ```
 
 This automatically creates:
+
 - `CLAUDE.md` (for Claude Code)
-- `.cursor/rules/my-coding-rules.md` (for Cursor)
+- `.cursor/rules/main.md` (for Cursor)
+- `AGENTS.md` (for Codex)
 
 ### 3. Add MCP Configurations
 
@@ -73,11 +79,13 @@ export default {
 
 ### Supported Agents
 
-- **Claude Code**: `.mcp.json`
-- **Cursor**: `~/.cursor/mcp.json`
-- **Roo Code/Cline**: `.roo/mcp.json`
+- **Claude Code**
+- **Cursor**
+- **Roo Code/Cline**
+- **Codex**
+- **Generic**
 
-### Example Configuration
+### Full Configuration
 
 ```typescript
 import { Config } from 'glooit';
@@ -120,24 +128,10 @@ glooit backup list   # List backups
 
 - 🔄 **Multi-platform sync** - Works with all major AI coding assistants
 - 📦 **MCP support** - Model Context Protocol configuration management
-- 🎯 **Selective targeting** - Choose which agents get which rules
+- 🎯 **Selective targeting** - Choose which agents get which rules and wht folders, perfect for complex projects & monorepos
 - 🔙 **Backup system** - Automatic backups before changes
 - 🧹 **Clean management** - Easy cleanup and reset options
-- ⚡ **Fast** - Built with Bun for maximum performance
-
-## Installation
-
-```bash
-# NPM
-npm install -g glooit
-
-# Bun
-bun install -g glooit
-
-# Direct execution
-npx glooitit init
-bunx glooitit sync
-```
+- ⚡ **Fast** - Built with Bun for.... you know... bun?
 
 ## License
 
