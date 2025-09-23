@@ -44,9 +44,9 @@ export interface BackupConfig {
 }
 
 export interface Hooks {
-  before?: any[];
-  after?: any[];
-  error?: any[];
+  before?: ((context: { config: Config }) => Promise<void> | void)[];
+  after?: ((context: SyncContext) => Promise<string | void> | string | void)[];
+  error?: ((error: unknown) => Promise<void> | void)[];
 }
 
 export interface Config {
@@ -84,38 +84,40 @@ export interface BackupEntry {
 }
 
 // Simple validation functions
-function isValidAgent(agent: any): agent is Agent {
-  return ['claude', 'cursor', 'codex', 'roocode'].includes(agent);
+function isValidAgent(agent: unknown): agent is Agent {
+  return ['claude', 'cursor', 'codex', 'roocode'].includes(agent as string);
 }
 
-function validateRule(rule: any): asserts rule is Rule {
+function validateRule(rule: unknown): asserts rule is Rule {
   if (!rule || typeof rule !== 'object') {
     throw new Error('Rule must be an object');
   }
-  if (typeof rule.file !== 'string') {
+  const r = rule as Record<string, unknown>;
+  if (typeof r.file !== 'string') {
     throw new Error('Rule.file must be a string');
   }
-  if (typeof rule.to !== 'string') {
+  if (typeof r.to !== 'string') {
     throw new Error('Rule.to must be a string');
   }
-  if (!Array.isArray(rule.targets) || rule.targets.length === 0) {
+  if (!Array.isArray(r.targets) || r.targets.length === 0) {
     throw new Error('Rule.targets must be a non-empty array');
   }
-  if (!rule.targets.every(isValidAgent)) {
+  if (!r.targets.every(isValidAgent)) {
     throw new Error('Rule.targets must contain valid agents: claude, cursor, codex, roocode');
   }
 }
 
-function validateConfig(config: any): asserts config is Config {
+function validateConfig(config: unknown): asserts config is Config {
   if (!config || typeof config !== 'object') {
     throw new Error('Config must be an object');
   }
-  if (!Array.isArray(config.rules)) {
+  const c = config as Record<string, unknown>;
+  if (!Array.isArray(c.rules)) {
     throw new Error('Config.rules must be an array');
   }
 
   // Validate each rule
-  config.rules.forEach((rule: any, index: number) => {
+  c.rules.forEach((rule: unknown, index: number) => {
     try {
       validateRule(rule);
     } catch (error) {
@@ -124,18 +126,20 @@ function validateConfig(config: any): asserts config is Config {
   });
 
   // Apply defaults
-  config.configDir = config.configDir || '.glooit';
-  config.mergeMcps = config.mergeMcps ?? true;
+  c.configDir = c.configDir || '.glooit';
+  c.mergeMcps = c.mergeMcps ?? true;
 
-  if (config.backup) {
-    config.backup.enabled = config.backup.enabled ?? true;
-    config.backup.retention = config.backup.retention ?? 10;
+  if (c.backup) {
+    const backup = c.backup as Record<string, unknown>;
+    backup.enabled = backup.enabled ?? true;
+    backup.retention = backup.retention ?? 10;
   }
 
-  if (config.mcps) {
-    config.mcps.forEach((mcp: any) => {
-      if (!mcp.targets) {
-        mcp.targets = ['claude'];
+  if (c.mcps) {
+    (c.mcps as unknown[]).forEach((mcp: unknown) => {
+      const m = mcp as Record<string, unknown>;
+      if (!m.targets) {
+        m.targets = ['claude'];
       }
     });
   }
