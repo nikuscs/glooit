@@ -124,7 +124,7 @@ export class AIRulesCore {
     const mcpGroups = new Map<string, McpGroupItem[]>();
 
     for (const mcp of this.config.mcps) {
-      for (const agent of mcp.targets) {
+      for (const agent of mcp.targets || ['claude']) {
         const outputPath = mcp.outputPath || getAgentMcpPath(agent);
         if (!mcpGroups.has(outputPath)) {
           mcpGroups.set(outputPath, []);
@@ -223,7 +223,7 @@ export class AIRulesCore {
 
     if (this.config.mcps) {
       for (const mcp of this.config.mcps) {
-        for (const agent of mcp.targets) {
+        for (const agent of mcp.targets || ['claude']) {
           const outputPath = mcp.outputPath || getAgentMcpPath(agent);
           if (!paths.includes(outputPath)) {
             paths.push(outputPath);

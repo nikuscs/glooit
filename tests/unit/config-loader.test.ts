@@ -15,9 +15,9 @@ describe('ConfigLoader', () => {
     it('should create a valid initial configuration', () => {
       const config = ConfigLoader.createInitialConfig();
 
-      expect(config).toContain('import type { Config }');
-      expect(config).toContain('export default {');
-      expect(config).toContain('} satisfies Config;');
+      expect(config).toContain('import { defineRules }');
+      expect(config).toContain('export default defineRules({');
+      expect(config).toContain('});');
       expect(config).toContain('targets: [');
       expect(config).toContain('claude');
       expect(config).toContain('cursor');

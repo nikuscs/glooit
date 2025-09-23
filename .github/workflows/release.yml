@@ -71,7 +71,7 @@ jobs:
           npm install -g bumpp
 
           # Bump version and create tag
-          bumpp minor --yes --no-verify
+          bumpp patch --yes --no-verify
 
           # Publish to NPM (without provenance for private repos)
           npm publish --access public

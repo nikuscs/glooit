@@ -1,74 +1,64 @@
-import { z } from 'zod';
+// TypeScript types and enums
+export type Agent = 'claude' | 'cursor' | 'codex' | 'roocode';
 
-export const AgentSchema = z.enum(['claude', 'cursor', 'codex', 'roocode']);
-export type Agent = z.infer<typeof AgentSchema>;
+export interface Rule {
+  name?: string;
+  file: string;
+  to: string;
+  globs?: string;
+  targets: Agent[];
+  hooks?: string[];
+}
 
-export const HookFunctionSchema = z.any();
+export interface Command {
+  command: string;
+  file: string;
+  targets: Agent[];
+}
 
-export const RuleSchema = z.object({
-  file: z.string(),
-  to: z.string(),
-  globs: z.string().optional(),
-  targets: z.array(AgentSchema),
-  hooks: z.array(z.string()).optional(),
-});
+export interface McpConfig {
+  command?: string;
+  args?: string[];
+  env?: Record<string, string>;
+  type?: string;
+  url?: string;
+  headers?: Record<string, string>;
+  alwaysAllow?: string[];
+  disabled?: boolean;
+}
 
-export const CommandSchema = z.object({
-  command: z.string(),
-  file: z.string(),
-  targets: z.array(AgentSchema),
-});
-
-export const McpConfigSchema = z.object({
-  command: z.string().optional(), // Optional for remote MCPs
-  args: z.array(z.string()).optional(),
-  env: z.record(z.string(), z.string()).optional(),
-  type: z.string().optional(),
-  url: z.string().optional(), // For remote MCPs
-  headers: z.record(z.string(), z.string()).optional(), // For remote MCPs
-  alwaysAllow: z.array(z.string()).optional(), // For roocode/cline
-  disabled: z.boolean().optional(),
-});
-
-export const McpSchema = z.object({
-  name: z.string(),
-  config: McpConfigSchema,
-  targets: z.array(AgentSchema).default(['claude']), // Which agents this MCP is for
-  outputPath: z.string().optional(), // Will be determined by agent type if not specified
-});
-
-export const BackupConfigSchema = z.object({
-  enabled: z.boolean().default(true),
-  retention: z.number().default(10),
-});
-
-export const HooksSchema = z.object({
-  before: z.array(HookFunctionSchema).optional(),
-  after: z.array(HookFunctionSchema).optional(),
-  error: z.array(HookFunctionSchema).optional(),
-});
-
-export const ConfigSchema = z.object({
-  configDir: z.string().default('.glooit'),
-  rules: z.array(RuleSchema),
-  commands: z.array(CommandSchema).optional(),
-  mcps: z.array(McpSchema).optional(),
-  mergeMcps: z.boolean().default(true), // Whether to merge MCPs with existing configs
-  hooks: HooksSchema.optional(),
-  backup: BackupConfigSchema.optional(),
-});
-
-export type Rule = z.infer<typeof RuleSchema>;
-export type Command = z.infer<typeof CommandSchema>;
-export type McpConfig = z.infer<typeof McpConfigSchema>;
-export type Mcp = z.infer<typeof McpSchema>;
+export interface Mcp {
+  name: string;
+  config: McpConfig;
+  targets?: Agent[];
+  outputPath?: string;
+}
 
 export interface ResolvedMcp extends Omit<Mcp, 'outputPath'> {
-  outputPath: string; // Always defined after resolution
+  outputPath: string;
 }
-export type BackupConfig = z.infer<typeof BackupConfigSchema>;
-export type Hooks = z.infer<typeof HooksSchema>;
-export type Config = z.infer<typeof ConfigSchema>;
+
+export interface BackupConfig {
+  enabled?: boolean;
+  retention?: number;
+}
+
+export interface Hooks {
+  before?: any[];
+  after?: any[];
+  error?: any[];
+}
+
+export interface Config {
+  configDir?: string;
+  targets?: Agent[];
+  rules: Rule[];
+  commands?: Command[];
+  mcps?: Mcp[];
+  mergeMcps?: boolean;
+  hooks?: Hooks;
+  backup?: BackupConfig;
+}
 
 export interface AgentMapping {
   path: string;
@@ -93,6 +83,65 @@ export interface BackupEntry {
   }[];
 }
 
+// Simple validation functions
+function isValidAgent(agent: any): agent is Agent {
+  return ['claude', 'cursor', 'codex', 'roocode'].includes(agent);
+}
+
+function validateRule(rule: any): asserts rule is Rule {
+  if (!rule || typeof rule !== 'object') {
+    throw new Error('Rule must be an object');
+  }
+  if (typeof rule.file !== 'string') {
+    throw new Error('Rule.file must be a string');
+  }
+  if (typeof rule.to !== 'string') {
+    throw new Error('Rule.to must be a string');
+  }
+  if (!Array.isArray(rule.targets) || rule.targets.length === 0) {
+    throw new Error('Rule.targets must be a non-empty array');
+  }
+  if (!rule.targets.every(isValidAgent)) {
+    throw new Error('Rule.targets must contain valid agents: claude, cursor, codex, roocode');
+  }
+}
+
+function validateConfig(config: any): asserts config is Config {
+  if (!config || typeof config !== 'object') {
+    throw new Error('Config must be an object');
+  }
+  if (!Array.isArray(config.rules)) {
+    throw new Error('Config.rules must be an array');
+  }
+
+  // Validate each rule
+  config.rules.forEach((rule: any, index: number) => {
+    try {
+      validateRule(rule);
+    } catch (error) {
+      throw new Error(`Rule at index ${index}: ${error}`);
+    }
+  });
+
+  // Apply defaults
+  config.configDir = config.configDir || '.glooit';
+  config.mergeMcps = config.mergeMcps ?? true;
+
+  if (config.backup) {
+    config.backup.enabled = config.backup.enabled ?? true;
+    config.backup.retention = config.backup.retention ?? 10;
+  }
+
+  if (config.mcps) {
+    config.mcps.forEach((mcp: any) => {
+      if (!mcp.targets) {
+        mcp.targets = ['claude'];
+      }
+    });
+  }
+}
+
 export function defineRules(config: Config): Config {
-  return ConfigSchema.parse(config);
+  validateConfig(config);
+  return config;
 }

@@ -54,10 +54,11 @@ export class ConfigValidator {
       }
     }
 
-    if (!config.configDir.startsWith('.') && !config.configDir.startsWith('/')) {
+    const configDir = config.configDir || '.glooit';
+    if (!configDir.startsWith('.') && !configDir.startsWith('/')) {
       errors.push({
         field: 'configDir',
-        message: `Invalid config directory format: ${config.configDir}`
+        message: `Invalid config directory format: ${configDir}`
       });
     }
 

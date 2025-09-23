@@ -6,7 +6,7 @@ export class BackupManager {
   private backupDir: string;
 
   constructor(private config: Config) {
-    this.backupDir = join(config.configDir, 'backups');
+    this.backupDir = join(config.configDir || '.glooit', 'backups');
     this.ensureBackupDir();
   }
 

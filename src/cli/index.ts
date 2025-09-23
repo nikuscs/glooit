@@ -4,8 +4,8 @@ import { Command } from 'commander';
 import { AIRulesCore } from '../core';
 import { ConfigLoader } from '../core/config-loader';
 import { ConfigValidator } from '../core/validation';
-import { existsSync, writeFileSync, rmSync, readdirSync, readFileSync } from 'fs';
-import { dirname } from 'path';
+import { existsSync, writeFileSync, rmSync, readdirSync, readFileSync, mkdirSync } from 'fs';
+import { dirname, join } from 'path';
 import { GitIgnoreManager } from '../core/gitignore';
 import { detect } from 'package-manager-detector/detect';
 import { resolveCommand } from 'package-manager-detector/commands';
@@ -138,6 +138,7 @@ function promptUser(question: string): Promise<boolean> {
   });
 }
 
+
 async function initCommand(force: boolean): Promise<void> {
   const configPath = 'glooit.config.ts';
 
@@ -221,7 +222,7 @@ async function initCommand(force: boolean): Promise<void> {
 
   console.log('Next steps:');
   console.log('1. Edit the configuration file to match your project');
-  console.log('2. Create your rule files in .glooit/');
+  console.log('2. Create your rule files in the configured directory');
   console.log('3. Run `glooit sync` to distribute rules');
 }
 
@@ -309,7 +310,7 @@ async function resetCommand(force: boolean): Promise<void> {
   let customConfigDir: string | null = null;
   try {
     const config = await ConfigLoader.load();
-    customConfigDir = config.configDir;
+    customConfigDir = config.configDir || null;
     const core = new AIRulesCore(config);
     generatedPaths = core.collectAllGeneratedPaths();
   } catch {
