@@ -209,6 +209,19 @@ async function resetCommand(force: boolean): Promise<void> {
 
   console.log('🗑️  Resetting ai-rules...');
 
+  // Try to read config first to get all generated paths
+  let generatedPaths: string[] = [];
+  let customConfigDir: string | null = null;
+  try {
+    const config = await ConfigLoader.load();
+    customConfigDir = config.configDir;
+    const core = new AIRulesCore(config);
+    generatedPaths = (core as any).collectAllGeneratedPaths();
+  } catch {
+    // Config doesn't exist or can't be loaded, use default
+    generatedPaths = ['.ai-rules']; // Default config directory
+  }
+
   // Remove config files
   const configPaths = [
     'ai-rules.config.ts',
@@ -224,15 +237,10 @@ async function resetCommand(force: boolean): Promise<void> {
     }
   }
 
-  // Remove generated directories and files
-  const generatedPaths = [
-    '.ai-rules',
-    '.cursor/rules',
-    '.roo/rules',
-    'CLAUDE.md',
-    'AGENTS.md',
-    'claude_desktop_config.json'  // Common MCP config file
-  ];
+  // Add config directory to generated paths if not already included
+  if (customConfigDir && !generatedPaths.includes(customConfigDir)) {
+    generatedPaths.push(customConfigDir);
+  }
 
   for (const path of generatedPaths) {
     if (existsSync(path)) {
@@ -241,11 +249,23 @@ async function resetCommand(force: boolean): Promise<void> {
     }
   }
 
-  // Clean up empty parent directories
+  // Clean up empty parent directories from generated paths
   const { readdirSync } = await import('fs');
-  const dirsToCheck = ['.cursor', '.roo', 'config', 'custom-rules', 'custom-ai-rules'];
+  const { dirname } = await import('path');
 
-  for (const dir of dirsToCheck) {
+  // Get unique parent directories from generated paths (max 2 levels up)
+  const parentDirs = new Set<string>();
+  for (const path of generatedPaths) {
+    let parent = dirname(path);
+    let level = 0;
+    while (parent !== '.' && parent !== '/' && parent !== path && level < 2) {
+      parentDirs.add(parent);
+      parent = dirname(parent);
+      level++;
+    }
+  }
+
+  for (const dir of parentDirs) {
     try {
       if (existsSync(dir)) {
         const contents = readdirSync(dir);

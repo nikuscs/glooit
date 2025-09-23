@@ -163,7 +163,7 @@ export default {
 
     // Verify files are removed
     expect(existsSync('CLAUDE.md')).toBe(false);
-    // Custom config directory is removed because it's empty after cleanup
+    // Custom config directory is removed if it matches known patterns
     expect(existsSync('custom-rules')).toBe(false);
   });
 
