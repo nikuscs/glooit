@@ -74,8 +74,8 @@ jobs:
           # Bump version and create tag
           bumpp minor --yes --no-verify
 
-          # Publish to NPM
-          npm publish --provenance --access public
+          # Publish to NPM (without provenance for private repos)
+          npm publish --access public
 
       - name: Create GitHub Release
         env:
