@@ -1,5 +1,11 @@
-// TypeScript types and enums
-export type Agent = 'claude' | 'cursor' | 'codex' | 'roocode';
+export type AgentName = 'claude' | 'cursor' | 'codex' | 'roocode' | 'generic';
+
+export interface AgentTarget {
+  name: AgentName;
+  to?: string;
+}
+
+export type Agent = AgentName | AgentTarget;
 
 export interface Rule {
   name?: string;
@@ -30,7 +36,7 @@ export interface McpConfig {
 export interface Mcp {
   name: string;
   config: McpConfig;
-  targets?: Agent[];
+  targets?: AgentName[];
   outputPath?: string;
 }
 
@@ -72,7 +78,7 @@ export interface SyncContext {
   rule: Rule;
   content: string;
   targetPath: string;
-  agent: Agent;
+  agent: AgentName;
 }
 
 export interface BackupEntry {
@@ -84,8 +90,19 @@ export interface BackupEntry {
 }
 
 // Simple validation functions
+function isValidAgentName(agentName: unknown): agentName is AgentName {
+  return ['claude', 'cursor', 'codex', 'roocode', 'generic'].includes(agentName as string);
+}
+
 function isValidAgent(agent: unknown): agent is Agent {
-  return ['claude', 'cursor', 'codex', 'roocode'].includes(agent as string);
+  if (typeof agent === 'string') {
+    return isValidAgentName(agent);
+  }
+  if (typeof agent === 'object' && agent !== null) {
+    const a = agent as Record<string, unknown>;
+    return isValidAgentName(a.name) && (a.to === undefined || typeof a.to === 'string');
+  }
+  return false;
 }
 
 function validateRule(rule: unknown): asserts rule is Rule {
@@ -103,7 +120,7 @@ function validateRule(rule: unknown): asserts rule is Rule {
     throw new Error('Rule.targets must be a non-empty array');
   }
   if (!r.targets.every(isValidAgent)) {
-    throw new Error('Rule.targets must contain valid agents: claude, cursor, codex, roocode');
+    throw new Error('Rule.targets must contain valid agents: claude, cursor, codex, roocode, generic, or objects with {name, to?}');
   }
 }
 

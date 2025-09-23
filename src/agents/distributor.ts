@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join, dirname, basename } from 'path';
-import type { Agent, Rule, Config, SyncContext } from '../types';
-import { getAgentPath, getAgentDirectory } from './index';
+import type { Agent, AgentName, Rule, Config, SyncContext } from '../types';
+import { getAgentPath } from './index';
 import { AgentWriterFactory } from './writers';
 import { replaceStructure } from '../hooks/project-structure';
 import { replaceEnv } from '../hooks/env-variables';
@@ -18,20 +18,33 @@ export class AgentDistributor {
     }
   }
 
+  private getAgentName(agent: Agent): AgentName {
+    return typeof agent === 'string' ? agent : agent.name;
+  }
+
+  private getCustomPath(agent: Agent): string | undefined {
+    return typeof agent === 'object' ? agent.to : undefined;
+  }
+
   private async distributeToAgent(agent: Agent, rule: Rule, content: string): Promise<void> {
-    const ruleName = this.extractRuleName(rule.file);
-    const agentPath = getAgentPath(agent, ruleName);
-    const targetPath = join(rule.to, agentPath);
+    const agentName = this.getAgentName(agent);
+    const customPath = this.getCustomPath(agent);
 
-    const agentDir = getAgentDirectory(agent);
-    if (agentDir) {
-      const fullDir = join(rule.to, agentDir);
-      mkdirSync(fullDir, { recursive: true });
+    let targetPath: string;
+
+    if (customPath) {
+      // User provided custom path - use it as-is
+      targetPath = customPath;
     } else {
-      mkdirSync(dirname(targetPath), { recursive: true });
+      // Use default path for the agent
+      const ruleName = this.extractRuleName(rule.file);
+      const agentPath = getAgentPath(agentName, ruleName);
+      targetPath = join(rule.to, agentPath);
     }
+    
+    mkdirSync(dirname(targetPath), { recursive: true });
 
-    const writer = AgentWriterFactory.createWriter(agent);
+    const writer = AgentWriterFactory.createWriter(agentName);
     const formattedContent = writer.formatContent(content, rule);
 
     const context: SyncContext = {
@@ -39,7 +52,7 @@ export class AgentDistributor {
       rule,
       content: formattedContent,
       targetPath,
-      agent
+      agent: agentName
     };
 
     const finalContent = await this.applyHooks(context);

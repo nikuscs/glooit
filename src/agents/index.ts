@@ -1,14 +1,14 @@
-import type { Agent, AgentMapping } from '../types';
+import type { AgentName, AgentMapping } from '../types';
 import { homedir } from 'os';
 
-export const AGENT_MAPPINGS: Record<Agent, AgentMapping> = {
+export const AGENT_MAPPINGS: Record<AgentName, AgentMapping> = {
   claude: {
     path: 'CLAUDE.md',
     format: 'markdown',
     mcpPath: '.mcp.json'
   },
   cursor: {
-    path: '.cursor/rules/{name}.md',
+    path: '.cursor/rules/{name}.mdc',
     format: 'frontmatter',
     directory: '.cursor/rules',
     mcpPath: '~/.cursor/mcp.json'
@@ -23,19 +23,24 @@ export const AGENT_MAPPINGS: Record<Agent, AgentMapping> = {
     format: 'markdown',
     directory: '.roo/rules',
     mcpPath: '.roo/mcp.json'
+  },
+  generic: {
+    path: '{name}.md',
+    format: 'markdown',
+    mcpPath: 'mcp.json'
   }
 };
 
-export function getAgentPath(agent: Agent, name = 'global'): string {
+export function getAgentPath(agent: AgentName, name = 'global'): string {
   const mapping = AGENT_MAPPINGS[agent];
   return mapping.path.replace('{name}', name);
 }
 
-export function getAgentDirectory(agent: Agent): string | undefined {
+export function getAgentDirectory(agent: AgentName): string | undefined {
   return AGENT_MAPPINGS[agent].directory;
 }
 
-export function getAgentMcpPath(agent: Agent): string {
+export function getAgentMcpPath(agent: AgentName): string {
   const mcpPath = AGENT_MAPPINGS[agent].mcpPath;
 
   // Handle home directory expansion and test environment

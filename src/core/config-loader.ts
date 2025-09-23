@@ -104,9 +104,18 @@ export class ConfigLoader {
       throw new Error(`Rule at index ${index}: Rule.targets must be a non-empty array`);
     }
 
-    const validAgents = ['claude', 'cursor', 'codex', 'roocode'];
-    if (!r.targets.every((agent: unknown) => validAgents.includes(agent as string))) {
-      throw new Error(`Rule at index ${index}: Rule.targets must contain valid agents: ${validAgents.join(', ')}`);
+    const validAgentNames = ['claude', 'cursor', 'codex', 'roocode', 'generic'];
+    if (!r.targets.every((agent: unknown) => {
+      if (typeof agent === 'string') {
+        return validAgentNames.includes(agent);
+      }
+      if (typeof agent === 'object' && agent !== null) {
+        const a = agent as Record<string, unknown>;
+        return validAgentNames.includes(a.name as string) && (a.to === undefined || typeof a.to === 'string');
+      }
+      return false;
+    })) {
+      throw new Error(`Rule at index ${index}: Rule.targets must contain valid agents: ${validAgentNames.join(', ')}, or objects with {name, to?}`);
     }
   }
 
@@ -138,7 +147,11 @@ export default defineRules({
     //   name: 'coding-standards',
     //   file: '.glooit/coding-rules.md',
     //   to: './',
-    //   targets: ['claude'],
+    //   targets: [
+    //     'claude',
+    //     { name: 'cursor', to: './custom/cursor-rules.mdc' }, // Custom path override
+    //     { name: 'generic', to: './docs/coding-standards.md' } // Generic agent with custom path
+    //   ],
     //   globs: '**/*.{ts,js,tsx,jsx}' // Optional: only apply to certain file patterns
     // }
   ],
@@ -201,7 +214,11 @@ export default defineRules({
     //   name: 'coding-standards',
     //   file: '.glooit/coding-rules.md',
     //   to: './',
-    //   targets: ['claude'],
+    //   targets: [
+    //     'claude',
+    //     { name: 'cursor', to: './custom/cursor-rules.mdc' }, // Custom path override
+    //     { name: 'generic', to: './docs/coding-standards.md' } // Generic agent with custom path
+    //   ],
     //   globs: '**/*.{ts,js,tsx,jsx}' // Optional: only apply to certain file patterns
     // }
   ],

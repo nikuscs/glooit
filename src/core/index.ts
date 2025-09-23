@@ -1,4 +1,4 @@
-import type { Config, Agent, McpConfig } from '../types';
+import type { Config, Agent, AgentName, McpConfig } from '../types';
 
 interface McpGroupItem {
   name: string;
@@ -142,7 +142,7 @@ export class AIRulesCore {
       const agent = mcps[0]?.agent;
       if (!agent) continue;
 
-      const writer = AgentWriterFactory.createWriter(agent as Agent);
+      const writer = AgentWriterFactory.createWriter(agent as AgentName);
 
       if (writer.formatMcp) {
         const dir = dirname(outputPath);
@@ -194,26 +194,48 @@ export class AIRulesCore {
     }
   }
 
+  private getAgentName(agent: Agent): AgentName {
+    return typeof agent === 'string' ? agent : agent.name;
+  }
+
+  private getCustomPath(agent: Agent): string | undefined {
+    return typeof agent === 'object' ? agent.to : undefined;
+  }
+
   collectAllGeneratedPaths(): string[] {
     const paths: string[] = [];
 
     for (const rule of this.config.rules) {
       for (const agent of rule.targets) {
-        const ruleName = rule.file.split('/').pop()?.replace('.md', '') || 'rule';
-        const agentPath = getAgentPath(agent, ruleName);
-        let fullPath = `${rule.to}/${agentPath}`.replace(/\/+/g, '/');
-        if (fullPath.startsWith('./')) {
-          fullPath = fullPath.substring(2);
+        const agentName = this.getAgentName(agent);
+        const customPath = this.getCustomPath(agent);
+
+        if (customPath) {
+          paths.push(customPath);
+        } else {
+          const ruleName = rule.file.split('/').pop()?.replace('.md', '') || 'rule';
+          const agentPath = getAgentPath(agentName, ruleName);
+          let fullPath = `${rule.to}/${agentPath}`.replace(/\/+/g, '/');
+          if (fullPath.startsWith('./')) {
+            fullPath = fullPath.substring(2);
+          }
+          paths.push(fullPath);
         }
-        paths.push(fullPath);
       }
     }
 
     if (this.config.commands) {
       for (const command of this.config.commands) {
         for (const agent of command.targets) {
-          const agentPath = getAgentPath(agent, command.command);
-          paths.push(agentPath);
+          const agentName = this.getAgentName(agent);
+          const customPath = this.getCustomPath(agent);
+
+          if (customPath) {
+            paths.push(customPath);
+          } else {
+            const agentPath = getAgentPath(agentName, command.command);
+            paths.push(agentPath);
+          }
         }
       }
     }

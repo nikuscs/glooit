@@ -72,10 +72,10 @@ export default {
     execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
 
     expect(existsSync('CLAUDE.md')).toBe(true);
-    expect(existsSync('.cursor/rules/shared.md')).toBe(true);
+    expect(existsSync('.cursor/rules/shared.mdc')).toBe(true);
 
     const claudeContent = readFileSync('CLAUDE.md', 'utf-8');
-    const cursorContent = readFileSync('.cursor/rules/shared.md', 'utf-8');
+    const cursorContent = readFileSync('.cursor/rules/shared.mdc', 'utf-8');
 
     expect(claudeContent).toContain('# Shared content');
     expect(cursorContent).toContain('---');
@@ -184,8 +184,8 @@ export default {
     const cliPath = `${originalCwd}/src/cli/index.ts`;
     execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
 
-    expect(existsSync('.cursor/rules/test.md')).toBe(true);
-    const content = readFileSync('.cursor/rules/test.md', 'utf-8');
+    expect(existsSync('.cursor/rules/test.mdc')).toBe(true);
+    const content = readFileSync('.cursor/rules/test.mdc', 'utf-8');
     expect(content).toContain('globs: src/**/*.ts');
   });
 });
