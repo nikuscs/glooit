@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const AgentSchema = z.enum(['claude', 'cursor', 'codex', 'roocode']);
 export type Agent = z.infer<typeof AgentSchema>;
 
-export const HookFunctionSchema = z.function();
+export const HookFunctionSchema = z.any();
 
 export const RuleSchema = z.object({
   file: z.string(),
@@ -22,7 +22,7 @@ export const CommandSchema = z.object({
 export const McpConfigSchema = z.object({
   command: z.string(),
   args: z.array(z.string()).optional(),
-  env: z.record(z.string()).optional(),
+  env: z.record(z.string(), z.string()).optional(),
   type: z.string().optional(),
 });
 

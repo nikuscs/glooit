@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { existsSync, writeFileSync, unlinkSync, mkdirSync, rmSync } from 'fs';
+import { existsSync, writeFileSync, mkdirSync, rmSync } from 'fs';
 import { ConfigValidator } from '../../src/core/validation';
 import type { Config } from '../../src/types';
 
@@ -49,9 +49,9 @@ describe('ConfigValidator', () => {
 
       const errors = await ConfigValidator.validate(config);
       expect(errors).toHaveLength(1);
-      expect(errors[0].field).toBe('rules[0].file');
-      expect(errors[0].message).toContain('not found');
-      expect(errors[0].path).toBe('non-existent-file.md');
+      expect(errors[0]?.field).toBe('rules[0].file');
+      expect(errors[0]?.message).toContain('not found');
+      expect(errors[0]?.path).toBe('non-existent-file.md');
     });
 
     it('should detect empty targets array', async () => {
@@ -68,8 +68,8 @@ describe('ConfigValidator', () => {
 
       const errors = await ConfigValidator.validate(config);
       expect(errors).toHaveLength(1);
-      expect(errors[0].field).toBe('rules[0].targets');
-      expect(errors[0].message).toContain('At least one target');
+      expect(errors[0]?.field).toBe('rules[0].targets');
+      expect(errors[0]?.message).toContain('At least one target');
     });
 
     it('should detect invalid path formats', async () => {
@@ -86,8 +86,8 @@ describe('ConfigValidator', () => {
 
       const errors = await ConfigValidator.validate(config);
       expect(errors).toHaveLength(1);
-      expect(errors[0].field).toBe('rules[0].to');
-      expect(errors[0].message).toContain('Invalid path format');
+      expect(errors[0]?.field).toBe('rules[0].to');
+      expect(errors[0]?.message).toContain('Invalid path format');
     });
 
     it('should validate commands', async () => {

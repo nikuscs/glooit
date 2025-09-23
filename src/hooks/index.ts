@@ -1,4 +1,3 @@
-import type { SyncContext } from '../types';
 
 export type HookFunction = (context: any) => void | Promise<void> | string | Promise<string>;
 

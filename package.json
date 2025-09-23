@@ -9,14 +9,19 @@
     "ai-rules": "dist/cli/index.js"
   },
   "scripts": {
-    "build": "bun build src/index.ts --outdir dist --target node",
+    "build": "bun run typecheck && bun run lint && bun build src/index.ts --outdir dist --target node",
     "build:cli": "bun build src/cli/index.ts --outdir dist/cli --target node",
     "dev": "bun run src/cli/index.ts",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "prepare": "bun run build && bun run build:cli"
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint src tests",
+    "lint:fix": "oxlint src tests --fix",
+    "format": "oxlint src tests --fix",
+    "check": "bun run typecheck && bun run lint && bun run test:run",
+    "prepare": "bun run check && bun run build && bun run build:cli"
   },
   "files": [
     "dist",
@@ -38,6 +43,7 @@
     "@types/bun": "latest",
     "@types/node": "^24.5.2",
     "@vitest/ui": "^3.2.4",
+    "oxlint": "^1.17.0",
     "vitest": "^3.2.4"
   },
   "peerDependencies": {

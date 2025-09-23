@@ -1,0 +1,31 @@
+{
+  "rules": {
+    "typescript": "warn",
+    "unicorn": "warn",
+    "import": "warn",
+    "jsdoc": "off",
+    "jsx-a11y": "off",
+    "nextjs": "off",
+    "react": "off",
+    "react-hooks": "off"
+  },
+  "env": {
+    "node": true,
+    "es2022": true
+  },
+  "globals": {
+    "console": "readonly",
+    "process": "readonly"
+  },
+  "ignore": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "*.config.js",
+    "*.config.ts",
+    ".cursor",
+    ".roo",
+    ".ai-rules",
+    "test-*"
+  ]
+}

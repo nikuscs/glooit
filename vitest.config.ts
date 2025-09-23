@@ -4,8 +4,8 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['tests/**/*.{test,spec}.{js,ts}'],
-    exclude: ['node_modules', 'dist', '.cursor', '.roo', '.ai-rules'],
+    include: ['tests/unit/**/*.{test,spec}.{js,ts}'],
+    exclude: ['node_modules', 'dist', '.cursor', '.roo', '.ai-rules', 'tests/integration'],
     coverage: {
       reporter: ['text', 'json', 'html'],
       exclude: [

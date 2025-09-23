@@ -5,7 +5,7 @@ export interface GenericWriter {
 }
 
 export class MarkdownWriter implements GenericWriter {
-  formatContent(content: string, rule: Rule): string {
+  formatContent(content: string, _rule: Rule): string {
     // Generic markdown - return content as-is
     return content;
   }
