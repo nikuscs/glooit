@@ -3,6 +3,9 @@ import { join, dirname, basename } from 'path';
 import type { Agent, Rule, Config, SyncContext } from '../types';
 import { getAgentPath, getAgentDirectory } from './index';
 import { AgentWriterFactory } from './writers';
+import { replaceStructure } from '../hooks/project-structure';
+import { replaceEnv } from '../hooks/env-variables';
+import { addTimestamp } from '../hooks/timestamp';
 
 export class AgentDistributor {
   constructor(private config: Config) {}
@@ -89,15 +92,12 @@ export class AgentDistributor {
     // Import built-in hooks dynamically if needed
     switch (hookName) {
       case 'replaceStructure': {
-        const { replaceStructure } = await import('../hooks/project-structure');
         return await replaceStructure(context);
       }
       case 'replaceEnv': {
-        const { replaceEnv } = await import('../hooks/env-variables');
         return replaceEnv(context);
       }
       case 'addTimestamp': {
-        const { addTimestamp } = await import('../hooks/timestamp');
         return addTimestamp(context);
       }
       default:

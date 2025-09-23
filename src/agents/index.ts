@@ -1,4 +1,5 @@
 import type { Agent, AgentMapping } from '../types';
+import { homedir } from 'os';
 
 export const AGENT_MAPPINGS: Record<Agent, AgentMapping> = {
   claude: {
@@ -45,7 +46,6 @@ export function getAgentMcpPath(agent: Agent): string {
       return mcpPath.replace('~/', './');
     } else {
       // In production, expand to actual home directory
-      const { homedir } = require('os');
       return mcpPath.replace('~/', `${homedir()}/`);
     }
   }

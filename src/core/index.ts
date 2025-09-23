@@ -3,6 +3,10 @@ import { AgentDistributor } from '../agents/distributor';
 import { BackupManager } from './backup';
 import { GitIgnoreManager } from './gitignore';
 import { HookManager } from '../hooks';
+import { getAgentPath, getAgentMcpPath } from '../agents';
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
+import { dirname } from 'path';
+import { AgentWriterFactory } from '../agents/writers';
 
 export class AIRulesCore {
   private distributor: AgentDistributor;
@@ -92,7 +96,6 @@ export class AIRulesCore {
     try {
       // Validate that all rule files exist
       for (const rule of this.config.rules) {
-        const { existsSync } = await import('fs');
         if (!existsSync(rule.file)) {
           throw new Error(`Rule file not found: ${rule.file}`);
         }
@@ -101,8 +104,7 @@ export class AIRulesCore {
       // Validate command files
       if (this.config.commands) {
         for (const command of this.config.commands) {
-          const { existsSync } = await import('fs');
-          if (!existsSync(command.file)) {
+            if (!existsSync(command.file)) {
             throw new Error(`Command file not found: ${command.file}`);
           }
         }
@@ -120,10 +122,6 @@ export class AIRulesCore {
     // Validate for duplicate MCP names
     this.validateMcpNames();
 
-    const { AgentWriterFactory } = await import('../agents/writers');
-    const { getAgentMcpPath } = await import('../agents');
-    const { writeFileSync, mkdirSync } = await import('fs');
-    const { dirname } = await import('path');
 
     // Expand MCPs for each target agent and group by output path
     const mcpGroups = new Map<string, Array<{ name: string, config: any, agent: string, outputPath: string }>>();
@@ -161,7 +159,6 @@ export class AIRulesCore {
         // Start with existing config if merge is enabled
         let existingConfig: any = {};
         if (this.config.mergeMcps) {
-          const { existsSync, readFileSync } = await import('fs');
           if (existsSync(outputPath)) {
             try {
               const content = readFileSync(outputPath, 'utf-8');
@@ -212,7 +209,6 @@ export class AIRulesCore {
     // Collect rule-generated paths
     for (const rule of this.config.rules) {
       for (const agent of rule.targets) {
-        const { getAgentPath } = require('../agents');
         const ruleName = rule.file.split('/').pop()?.replace('.md', '') || 'rule';
         const agentPath = getAgentPath(agent, ruleName);
         let fullPath = `${rule.to}/${agentPath}`.replace(/\/+/g, '/');
@@ -228,8 +224,7 @@ export class AIRulesCore {
     if (this.config.commands) {
       for (const command of this.config.commands) {
         for (const agent of command.targets) {
-          const { getAgentPath } = require('../agents');
-          const agentPath = getAgentPath(agent, command.command);
+            const agentPath = getAgentPath(agent, command.command);
           paths.push(agentPath);
         }
       }
@@ -237,7 +232,6 @@ export class AIRulesCore {
 
     // Collect MCP output paths
     if (this.config.mcps) {
-      const { getAgentMcpPath } = require('../agents');
       for (const mcp of this.config.mcps) {
         for (const agent of mcp.targets) {
           const outputPath = mcp.outputPath || getAgentMcpPath(agent);

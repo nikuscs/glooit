@@ -1,4 +1,6 @@
 import type { SyncContext } from '../types';
+import { readdirSync, statSync } from 'fs';
+import { join } from 'path';
 
 export const replaceStructure = async (context: SyncContext): Promise<string> => {
   const structure = await getProjectStructure();
@@ -7,8 +9,6 @@ export const replaceStructure = async (context: SyncContext): Promise<string> =>
 
 async function getProjectStructure(maxDepth: number = 3): Promise<string> {
   try {
-    const { readdirSync, statSync } = await import('fs');
-    const { join } = await import('path');
 
     const buildTree = (dir: string, depth: number = 0, prefix: string = ''): string[] => {
       if (depth > maxDepth) return [];

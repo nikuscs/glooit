@@ -4,6 +4,9 @@ import { Command } from 'commander';
 import { AIRulesCore } from '../core';
 import { ConfigLoader } from '../core/config-loader';
 import { ConfigValidator } from '../core/validation';
+import { existsSync, writeFileSync, rmSync, readdirSync } from 'fs';
+import { dirname } from 'path';
+import { GitIgnoreManager } from '../core/gitignore';
 
 const program = new Command();
 
@@ -110,7 +113,6 @@ program
 // Command implementations
 
 async function initCommand(force: boolean): Promise<void> {
-  const { existsSync, writeFileSync } = await import('fs');
 
   const configPath = 'ai-rules.config.ts';
 
@@ -204,7 +206,6 @@ async function resetCommand(force: boolean): Promise<void> {
     return;
   }
 
-  const { existsSync, rmSync } = await import('fs');
 
   console.log('🗑️  Resetting ai-rules...');
 
@@ -249,8 +250,6 @@ async function resetCommand(force: boolean): Promise<void> {
   }
 
   // Clean up empty parent directories from generated paths
-  const { readdirSync } = await import('fs');
-  const { dirname } = await import('path');
 
   // Get unique parent directories from generated paths (max 2 levels up)
   const parentDirs = new Set<string>();
@@ -281,7 +280,6 @@ async function resetCommand(force: boolean): Promise<void> {
   // Clean .gitignore
   try {
     const config = { configDir: '.ai-rules', rules: [], commands: [] };
-    const { GitIgnoreManager } = await import('../core/gitignore');
     const gitIgnoreManager = new GitIgnoreManager(config as any);
     await gitIgnoreManager.cleanupGitIgnore();
     console.log('   Cleaned .gitignore');
