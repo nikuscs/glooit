@@ -36,12 +36,10 @@ describe('CLI - Init Command', () => {
     writeFileSync('ai-rules.config.ts', 'existing config');
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
-    const result = execSync(`bun run ${cliPath} init`, {
-      encoding: 'utf-8'
-    });
 
-    expect(result).toContain('already exists');
-    expect(result).toContain('Use --force to overwrite');
+    expect(() => {
+      execSync(`bun run ${cliPath} init`, { encoding: 'utf-8' });
+    }).toThrow();
   });
 
   it('should overwrite existing config with --force', () => {

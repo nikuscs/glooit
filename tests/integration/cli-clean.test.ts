@@ -49,7 +49,7 @@ export default {
     expect(existsSync('.ai-rules')).toBe(true);
 
     // Create a gitignore to test cleanup
-    writeFileSync('.gitignore', 'some-file\n# AI Rules - Start\nCLAUDE.md\n# AI Rules - End\nother-file\n');
+    writeFileSync('.gitignore', 'some-file\n# ai-rules generated files\nCLAUDE.md\nother-file\n');
 
     // Now clean
     const result = execSync(`bun run ${cliPath} clean`, {
@@ -60,9 +60,8 @@ export default {
 
     // Check that gitignore was cleaned up
     const gitignoreContent = readFileSync('.gitignore', 'utf-8');
-    expect(gitignoreContent).not.toContain('# AI Rules - Start');
+    expect(gitignoreContent).not.toContain('# ai-rules generated files');
     expect(gitignoreContent).not.toContain('CLAUDE.md');
-    expect(gitignoreContent).not.toContain('# AI Rules - End');
     expect(gitignoreContent).toContain('some-file');
     expect(gitignoreContent).toContain('other-file');
   });

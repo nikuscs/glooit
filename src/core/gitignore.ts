@@ -109,11 +109,17 @@ export class GitIgnoreManager {
       return content;
     }
 
-    // Find the end of the section (next non-empty line that doesn't start with # or /)
+    // Find the end of the section - continue until we find an empty line or a line that looks like user content
     let endIndex = markerIndex + 1;
     while (endIndex < lines.length) {
       const line = lines[endIndex]?.trim();
-      if (line === '' || line?.startsWith('#') || line?.startsWith('/') || line?.startsWith('.')) {
+      // Stop if we hit an empty line or what looks like user content (not starting with / or .)
+      if (line === '') {
+        endIndex++;
+        break;
+      }
+      // Continue if it looks like a generated file path
+      if (line?.startsWith('/') || line?.startsWith('.') || line?.includes('.md') || line?.includes('.json')) {
         endIndex++;
       } else {
         break;

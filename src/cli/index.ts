@@ -115,8 +115,7 @@ async function initCommand(force: boolean): Promise<void> {
   const configPath = 'ai-rules.config.ts';
 
   if (existsSync(configPath) && !force) {
-    console.error(`Configuration file ${configPath} already exists. Use --force to overwrite.`);
-    return;
+    throw new Error(`Configuration file ${configPath} already exists. Use --force to overwrite.`);
   }
 
   const initialConfig = ConfigLoader.createInitialConfig();

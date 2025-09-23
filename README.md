@@ -117,17 +117,20 @@ export default defineRules({
     }
   ],
 
-  mcps: [                          // Claude MCP configurations
+  mcps: [                          // MCP configurations for AI agents
     {
       name: 'postgres',
       config: {
         command: 'npx',
         args: ['pg-mcp-server'],
-        env: { DATABASE_URL: '__ENV_DATABASE_URL__' }
+        env: { DATABASE_URL: '__ENV_DATABASE_URL__' },
+        type: 'stdio'
       },
-      outputPath: 'claude_desktop_config.json'
+      targets: ['claude', 'cursor']   // Deploy to multiple agents
     }
   ],
+
+  mergeMcps: true,                   // Merge with existing MCP configs
 
   hooks: {
     before: [                      // Before sync starts
@@ -267,6 +270,207 @@ export default defineRules({
       targets: ['claude', 'roocode']
     }
   ]
+});
+```
+
+## MCP (Model Context Protocol) Configuration
+
+AI Rules supports configuring MCP servers for different AI agents. MCPs allow AI assistants to connect to external tools and data sources.
+
+### Basic MCP Configuration
+
+```typescript
+export default defineRules({
+  mcps: [
+    {
+      name: 'postgres',
+      config: {
+        command: 'npx',
+        args: ['pg-mcp-server'],
+        env: { DATABASE_URL: 'postgresql://localhost/mydb' },
+        type: 'stdio'
+      },
+      targets: ['claude']  // Deploy to Claude only
+    }
+  ],
+  mergeMcps: true  // Merge with existing MCP configurations
+});
+```
+
+### MCP Targets
+
+Like rules, MCPs support multiple targets to deploy the same MCP configuration to different agents:
+
+```typescript
+mcps: [
+  {
+    name: 'shared-tools',
+    config: {
+      command: 'my-mcp-server',
+      type: 'stdio'
+    },
+    targets: ['claude', 'cursor', 'roocode']  // Deploy to all agents
+  }
+]
+```
+
+### Agent-Specific Default Paths
+
+Each agent has its own default MCP configuration path:
+
+- **Claude**: `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
+- **Cursor**: `~/.cursor/mcp.json`
+- **Roo Code/Cline**: `.roo/mcp.json` (project-relative)
+- **Codex**: `codex_mcp.json` (project-relative)
+
+### Custom Output Paths
+
+Override default paths with custom locations:
+
+```typescript
+mcps: [
+  {
+    name: 'custom-server',
+    config: { command: 'server-cmd' },
+    targets: ['cursor'],
+    outputPath: './custom-cursor-mcp.json'  // Custom path
+  }
+]
+```
+
+### Complex MCP Configurations
+
+Support for different MCP types including remote servers:
+
+```typescript
+mcps: [
+  // Standard stdio MCP
+  {
+    name: 'brave-search',
+    config: {
+      command: 'npx',
+      args: ['-y', 'brave-search-mcp'],
+      env: { BRAVE_API_KEY: 'your-api-key' },
+      type: 'stdio'
+    },
+    targets: ['claude', 'cursor']
+  },
+
+  // Remote MCP server
+  {
+    name: 'remote-tools',
+    config: {
+      url: 'https://api.example.com/mcp',
+      headers: { Authorization: 'Bearer your-token' },
+      type: 'remote'
+    },
+    targets: ['cursor']
+  },
+
+  // Roo Code/Cline with additional options
+  {
+    name: 'roo-server',
+    config: {
+      command: 'python',
+      args: ['/path/to/server.py'],
+      env: { API_KEY: 'your-key' },
+      alwaysAllow: ['read_file', 'write_file'],
+      disabled: false
+    },
+    targets: ['roocode']
+  }
+]
+```
+
+### MCP Merge Behavior
+
+Control how MCPs are merged with existing configurations:
+
+```typescript
+export default defineRules({
+  mergeMcps: true,   // Default: merge with existing MCP configs
+  mergeMcps: false,  // Overwrite existing MCP configs completely
+
+  mcps: [/* your MCPs */]
+});
+```
+
+When `mergeMcps: true`:
+- Preserves existing MCP servers in the target file
+- Adds or updates only the MCPs defined in your config
+- Keeps other settings in the target file intact
+
+When `mergeMcps: false`:
+- Completely replaces the target MCP configuration file
+- Only contains the MCPs defined in your config
+
+### MCP Validation
+
+AI Rules validates MCP configurations and prevents duplicate server names:
+
+```typescript
+// ❌ This will fail - duplicate names
+mcps: [
+  { name: 'server1', config: {...}, targets: ['claude'] },
+  { name: 'server1', config: {...}, targets: ['cursor'] }  // Error!
+]
+
+// ✅ This works - unique names
+mcps: [
+  { name: 'claude-server', config: {...}, targets: ['claude'] },
+  { name: 'cursor-server', config: {...}, targets: ['cursor'] }
+]
+```
+
+### Real-World Example
+
+```typescript
+export default defineRules({
+  rules: [
+    // Your regular rules...
+  ],
+
+  mcps: [
+    // Database access for all agents
+    {
+      name: 'postgres',
+      config: {
+        command: 'npx',
+        args: ['pg-mcp-server'],
+        env: { DATABASE_URL: process.env.DATABASE_URL },
+        type: 'stdio'
+      },
+      targets: ['claude', 'cursor', 'roocode']
+    },
+
+    // File system tools for Cursor only
+    {
+      name: 'fs-tools',
+      config: {
+        command: 'filesystem-mcp',
+        args: ['--safe-mode'],
+        type: 'stdio'
+      },
+      targets: ['cursor'],
+      outputPath: '.cursor/mcp.json'
+    },
+
+    // API access for Claude
+    {
+      name: 'api-client',
+      config: {
+        url: 'https://api.mycompany.com/mcp',
+        headers: {
+          Authorization: `Bearer ${process.env.API_TOKEN}`,
+          'X-Client': 'ai-rules'
+        },
+        type: 'remote'
+      },
+      targets: ['claude']
+    }
+  ],
+
+  mergeMcps: true  // Preserve existing MCP configs
 });
 ```
 

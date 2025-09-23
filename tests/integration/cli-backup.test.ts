@@ -46,7 +46,13 @@ export default {
 
       const cliPath = `${originalCwd}/src/cli/index.ts`;
 
-      // Sync to create files (this will also create a backup)
+      // First sync to create files
+      execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
+
+      // Modify the content to trigger a backup on second sync
+      writeFileSync('test.md', '# Updated test content');
+
+      // Second sync will create a backup of the existing files
       execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
 
       // List backups
@@ -103,7 +109,13 @@ export default {
 
       const cliPath = `${originalCwd}/src/cli/index.ts`;
 
-      // First sync to create files and backup
+      // First sync to create files
+      execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
+
+      // Modify content to trigger backup on second sync
+      writeFileSync('test.md', '# Updated content');
+
+      // Second sync creates backup
       execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
 
       // Get list of backups to find a timestamp

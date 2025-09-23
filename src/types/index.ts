@@ -20,16 +20,21 @@ export const CommandSchema = z.object({
 });
 
 export const McpConfigSchema = z.object({
-  command: z.string(),
+  command: z.string().optional(), // Optional for remote MCPs
   args: z.array(z.string()).optional(),
   env: z.record(z.string(), z.string()).optional(),
   type: z.string().optional(),
+  url: z.string().optional(), // For remote MCPs
+  headers: z.record(z.string(), z.string()).optional(), // For remote MCPs
+  alwaysAllow: z.array(z.string()).optional(), // For roocode/cline
+  disabled: z.boolean().optional(),
 });
 
 export const McpSchema = z.object({
   name: z.string(),
   config: McpConfigSchema,
-  outputPath: z.string().optional(),
+  targets: z.array(AgentSchema).default(['claude']), // Which agents this MCP is for
+  outputPath: z.string().optional(), // Will be determined by agent type if not specified
 });
 
 export const BackupConfigSchema = z.object({
@@ -48,6 +53,7 @@ export const ConfigSchema = z.object({
   rules: z.array(RuleSchema),
   commands: z.array(CommandSchema).optional(),
   mcps: z.array(McpSchema).optional(),
+  mergeMcps: z.boolean().default(true), // Whether to merge MCPs with existing configs
   hooks: HooksSchema.optional(),
   backup: BackupConfigSchema.optional(),
 });

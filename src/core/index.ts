@@ -117,32 +117,92 @@ export class AIRulesCore {
   private async distributeMcps(): Promise<void> {
     if (!this.config.mcps) return;
 
+    // Validate for duplicate MCP names
+    this.validateMcpNames();
+
+    const { AgentWriterFactory } = await import('../agents/writers');
+    const { getMcpPath } = await import('../agents/mcp-paths');
+    const { writeFileSync, mkdirSync } = await import('fs');
+    const { dirname } = await import('path');
+
+    // Expand MCPs for each target agent and group by output path
+    const mcpGroups = new Map<string, Array<{ name: string, config: any, agent: string, outputPath: string }>>();
+
     for (const mcp of this.config.mcps) {
-      const outputPath = mcp.outputPath || 'claude_desktop_config.json';
-
-      // Read existing config if it exists
-      let existingConfig: any = {};
-      try {
-        const { existsSync, readFileSync } = await import('fs');
-        if (existsSync(outputPath)) {
-          const content = readFileSync(outputPath, 'utf-8');
-          existingConfig = JSON.parse(content);
+      for (const agent of mcp.targets) {
+        const outputPath = getMcpPath(agent, mcp.outputPath);
+        if (!mcpGroups.has(outputPath)) {
+          mcpGroups.set(outputPath, []);
         }
-      } catch {
-        // Ignore errors, start with empty config
+        mcpGroups.get(outputPath)!.push({
+          name: mcp.name,
+          config: mcp.config,
+          agent,
+          outputPath
+        });
       }
+    }
 
-      // Ensure mcpServers section exists
-      if (!existingConfig.mcpServers) {
-        existingConfig.mcpServers = {};
+    // Process each group
+    for (const [outputPath, mcps] of mcpGroups) {
+      const agent = mcps[0]?.agent; // All MCPs in group should have same agent
+      if (!agent) continue;
+
+      const writer = AgentWriterFactory.createWriter(agent as any);
+
+      if (writer.formatMcp) {
+        // Create directory if needed
+        const dir = dirname(outputPath);
+        if (dir !== '.') {
+          mkdirSync(dir, { recursive: true });
+        }
+
+        // For multiple MCPs in the same file, we need to merge them
+        // Start with existing config if merge is enabled
+        let existingConfig: any = {};
+        if (this.config.mergeMcps) {
+          const { existsSync, readFileSync } = await import('fs');
+          if (existsSync(outputPath)) {
+            try {
+              const content = readFileSync(outputPath, 'utf-8');
+              existingConfig = JSON.parse(content);
+            } catch {
+              // If corrupted, start fresh
+            }
+          }
+        }
+
+        if (!existingConfig.mcpServers) {
+          existingConfig.mcpServers = {};
+        }
+
+        // Add all MCPs to the config
+        for (const mcp of mcps) {
+          existingConfig.mcpServers[mcp.name] = mcp.config;
+        }
+
+        const finalConfig = JSON.stringify(existingConfig, null, 2);
+
+        writeFileSync(outputPath, finalConfig, 'utf-8');
       }
+    }
+  }
 
-      // Add/update MCP configuration
-      existingConfig.mcpServers[mcp.name] = mcp.config;
+  private validateMcpNames(): void {
+    if (!this.config.mcps) return;
 
-      // Write updated config
-      const { writeFileSync } = await import('fs');
-      writeFileSync(outputPath, JSON.stringify(existingConfig, null, 2), 'utf-8');
+    const nameCount = new Map<string, number>();
+
+    for (const mcp of this.config.mcps) {
+      nameCount.set(mcp.name, (nameCount.get(mcp.name) || 0) + 1);
+    }
+
+    const duplicates = Array.from(nameCount.entries())
+      .filter(([, count]) => count > 1)
+      .map(([name]) => name);
+
+    if (duplicates.length > 0) {
+      throw new Error(`Duplicate MCP names found: ${duplicates.join(', ')}`);
     }
   }
 
@@ -177,9 +237,13 @@ export class AIRulesCore {
 
     // Collect MCP output paths
     if (this.config.mcps) {
+      const { getMcpPath } = require('../agents/mcp-paths');
       for (const mcp of this.config.mcps) {
-        if (mcp.outputPath) {
-          paths.push(mcp.outputPath);
+        for (const agent of mcp.targets) {
+          const outputPath = getMcpPath(agent, mcp.outputPath);
+          if (!paths.includes(outputPath)) {
+            paths.push(outputPath);
+          }
         }
       }
     }
