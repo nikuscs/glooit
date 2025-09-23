@@ -49,7 +49,7 @@ export const HooksSchema = z.object({
 });
 
 export const ConfigSchema = z.object({
-  configDir: z.string().default('.gloo'),
+  configDir: z.string().default('.glooit'),
   rules: z.array(RuleSchema),
   commands: z.array(CommandSchema).optional(),
   mcps: z.array(McpSchema).optional(),

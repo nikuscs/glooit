@@ -1,7 +1,6 @@
 {
   "files": [
-    "package.json",
-    "src/cli/index.ts"
+    "package.json"
   ],
   "all": true,
   "push": true,

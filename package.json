@@ -6,18 +6,17 @@
   "module": "dist/index.js",
   "type": "module",
   "bin": {
-    "gloo": "dist/cli/index.js"
+    "glooit": "dist/cli/index.js"
   },
   "scripts": {
     "build": "bun run typecheck && bun run lint && bun build src/index.ts --outdir dist --target node",
     "build:cli": "bun build src/cli/index.ts --outdir dist/cli --target node",
-    "build:binary": "bun build src/cli/index.ts --compile --outfile bin/gloo",
-    "build:binary:linux": "bun build src/cli/index.ts --compile --target=bun-linux-x64 --outfile bin/gloo-linux",
-    "build:binary:macos": "bun build src/cli/index.ts --compile --target=bun-darwin-arm64 --outfile bin/gloo-macos",
-    "build:binary:windows": "bun build src/cli/index.ts --compile --target=bun-windows-x64 --outfile bin/gloo-windows.exe",
+    "build:binary": "bun build src/cli/index.ts --compile --outfile bin/glooit",
+    "build:binary:linux": "bun build src/cli/index.ts --compile --target=bun-linux-x64 --outfile bin/glooit-linux",
+    "build:binary:macos": "bun build src/cli/index.ts --compile --target=bun-darwin-arm64 --outfile bin/glooit-macos",
+    "build:binary:windows": "bun build src/cli/index.ts --compile --target=bun-windows-x64 --outfile bin/glooit-windows.exe",
     "dev": "bun run src/cli/index.ts",
     "test": "vitest",
-    "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
@@ -27,7 +26,7 @@
     "check": "bun run typecheck && bun run lint && bun run test:run",
     "prepare": "bun run check && bun run build && bun run build:cli",
     "prepublishOnly": "bun run check && bun run build && bun run build:cli",
-    "install:local": "bun run build:binary && sudo mv bin/gloo /usr/local/bin/"
+    "install:local": "bun run build:binary && sudo mv bin/glooit /usr/local/bin/"
   },
   "files": [
     "dist",

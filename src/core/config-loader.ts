@@ -5,10 +5,10 @@ import { ConfigSchema } from '../types';
 
 export class ConfigLoader {
   private static readonly DEFAULT_CONFIG_PATHS = [
-    'gloo.config.ts',
-    'gloo.config.js',
-    'config/gloo.ts',
-    'config/gloo.js',
+    'glooit.config.ts',
+    'glooit.config.js',
+    'config/glooit.ts',
+    'config/glooit.js',
   ];
 
   static async load(customPath?: string): Promise<Config> {

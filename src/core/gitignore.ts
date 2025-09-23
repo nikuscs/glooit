@@ -4,7 +4,7 @@ import { getAgentPath, getAgentDirectory } from '../agents';
 
 export class GitIgnoreManager {
   private gitignorePath = '.gitignore';
-  private marker = '# ai-rules generated files';
+  private marker = '# glooit generated files';
 
   constructor(private config: Config) {}
 

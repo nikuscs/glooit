@@ -5,23 +5,31 @@ import { AIRulesCore } from '../core';
 import { ConfigLoader } from '../core/config-loader';
 import { ConfigValidator } from '../core/validation';
 import { existsSync, writeFileSync, rmSync, readdirSync, readFileSync } from 'fs';
-import { dirname, join } from 'path';
+import { dirname } from 'path';
 import { GitIgnoreManager } from '../core/gitignore';
 import { detect } from 'package-manager-detector/detect';
 import { resolveCommand } from 'package-manager-detector/commands';
 import { execSync } from 'child_process';
 import { createInterface } from 'readline';
-import { fileURLToPath } from 'url';
+import { version } from '../../package.json';
+
+const args = process.argv.slice(2);
+
+// Handle version flag like antfu's ni
+if (args.length === 1 && (args[0]?.toLowerCase() === '-v' || args[0] === '--version')) {
+  console.log(`v${version}`);
+  process.exit(0);
+}
+
 const program = new Command();
 
 program
-  .name('gloo')
-  .description('🧴 Sync your AI agent configurations and rules across platforms with ease')
-  .version('0.4.0');
+  .name('glooit')
+  .description('🧴 Sync your AI agent configurations and rules across platforms with ease');
 
 program
   .command('init')
-  .description('Initialize gloo configuration')
+  .description('Initialize glooit configuration')
   .option('-f, --force', 'overwrite existing configuration')
   .action(async (options) => {
     try {
@@ -131,7 +139,7 @@ function promptUser(question: string): Promise<boolean> {
 }
 
 async function initCommand(force: boolean): Promise<void> {
-  const configPath = 'gloo.config.ts';
+  const configPath = 'glooit.config.ts';
 
   if (existsSync(configPath) && !force) {
     throw new Error(`Configuration file ${configPath} already exists. Use --force to overwrite.`);
@@ -168,9 +176,7 @@ async function initCommand(force: boolean): Promise<void> {
         // Add to devDependencies
         const pkg = JSON.parse(readFileSync('package.json', 'utf-8'));
         pkg.devDependencies = pkg.devDependencies || {};
-        // Use current package version
-        const currentPkg = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../../package.json'), 'utf-8'));
-        pkg.devDependencies.glooit = `^${currentPkg.version}`;
+        pkg.devDependencies.glooit = 'latest';
         writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
 
         // Create typed config
@@ -290,13 +296,13 @@ async function cleanCommand(configPath?: string): Promise<void> {
 async function resetCommand(force: boolean): Promise<void> {
   if (!force) {
     // In a real implementation, we'd prompt the user for confirmation
-    console.log('⚠️  This will remove all ai-rules generated files, backups, and configuration.');
+    console.log('⚠️  This will remove all glooit generated files, backups, and configuration.');
     console.log('Use --force to skip this confirmation.');
     return;
   }
 
 
-  console.log('🗑️  Resetting ai-rules...');
+  console.log('🗑️  Resetting glooit...');
 
   // Try to read config first to get all generated paths
   let generatedPaths: string[] = [];
@@ -308,12 +314,12 @@ async function resetCommand(force: boolean): Promise<void> {
     generatedPaths = (core as any).collectAllGeneratedPaths();
   } catch {
     // Config doesn't exist or can't be loaded, use default
-    generatedPaths = ['.gloo']; // Default config directory
+    generatedPaths = ['.glooit']; // Default config directory
   }
 
   // Remove config files
   const configPaths = [
-    'gloo.config.ts',
+    'glooit.config.ts',
     'gloo.config.js',
     'config/gloo.ts',
     'config/gloo.js'
@@ -368,7 +374,7 @@ async function resetCommand(force: boolean): Promise<void> {
 
   // Clean .gitignore
   try {
-    const config = { configDir: '.gloo', rules: [], commands: [] };
+    const config = { configDir: '.glooit', rules: [], commands: [] };
     const gitIgnoreManager = new GitIgnoreManager(config as any);
     await gitIgnoreManager.cleanupGitIgnore();
     console.log('   Cleaned .gitignore');

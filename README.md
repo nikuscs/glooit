@@ -1,17 +1,17 @@
-# gloo 🧴
+# glooit 🧴
 
 > Sync your AI agent configurations and rules across platforms with ease
 
-**gloo** keeps your AI agent rules and MCP configurations in perfect sync across Claude Code, Cursor, Roo Code, and other AI development tools.
+**glooit** keeps your AI agent rules and MCP configurations in perfect sync across Claude Code, Cursor, Roo Code, and other AI development tools.
 
 ## Quick Start
 
 ```bash
 # Install globally
-npm install -g gloo
+npm install -g glooitit
 
 # Or run directly
-npx gloo init
+npx glooitit init
 ```
 
 ## Basic Usage
@@ -19,13 +19,13 @@ npx gloo init
 ### 1. Initialize Configuration
 
 ```bash
-gloo init
+glooit init
 ```
 
-This creates a `gloo.config.ts` file:
+This creates a `glooit.config.ts` file:
 
 ```typescript
-import { Config } from 'gloo/types';
+import { Config } from 'glooit';
 
 export default {
   rules: [
@@ -41,7 +41,7 @@ export default {
 ### 2. Sync Your Rules
 
 ```bash
-gloo sync
+glooit sync
 ```
 
 This automatically creates:
@@ -80,10 +80,10 @@ export default {
 ### Example Configuration
 
 ```typescript
-import { Config } from 'gloo/types';
+import { Config } from 'glooit';
 
 export default {
-  configDir: '.gloo',
+  configDir: '.glooit',
   rules: [
     {
       file: 'coding-standards.md',
@@ -108,12 +108,12 @@ export default {
 ## Commands
 
 ```bash
-gloo init          # Initialize configuration
-gloo sync          # Sync rules and MCPs
-gloo validate      # Validate configuration
-gloo clean         # Remove generated files
-gloo reset --force # Complete reset
-gloo backup list   # List backups
+glooit init          # Initialize configuration
+glooit sync          # Sync rules and MCPs
+glooit validate      # Validate configuration
+glooit clean         # Remove generated files
+glooit reset --force # Complete reset
+glooit backup list   # List backups
 ```
 
 ## Features
@@ -129,14 +129,14 @@ gloo backup list   # List backups
 
 ```bash
 # NPM
-npm install -g gloo
+npm install -g glooit
 
 # Bun
-bun install -g gloo
+bun install -g glooit
 
 # Direct execution
-npx gloo init
-bunx gloo sync
+npx glooitit init
+bunx glooitit sync
 ```
 
 ## License
