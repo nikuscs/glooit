@@ -1,4 +1,4 @@
-import type { Agent, Rule, ResolvedMcp } from '../../types';
+import type { AgentName, Rule, ResolvedMcp } from '../../types';
 import { MarkdownWriter } from './generic';
 import { CursorWriter } from './cursor';
 
@@ -8,13 +8,14 @@ export interface AgentWriter {
 }
 
 export class AgentWriterFactory {
-  static createWriter(agent: Agent): AgentWriter {
+  static createWriter(agent: AgentName): AgentWriter {
     switch (agent) {
       case 'cursor':
         return new CursorWriter();
       case 'claude':
       case 'codex':
       case 'roocode':
+      case 'generic':
         return new MarkdownWriter();
       default:
         return new MarkdownWriter();

@@ -14,6 +14,7 @@ export class MarkdownWriter implements GenericWriter {
     return content;
   }
 
+
   formatMcp(mcp: ResolvedMcp, merge: boolean): string {
     let existingConfig: McpConfigFile = {};
 

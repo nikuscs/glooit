@@ -140,7 +140,7 @@ export default {
 
     // Verify files were created
     expect(existsSync('CLAUDE.md')).toBe(true);
-    expect(existsSync('.cursor/rules/shared.md')).toBe(true);
+    expect(existsSync('.cursor/rules/shared.mdc')).toBe(true);
 
     const result = execSync(`bun run ${cliPath} clean`, {
       encoding: 'utf-8'

@@ -12,7 +12,7 @@ describe('Agent Mappings', () => {
 
     it('should have correct path patterns', () => {
       expect(AGENT_MAPPINGS.claude.path).toBe('CLAUDE.md');
-      expect(AGENT_MAPPINGS.cursor.path).toBe('.cursor/rules/{name}.md');
+      expect(AGENT_MAPPINGS.cursor.path).toBe('.cursor/rules/{name}.mdc');
       expect(AGENT_MAPPINGS.codex.path).toBe('AGENTS.md');
       expect(AGENT_MAPPINGS.roocode.path).toBe('.roo/rules/{name}.md');
     });
@@ -27,7 +27,7 @@ describe('Agent Mappings', () => {
 
   describe('getAgentPath', () => {
     it('should replace {name} placeholder correctly', () => {
-      expect(getAgentPath('cursor', 'main')).toBe('.cursor/rules/main.md');
+      expect(getAgentPath('cursor', 'main')).toBe('.cursor/rules/main.mdc');
       expect(getAgentPath('roocode', 'frontend')).toBe('.roo/rules/frontend.md');
     });
 
@@ -37,7 +37,7 @@ describe('Agent Mappings', () => {
     });
 
     it('should use default name when not provided', () => {
-      expect(getAgentPath('cursor')).toBe('.cursor/rules/global.md');
+      expect(getAgentPath('cursor')).toBe('.cursor/rules/global.mdc');
       expect(getAgentPath('roocode')).toBe('.roo/rules/global.md');
     });
   });

@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs';
-import type { Config } from '../types';
+import type { Config, Agent, AgentName } from '../types';
 import { getAgentPath, getAgentDirectory } from '../agents';
 
 export class GitIgnoreManager {
@@ -7,6 +7,14 @@ export class GitIgnoreManager {
   private marker = '# glooit generated files';
 
   constructor(private config: Config) {}
+
+  private getAgentName(agent: Agent): AgentName {
+    return typeof agent === 'string' ? agent : agent.name;
+  }
+
+  private getCustomPath(agent: Agent): string | undefined {
+    return typeof agent === 'object' ? agent.to : undefined;
+  }
 
   async updateGitIgnore(): Promise<void> {
     const paths = this.collectGeneratedPaths();
@@ -47,16 +55,23 @@ export class GitIgnoreManager {
 
     for (const rule of this.config.rules) {
       for (const agent of rule.targets) {
-        const ruleName = this.extractRuleName(rule.file);
-        const agentPath = getAgentPath(agent, ruleName);
-        const fullPath = `${rule.to}/${agentPath}`.replace(/\/+/g, '/');
+        const agentName = this.getAgentName(agent);
+        const customPath = this.getCustomPath(agent);
 
-        paths.add(fullPath);
+        if (customPath) {
+          paths.add(customPath);
+        } else {
+          const ruleName = this.extractRuleName(rule.file);
+          const agentPath = getAgentPath(agentName, ruleName);
+          const fullPath = `${rule.to}/${agentPath}`.replace(/\/+/g, '/');
 
-        const agentDir = getAgentDirectory(agent);
-        if (agentDir) {
-          const fullDir = `${rule.to}/${agentDir}`.replace(/\/+/g, '/');
-          paths.add(`${fullDir}/`);
+          paths.add(fullPath);
+
+          const agentDir = getAgentDirectory(agentName);
+          if (agentDir) {
+            const fullDir = `${rule.to}/${agentDir}`.replace(/\/+/g, '/');
+            paths.add(`${fullDir}/`);
+          }
         }
       }
     }
@@ -64,8 +79,15 @@ export class GitIgnoreManager {
     if (this.config.commands) {
       for (const command of this.config.commands) {
         for (const agent of command.targets) {
-          const agentPath = getAgentPath(agent, command.command);
-          paths.add(agentPath);
+          const agentName = this.getAgentName(agent);
+          const customPath = this.getCustomPath(agent);
+
+          if (customPath) {
+            paths.add(customPath);
+          } else {
+            const agentPath = getAgentPath(agentName, command.command);
+            paths.add(agentPath);
+          }
         }
       }
     }
