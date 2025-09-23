@@ -7,7 +7,57 @@
     "jsx-a11y": "off",
     "nextjs": "off",
     "react": "off",
-    "react-hooks": "off"
+    "react-hooks": "off",
+    "typescript/array-type": [
+      "error",
+      {
+        "default": "array"
+      }
+    ],
+    "typescript/adjacent-overload-signatures": "error",
+    "typescript/ban-tslint-comment": "error",
+    "typescript/ban-ts-comment": "warn",
+    "typescript/consistent-indexed-object-style": "error",
+    "typescript/consistent-type-assertions": [
+      "error",
+      {
+        "assertionStyle": "as"
+      }
+    ],
+    "typescript/consistent-type-definitions": [
+      "error",
+      "interface"
+    ],
+    "typescript/no-array-constructor": "error",
+    "typescript/no-confusing-non-null-assertion": "error",
+    "typescript/no-duplicate-enum-values": "error",
+    "typescript/no-empty-function": "error",
+    "typescript/no-empty-interface": "error",
+    "typescript/no-explicit-any": "warn",
+    "typescript/no-extra-non-null-assertion": "error",
+    "typescript/no-inferrable-types": "error",
+    "typescript/no-misused-new": "error",
+    "typescript/no-namespace": "error",
+    "typescript/no-non-null-asserted-optional-chain": "error",
+    "typescript/no-non-null-assertion": "warn",
+    "typescript/no-this-alias": "error",
+    "typescript/no-unnecessary-type-assertion": "error",
+    "typescript/no-unnecessary-type-constraint": "error",
+    "typescript/no-unsafe-declaration-merging": "error",
+    "typescript/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "typescript/no-useless-constructor": "error",
+    "typescript/prefer-as-const": "error",
+    "typescript/prefer-for-of": "error",
+    "typescript/prefer-function-type": "error",
+    "typescript/prefer-namespace-keyword": "error",
+    "typescript/prefer-ts-expect-error": "error",
+    "typescript/triple-slash-reference": "error"
   },
   "env": {
     "node": true,

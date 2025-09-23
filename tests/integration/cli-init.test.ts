@@ -27,13 +27,13 @@ describe('CLI - Init Command', () => {
       encoding: 'utf-8'
     });
 
-    expect(result).toContain('✅ Created gloo.config.ts');
-    expect(existsSync('gloo.config.ts')).toBe(true);
+    expect(result).toContain('✅ Created glooit.config.ts');
+    expect(existsSync('glooit.config.ts')).toBe(true);
   });
 
   it('should prevent overwriting existing config without --force', () => {
     // Create existing config
-    writeFileSync('gloo.config.ts', 'existing config');
+    writeFileSync('glooit.config.ts', 'existing config');
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
 
@@ -44,14 +44,14 @@ describe('CLI - Init Command', () => {
 
   it('should overwrite existing config with --force', () => {
     // Create existing config
-    writeFileSync('gloo.config.ts', 'existing config');
+    writeFileSync('glooit.config.ts', 'existing config');
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
     const result = execSync(`bun run ${cliPath} init --force`, {
       encoding: 'utf-8'
     });
 
-    expect(result).toContain('✅ Created gloo.config.ts');
-    expect(existsSync('gloo.config.ts')).toBe(true);
+    expect(result).toContain('✅ Created glooit.config.ts');
+    expect(existsSync('glooit.config.ts')).toBe(true);
   });
 });

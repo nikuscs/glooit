@@ -15,7 +15,7 @@ describe('ConfigLoader', () => {
     it('should create a valid initial configuration', () => {
       const config = ConfigLoader.createInitialConfig();
 
-      expect(config).toContain('import { Config }');
+      expect(config).toContain('import type { Config }');
       expect(config).toContain('export default {');
       expect(config).toContain('} satisfies Config;');
       expect(config).toContain('targets: [');
@@ -34,7 +34,7 @@ describe('ConfigLoader', () => {
       const validConfig = `
         export default {
           rules: [{
-            file: '.gloo/test.md',
+            file: '.glooit/test.md',
             to: './',
             targets: ['claude']
           }]

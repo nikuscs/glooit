@@ -89,6 +89,6 @@ jobs:
             --title "Release $TAG" \
             --notes "Auto-generated release" \
             --latest \
-            bin/gloo-linux \
-            bin/gloo-macos \
-            bin/gloo-windows.exe
+            bin/glooit-linux \
+            bin/glooit-macos \
+            bin/glooit-windows.exe

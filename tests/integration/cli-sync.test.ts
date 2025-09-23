@@ -27,7 +27,7 @@ describe('CLI - Sync Command', () => {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.gloo',
+  configDir: '.glooit',
   rules: [
     {
       file: 'test.md',
@@ -37,7 +37,7 @@ export default {
   ]
 } satisfies Config;
 `;
-    writeFileSync('gloo.config.ts', config);
+    writeFileSync('glooit.config.ts', config);
     writeFileSync('test.md', '# Test content for sync');
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
@@ -55,7 +55,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.gloo',
+  configDir: '.glooit',
   rules: [
     {
       file: 'shared.md',
@@ -65,7 +65,7 @@ export default {
   ]
 } satisfies Config;
 `;
-    writeFileSync('gloo.config.ts', config);
+    writeFileSync('glooit.config.ts', config);
     writeFileSync('shared.md', '# Shared content');
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
@@ -88,7 +88,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.gloo',
+  configDir: '.glooit',
   rules: [
     {
       file: 'test.md',
@@ -102,7 +102,7 @@ export default {
   }
 } satisfies Config;
 `;
-    writeFileSync('gloo.config.ts', config);
+    writeFileSync('glooit.config.ts', config);
     writeFileSync('test.md', '# Test content');
 
     // First sync to create initial files
@@ -110,7 +110,7 @@ export default {
     execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
 
     // Check that backup directory is created
-    expect(existsSync('.gloo/backups')).toBe(true);
+    expect(existsSync('.glooit/backups')).toBe(true);
   });
 
   it('should sync with custom config directory', () => {
@@ -128,7 +128,7 @@ export default {
   ]
 } satisfies Config;
 `;
-    writeFileSync('gloo.config.ts', config);
+    writeFileSync('glooit.config.ts', config);
     writeFileSync('test.md', '# Custom config test');
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
@@ -143,7 +143,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.gloo',
+  configDir: '.glooit',
   rules: [
     {
       file: 'missing.md',
@@ -153,7 +153,7 @@ export default {
   ]
 } satisfies Config;
 `;
-    writeFileSync('gloo.config.ts', config);
+    writeFileSync('glooit.config.ts', config);
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
 
@@ -167,7 +167,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.gloo',
+  configDir: '.glooit',
   rules: [
     {
       file: 'test.md',
@@ -178,7 +178,7 @@ export default {
   ]
 } satisfies Config;
 `;
-    writeFileSync('gloo.config.ts', config);
+    writeFileSync('glooit.config.ts', config);
     writeFileSync('test.md', '# Test with globs');
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;

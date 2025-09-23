@@ -61,13 +61,13 @@ export class ConfigLoader {
     return `import type { Config } from 'glooit';
 
 export default {
-  configDir: '.gloo',
+  configDir: '.glooit',
   targets: ['claude', 'cursor'],
 
   rules: [
     {
       name: 'main',
-      file: '.gloo/main.md',
+      file: '.glooit/main.md',
       targets: ['claude', 'cursor']
     }
   ],
@@ -75,7 +75,7 @@ export default {
   mcps: [
     // {
     //   name: 'example-server',
-    //   file: '.gloo/mcp.json',
+    //   file: '.glooit/mcp.json',
     //   targets: ['claude']
     // }
   ]
@@ -85,13 +85,13 @@ export default {
 
   static createPlainConfig(): string {
     return `export default {
-  configDir: '.gloo',
+  configDir: '.glooit',
   targets: ['claude', 'cursor'],
 
   rules: [
     {
       name: 'main',
-      file: '.gloo/main.md',
+      file: '.glooit/main.md',
       targets: ['claude', 'cursor']
     }
   ],
@@ -99,7 +99,7 @@ export default {
   mcps: [
     // {
     //   name: 'example-server',
-    //   file: '.gloo/mcp.json',
+    //   file: '.glooit/mcp.json',
     //   targets: ['claude']
     // }
   ]

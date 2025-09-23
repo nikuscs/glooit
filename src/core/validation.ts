@@ -11,7 +11,6 @@ export class ConfigValidator {
   static async validate(config: Config): Promise<ValidationError[]> {
     const errors: ValidationError[] = [];
 
-    // Validate rule files exist
     for (const [index, rule] of config.rules.entries()) {
       if (!existsSync(rule.file)) {
         errors.push({
@@ -21,7 +20,6 @@ export class ConfigValidator {
         });
       }
 
-      // Validate targets
       if (rule.targets.length === 0) {
         errors.push({
           field: `rules[${index}].targets`,
@@ -29,7 +27,6 @@ export class ConfigValidator {
         });
       }
 
-      // Validate 'to' path format
       if (!rule.to.startsWith('./') && !rule.to.startsWith('/') && rule.to !== '.') {
         errors.push({
           field: `rules[${index}].to`,
@@ -38,7 +35,6 @@ export class ConfigValidator {
       }
     }
 
-    // Validate command files exist
     if (config.commands) {
       for (const [index, command] of config.commands.entries()) {
         if (!existsSync(command.file)) {
@@ -58,7 +54,6 @@ export class ConfigValidator {
       }
     }
 
-    // Validate config directory
     if (!config.configDir.startsWith('.') && !config.configDir.startsWith('/')) {
       errors.push({
         field: 'configDir',
@@ -86,7 +81,7 @@ export class ConfigValidator {
     return lines.join('\n');
   }
 
-  static hasErrors(errors: ValidationError[]): boolean {
+  static hasErrors(errors: ValidationError[]) {
     return errors.length > 0;
   }
 }

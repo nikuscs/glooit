@@ -111,7 +111,7 @@ program
 
 program
   .command('reset')
-  .description('Remove all gloo generated files, backups, and config (start fresh)')
+  .description('Remove all glooit generated files, backups, and config (start fresh)')
   .option('--force', 'skip confirmation prompt')
   .action(async (options) => {
     try {
@@ -155,8 +155,8 @@ async function initCommand(force: boolean): Promise<void> {
     console.log('💡 For TypeScript support, create a package.json and add glooit to devDependencies');
     console.log('Next steps:');
     console.log('1. Edit the configuration file to match your project');
-    console.log('2. Create your rule files in .gloo/');
-    console.log('3. Run `gloo sync` to distribute rules');
+    console.log('2. Create your rule files in .glooit/');
+    console.log('3. Run `glooit sync` to distribute rules');
     return;
   }
 
@@ -191,7 +191,7 @@ async function initCommand(force: boolean): Promise<void> {
           console.log(`🔄 Installing dependencies with ${pm.name}...`);
           execSync(installCmd, { stdio: 'inherit' });
           console.log('✅ TypeScript support enabled!');
-        } catch (error) {
+        } catch {
           console.log(`❌ Installation failed. Please run '${installCmd}' manually.`);
         }
       } else {
@@ -210,7 +210,7 @@ async function initCommand(force: boolean): Promise<void> {
       console.log(`✅ Created ${configPath}`);
       console.log('💡 Add glooit to devDependencies for TypeScript support');
     }
-  } catch (error) {
+  } catch {
     // Fallback to plain config on any error
     const plainConfig = ConfigLoader.createPlainConfig();
     writeFileSync(configPath, plainConfig, 'utf-8');
@@ -221,8 +221,8 @@ async function initCommand(force: boolean): Promise<void> {
 
   console.log('Next steps:');
   console.log('1. Edit the configuration file to match your project');
-  console.log('2. Create your rule files in .gloo/');
-  console.log('3. Run `gloo sync` to distribute rules');
+  console.log('2. Create your rule files in .glooit/');
+  console.log('3. Run `glooit sync` to distribute rules');
 }
 
 async function syncCommand(configPath?: string, createBackup: boolean = true): Promise<void> {
@@ -320,9 +320,9 @@ async function resetCommand(force: boolean): Promise<void> {
   // Remove config files
   const configPaths = [
     'glooit.config.ts',
-    'gloo.config.js',
-    'config/gloo.ts',
-    'config/gloo.js'
+    'glooit.config.js',
+    'config/glooit.ts',
+    'config/glooit.js'
   ];
 
   for (const path of configPaths) {
@@ -382,7 +382,7 @@ async function resetCommand(force: boolean): Promise<void> {
     // Ignore errors if gitignore cleanup fails
   }
 
-  console.log('✅ Reset completed! Run `gloo init` to start fresh.');
+  console.log('✅ Reset completed! Run `glooit init` to start fresh.');
 }
 
 program.parse();

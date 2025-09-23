@@ -54,7 +54,6 @@ export class BackupManager {
       const backup: BackupEntry = JSON.parse(backupContent);
 
       for (const file of backup.files) {
-        // Ensure directory exists
         const dir = file.path.substring(0, file.path.lastIndexOf('/'));
         if (dir) {
           mkdirSync(dir, { recursive: true });
@@ -108,8 +107,7 @@ export class BackupManager {
         try {
           const backupPath = join(this.backupDir, `${backup.timestamp}.json`);
           if (existsSync(backupPath)) {
-            // In a real implementation, we'd use fs.unlinkSync here
-            // For now, just log what would be deleted
+            // TODO: Implement actual file deletion
             console.log(`Would delete old backup: ${backup.timestamp}`);
           }
         } catch (error) {

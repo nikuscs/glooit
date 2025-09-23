@@ -27,7 +27,6 @@ export const compact = (options: CompactOptions = {}) => {
   return (context: SyncContext): string => {
     let content = context.content;
 
-    // Check if this is Cursor format (has frontmatter)
     const hasFrontmatter = content.startsWith('---');
     let frontmatter = '';
     let body = content;
@@ -40,7 +39,6 @@ export const compact = (options: CompactOptions = {}) => {
       }
     }
 
-    // Apply compacting to the body
     body = compactMarkdown(body, config);
 
     return frontmatter + body;
@@ -50,7 +48,6 @@ export const compact = (options: CompactOptions = {}) => {
 function compactMarkdown(content: string, config: CompactOptions): string {
   let result = content;
 
-  // Remove excessive whitespace
   if (config.trimTrailingSpaces) {
     result = result
       .split('\n')
@@ -58,31 +55,25 @@ function compactMarkdown(content: string, config: CompactOptions): string {
       .join('\n');
   }
 
-  // Limit consecutive newlines
   if (config.maxConsecutiveNewlines && config.maxConsecutiveNewlines > 0) {
     const pattern = new RegExp(`\n{${config.maxConsecutiveNewlines + 1},}`, 'g');
     const replacement = '\n'.repeat(config.maxConsecutiveNewlines);
     result = result.replace(pattern, replacement);
   }
 
-  // Remove filler words (be careful with code blocks)
   if (config.removeFillerWords) {
     result = removeFillersFromMarkdown(result);
   }
 
-  // Compact lists
   if (config.compactLists) {
     result = compactLists(result);
   }
 
-  // Clean up spacing around headers
   result = result.replace(/\n\n+(#{1,6})/g, '\n\n$1');
 
-  // Clean up spacing around code blocks
   result = result.replace(/\n\n+```/g, '\n\n```');
   result = result.replace(/```\n\n+/g, '```\n\n');
 
-  // Remove leading/trailing whitespace only if trimTrailingSpaces is enabled
   if (config.trimTrailingSpaces) {
     result = result.trim();
   }
@@ -96,14 +87,12 @@ function removeFillersFromMarkdown(content: string): string {
   let inCodeBlock = false;
 
   for (const line of lines) {
-    // Track code block boundaries
     if (line.trim().startsWith('```')) {
       inCodeBlock = !inCodeBlock;
       result.push(line);
       continue;
     }
 
-    // Skip processing inside code blocks or lines with inline code
     if (inCodeBlock || line.includes('`')) {
       result.push(line);
       continue;
@@ -111,7 +100,6 @@ function removeFillersFromMarkdown(content: string): string {
 
     let cleanedLine = line;
     for (const filler of fillerWords) {
-      // Remove filler words but preserve sentence structure
       const pattern = new RegExp(`\\b${filler}\\b`, 'gi');
       cleanedLine = cleanedLine.replace(pattern, '').replace(/\s{2,}/g, ' ').trim();
     }
@@ -123,7 +111,6 @@ function removeFillersFromMarkdown(content: string): string {
 }
 
 function compactLists(content: string): string {
-  // Remove extra newlines between list items
   return content
     .replace(/(-|\*|\+|\d+\.)\s+([^\n]+)\n\n+(?=(-|\*|\+|\d+\.)\s)/g, '$1 $2\n')
     .replace(/(-|\*|\+|\d+\.)\s+([^\n]+)\n\n+$/g, '$1 $2\n');

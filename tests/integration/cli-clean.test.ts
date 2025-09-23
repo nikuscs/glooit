@@ -27,7 +27,7 @@ describe('CLI - Clean Command', () => {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.gloo',
+  configDir: '.glooit',
   rules: [
     {
       file: 'test.md',
@@ -37,7 +37,7 @@ export default {
   ]
 } satisfies Config;
 `;
-    writeFileSync('gloo.config.ts', config);
+    writeFileSync('glooit.config.ts', config);
     writeFileSync('test.md', '# Test content');
 
     // First sync to generate files
@@ -46,10 +46,10 @@ export default {
 
     // Verify files were created
     expect(existsSync('CLAUDE.md')).toBe(true);
-    expect(existsSync('.gloo')).toBe(true);
+    expect(existsSync('.glooit')).toBe(true);
 
     // Create a gitignore to test cleanup
-    writeFileSync('.gitignore', 'some-file\n# ai-rules generated files\nCLAUDE.md\nother-file\n');
+    writeFileSync('.gitignore', 'some-file\n# glooit generated files\nCLAUDE.md\nother-file\n');
 
     // Now clean
     const result = execSync(`bun run ${cliPath} clean`, {
@@ -60,7 +60,7 @@ export default {
 
     // Check that gitignore was cleaned up
     const gitignoreContent = readFileSync('.gitignore', 'utf-8');
-    expect(gitignoreContent).not.toContain('# ai-rules generated files');
+    expect(gitignoreContent).not.toContain('# glooit generated files');
     expect(gitignoreContent).not.toContain('CLAUDE.md');
     expect(gitignoreContent).toContain('some-file');
     expect(gitignoreContent).toContain('other-file');
@@ -71,11 +71,11 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.gloo',
+  configDir: '.glooit',
   rules: []
 } satisfies Config;
 `;
-    writeFileSync('gloo.config.ts', config);
+    writeFileSync('glooit.config.ts', config);
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
     const result = execSync(`bun run ${cliPath} clean`, {
@@ -101,7 +101,7 @@ export default {
   ]
 } satisfies Config;
 `;
-    writeFileSync('gloo.config.ts', config);
+    writeFileSync('glooit.config.ts', config);
     writeFileSync('test.md', '# Test content');
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
@@ -122,7 +122,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.gloo',
+  configDir: '.glooit',
   rules: [
     {
       file: 'shared.md',
@@ -132,7 +132,7 @@ export default {
   ]
 } satisfies Config;
 `;
-    writeFileSync('gloo.config.ts', config);
+    writeFileSync('glooit.config.ts', config);
     writeFileSync('shared.md', '# Shared content');
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;

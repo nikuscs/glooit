@@ -21,10 +21,8 @@ export class GitIgnoreManager {
       gitignoreContent = readFileSync(this.gitignorePath, 'utf-8');
     }
 
-    // Remove existing ai-rules section
     gitignoreContent = this.removeExistingSection(gitignoreContent);
 
-    // Add new section
     if (paths.length > 0) {
       const newSection = this.createIgnoreSection(paths);
       gitignoreContent = gitignoreContent.trim() + '\n\n' + newSection;
@@ -47,7 +45,6 @@ export class GitIgnoreManager {
   private collectGeneratedPaths(): string[] {
     const paths = new Set<string>();
 
-    // Add rule-generated paths
     for (const rule of this.config.rules) {
       for (const agent of rule.targets) {
         const ruleName = this.extractRuleName(rule.file);
@@ -56,7 +53,6 @@ export class GitIgnoreManager {
 
         paths.add(fullPath);
 
-        // Add agent directories
         const agentDir = getAgentDirectory(agent);
         if (agentDir) {
           const fullDir = `${rule.to}/${agentDir}`.replace(/\/+/g, '/');
@@ -65,7 +61,6 @@ export class GitIgnoreManager {
       }
     }
 
-    // Add command-generated paths
     if (this.config.commands) {
       for (const command of this.config.commands) {
         for (const agent of command.targets) {
@@ -75,7 +70,6 @@ export class GitIgnoreManager {
       }
     }
 
-    // Add MCP output paths
     if (this.config.mcps) {
       for (const mcp of this.config.mcps) {
         if (mcp.outputPath) {
@@ -109,16 +103,13 @@ export class GitIgnoreManager {
       return content;
     }
 
-    // Find the end of the section - continue until we find an empty line or a line that looks like user content
     let endIndex = markerIndex + 1;
     while (endIndex < lines.length) {
       const line = lines[endIndex]?.trim();
-      // Stop if we hit an empty line or what looks like user content (not starting with / or .)
       if (line === '') {
         endIndex++;
         break;
       }
-      // Continue if it looks like a generated file path
       if (line?.startsWith('/') || line?.startsWith('.') || line?.includes('.md') || line?.includes('.json')) {
         endIndex++;
       } else {
@@ -126,10 +117,8 @@ export class GitIgnoreManager {
       }
     }
 
-    // Remove the section
     lines.splice(markerIndex, endIndex - markerIndex);
 
-    // Remove trailing empty lines
     while (lines.length > 0 && lines[lines.length - 1]?.trim() === '') {
       lines.pop();
     }

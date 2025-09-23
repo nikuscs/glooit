@@ -6,7 +6,7 @@ import type { Rule } from '../../src/types';
 
 describe('Agent Writers', () => {
   const mockRule: Rule = {
-    file: '.gloo/test.md',
+    file: '.glooit/test.md',
     to: './',
     targets: ['claude'],
     globs: 'src/**/*'

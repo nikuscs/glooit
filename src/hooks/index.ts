@@ -9,7 +9,6 @@ export class HookManager {
   private hooks: HookRegistry = {};
 
   constructor() {
-    // Don't auto-register builtin hooks
   }
 
   register(name: string, hook: HookFunction): void {

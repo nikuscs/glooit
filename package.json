@@ -51,12 +51,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nikuscs/gloo.git"
+    "url": "https://github.com/nikuscs/glooit.git"
   },
   "bugs": {
-    "url": "https://github.com/nikuscs/gloo/issues"
+    "url": "https://github.com/nikuscs/glooit/issues"
   },
-  "homepage": "https://github.com/nikuscs/gloo#readme",
+  "homepage": "https://github.com/nikuscs/glooit#readme",
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "^24.5.2",

@@ -4,7 +4,7 @@ import type { SyncContext } from '../../src/types';
 describe('Built-in Hooks', () => {
   const mockContext: SyncContext = {
     config: {
-      configDir: '.gloo',
+      configDir: '.glooit',
       rules: [],
       mergeMcps: true
     },

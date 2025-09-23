@@ -23,23 +23,19 @@ export class AIRulesCore {
 
   async sync(): Promise<void> {
     try {
-      // Execute before hooks
       if (this.config.hooks?.before) {
         for (const hook of this.config.hooks.before) {
           await hook({ config: this.config });
         }
       }
 
-      // Distribute rules
       for (const rule of this.config.rules) {
         await this.distributor.distributeRule(rule);
       }
 
-      // Distribute commands
       if (this.config.commands) {
         for (const command of this.config.commands) {
-          // Commands are treated like rules but with a different naming pattern
-          const commandRule = {
+            const commandRule = {
             file: command.file,
             to: './',
             targets: command.targets
@@ -48,16 +44,13 @@ export class AIRulesCore {
         }
       }
 
-      // Handle MCP configurations
       if (this.config.mcps) {
         await this.distributeMcps();
       }
 
-      // Update .gitignore
       await this.gitIgnoreManager.updateGitIgnore();
 
     } catch (error) {
-      // Execute error hooks
       if (this.config.hooks?.error) {
         for (const hook of this.config.hooks.error) {
           await hook(error);
@@ -85,23 +78,18 @@ export class AIRulesCore {
   }
 
   async clean(): Promise<void> {
-    // This would remove all generated files - implementation depends on requirements
-    console.log('Clean functionality would be implemented here');
-
     // Clean .gitignore
     await this.gitIgnoreManager.cleanupGitIgnore();
   }
 
   async validate(): Promise<boolean> {
     try {
-      // Validate that all rule files exist
       for (const rule of this.config.rules) {
         if (!existsSync(rule.file)) {
           throw new Error(`Rule file not found: ${rule.file}`);
         }
       }
 
-      // Validate command files
       if (this.config.commands) {
         for (const command of this.config.commands) {
             if (!existsSync(command.file)) {
@@ -119,9 +107,7 @@ export class AIRulesCore {
   private async distributeMcps(): Promise<void> {
     if (!this.config.mcps) return;
 
-    // Validate for duplicate MCP names
     this.validateMcpNames();
-
 
     // Expand MCPs for each target agent and group by output path
     const mcpGroups = new Map<string, Array<{ name: string, config: any, agent: string, outputPath: string }>>();
@@ -141,22 +127,18 @@ export class AIRulesCore {
       }
     }
 
-    // Process each group
     for (const [outputPath, mcps] of mcpGroups) {
-      const agent = mcps[0]?.agent; // All MCPs in group should have same agent
+      const agent = mcps[0]?.agent;
       if (!agent) continue;
 
       const writer = AgentWriterFactory.createWriter(agent as any);
 
       if (writer.formatMcp) {
-        // Create directory if needed
         const dir = dirname(outputPath);
         if (dir !== '.') {
           mkdirSync(dir, { recursive: true });
         }
 
-        // For multiple MCPs in the same file, we need to merge them
-        // Start with existing config if merge is enabled
         let existingConfig: any = {};
         if (this.config.mergeMcps) {
           if (existsSync(outputPath)) {
@@ -164,8 +146,7 @@ export class AIRulesCore {
               const content = readFileSync(outputPath, 'utf-8');
               existingConfig = JSON.parse(content);
             } catch {
-              // If corrupted, start fresh
-            }
+              }
           }
         }
 
@@ -173,7 +154,6 @@ export class AIRulesCore {
           existingConfig.mcpServers = {};
         }
 
-        // Add all MCPs to the config
         for (const mcp of mcps) {
           existingConfig.mcpServers[mcp.name] = mcp.config;
         }
@@ -206,13 +186,11 @@ export class AIRulesCore {
   private collectAllGeneratedPaths(): string[] {
     const paths: string[] = [];
 
-    // Collect rule-generated paths
     for (const rule of this.config.rules) {
       for (const agent of rule.targets) {
         const ruleName = rule.file.split('/').pop()?.replace('.md', '') || 'rule';
         const agentPath = getAgentPath(agent, ruleName);
         let fullPath = `${rule.to}/${agentPath}`.replace(/\/+/g, '/');
-        // Remove leading "./" to match actual file paths
         if (fullPath.startsWith('./')) {
           fullPath = fullPath.substring(2);
         }
@@ -220,7 +198,6 @@ export class AIRulesCore {
       }
     }
 
-    // Collect command-generated paths
     if (this.config.commands) {
       for (const command of this.config.commands) {
         for (const agent of command.targets) {
@@ -230,7 +207,6 @@ export class AIRulesCore {
       }
     }
 
-    // Collect MCP output paths
     if (this.config.mcps) {
       for (const mcp of this.config.mcps) {
         for (const agent of mcp.targets) {

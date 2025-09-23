@@ -23,7 +23,6 @@ export class AgentDistributor {
     const agentPath = getAgentPath(agent, ruleName);
     const targetPath = join(rule.to, agentPath);
 
-    // Create directory if needed
     const agentDir = getAgentDirectory(agent);
     if (agentDir) {
       const fullDir = join(rule.to, agentDir);
@@ -32,11 +31,9 @@ export class AgentDistributor {
       mkdirSync(dirname(targetPath), { recursive: true });
     }
 
-    // Format content based on agent requirements
     const writer = AgentWriterFactory.createWriter(agent);
     const formattedContent = writer.formatContent(content, rule);
 
-    // Apply hooks if configured
     const context: SyncContext = {
       config: this.config,
       rule,
@@ -47,7 +44,6 @@ export class AgentDistributor {
 
     const finalContent = await this.applyHooks(context);
 
-    // Write the file
     writeFileSync(targetPath, finalContent, 'utf-8');
   }
 
@@ -67,14 +63,12 @@ export class AgentDistributor {
   private async applyHooks(context: SyncContext): Promise<string> {
     let content = context.content;
 
-    // Apply rule-specific hooks
     if (context.rule.hooks) {
       for (const hookName of context.rule.hooks) {
         content = await this.executeHook(hookName, content, { ...context, content });
       }
     }
 
-    // Apply global after hooks
     if (this.config.hooks?.after) {
       for (const hook of this.config.hooks.after) {
         const updatedContext = { ...context, content };
@@ -89,7 +83,6 @@ export class AgentDistributor {
   }
 
   private async executeHook(hookName: string, content: string, context: SyncContext): Promise<string> {
-    // Import built-in hooks dynamically if needed
     switch (hookName) {
       case 'replaceStructure': {
         return await replaceStructure(context);
@@ -101,7 +94,6 @@ export class AgentDistributor {
         return addTimestamp(context);
       }
       default:
-        // Custom hooks would be resolved here
         return content;
     }
   }

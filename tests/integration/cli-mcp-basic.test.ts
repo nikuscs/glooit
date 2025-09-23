@@ -26,7 +26,7 @@ describe('CLI - MCP Basic Configuration', () => {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.gloo',
+  configDir: '.glooit',
   rules: [],
   mcps: [
     {
@@ -51,7 +51,7 @@ export default {
   mergeMcps: true
 } satisfies Config;
 `;
-    writeFileSync('gloo.config.ts', config);
+    writeFileSync('glooit.config.ts', config);
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
     execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
@@ -91,7 +91,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.gloo',
+  configDir: '.glooit',
   rules: [],
   mcps: [
     {
@@ -105,7 +105,7 @@ export default {
   mergeMcps: true
 } satisfies Config;
 `;
-    writeFileSync('gloo.config.ts', config);
+    writeFileSync('glooit.config.ts', config);
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
     execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
@@ -138,7 +138,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.gloo',
+  configDir: '.glooit',
   rules: [],
   mcps: [
     {
@@ -152,7 +152,7 @@ export default {
   mergeMcps: false
 } satisfies Config;
 `;
-    writeFileSync('gloo.config.ts', config);
+    writeFileSync('glooit.config.ts', config);
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
     execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
@@ -172,7 +172,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.gloo',
+  configDir: '.glooit',
   rules: [],
   mcps: [
     {
@@ -195,7 +195,7 @@ export default {
   mergeMcps: true
 } satisfies Config;
 `;
-    writeFileSync('gloo.config.ts', config);
+    writeFileSync('glooit.config.ts', config);
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
     execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
@@ -216,7 +216,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.gloo',
+  configDir: '.glooit',
   rules: [],
   mcps: [
     {
@@ -229,7 +229,7 @@ export default {
   ]
 } satisfies Config;
 `;
-    writeFileSync('gloo.config.ts', config);
+    writeFileSync('glooit.config.ts', config);
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
     execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
@@ -248,7 +248,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.gloo',
+  configDir: '.glooit',
   rules: [],
   mcps: [
     {
@@ -261,7 +261,7 @@ export default {
   ]
 } satisfies Config;
 `;
-    writeFileSync('gloo.config.ts', config);
+    writeFileSync('glooit.config.ts', config);
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
     const result = execSync(`bun run ${cliPath} validate`, {

@@ -17,7 +17,6 @@ async function getProjectStructure(maxDepth: number = 3): Promise<string> {
         const items = readdirSync(dir);
         const result: string[] = [];
 
-        // Filter out common ignored directories
         const filtered = items.filter(item =>
           !item.startsWith('.') &&
           item !== 'node_modules' &&
@@ -39,7 +38,6 @@ async function getProjectStructure(maxDepth: number = 3): Promise<string> {
               result.push(...buildTree(itemPath, depth + 1, nextPrefix));
             }
           } catch {
-            // Skip if can't access
           }
         });
 

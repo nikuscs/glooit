@@ -21,18 +21,15 @@ export class CursorWriter {
   formatMcp(mcp: ResolvedMcp, merge: boolean): string {
     let existingConfig: any = {};
 
-    // Read existing config if merge is enabled and file exists
     if (merge && existsSync(mcp.outputPath)) {
       try {
         const content = readFileSync(mcp.outputPath, 'utf-8');
         existingConfig = JSON.parse(content);
       } catch {
-        // If file is corrupted or invalid JSON, start fresh
         existingConfig = {};
       }
     }
 
-    // Cursor might use a different structure, but for now use standard MCP format
     if (!existingConfig.mcpServers) {
       existingConfig.mcpServers = {};
     }
