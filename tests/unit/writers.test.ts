@@ -33,12 +33,12 @@ describe('Agent Writers', () => {
       expect(result).toContain('---');
       expect(result).toContain('description: AI Rules - test');
       expect(result).toContain('globs: src/**/*');
-      expect(result).toContain('alwaysApply: true');
+      expect(result).toContain('alwaysApply: false');
       expect(result).toContain('---');
       expect(result).toContain('# Test Rule');
     });
 
-    it('should use default globs when not specified', () => {
+    it('should use default globs and alwaysApply true when globs not specified', () => {
       const writer = new CursorWriter();
       const ruleWithoutGlobs: Rule = {
         ...mockRule,
@@ -48,6 +48,20 @@ describe('Agent Writers', () => {
       const result = writer.formatContent('# Test', ruleWithoutGlobs);
 
       expect(result).toContain('globs: **/*');
+      expect(result).toContain('alwaysApply: true');
+    });
+
+    it('should set alwaysApply false when globs are specified', () => {
+      const writer = new CursorWriter();
+      const ruleWithGlobs: Rule = {
+        ...mockRule,
+        globs: 'custom/**/*.ts'
+      };
+
+      const result = writer.formatContent('# Test', ruleWithGlobs);
+
+      expect(result).toContain('globs: custom/**/*.ts');
+      expect(result).toContain('alwaysApply: false');
     });
 
     it('should extract rule name from file path', () => {
