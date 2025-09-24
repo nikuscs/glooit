@@ -20,7 +20,27 @@ export class ConfigLoader {
     }
 
     try {
-      const configModule = await import(join(process.cwd(), configPath));
+      const fullPath = join(process.cwd(), configPath);
+      let configModule;
+      
+      if (configPath.endsWith('.ts')) {
+        try {
+          const { createJiti } = await import('jiti');
+          const jiti = createJiti(import.meta.url);
+          configModule = await jiti.import(fullPath) as unknown;
+        } catch (jitiError) {
+          throw new Error(
+            `Failed to load TypeScript config. Please either:\n` +
+            `1. Use 'bunx glooit' instead of 'npx glooit'\n` +
+            `2. Rename ${configPath} to ${configPath.replace('.ts', '.js')}\n` +
+            `3. Use JavaScript config: npx glooit init --js\n` +
+            `Original error: ${jitiError}`
+          );
+        }
+      } else {
+        configModule = await import(fullPath);
+      }
+
       const config = configModule.default || configModule;
 
       if (typeof config === 'function') {
