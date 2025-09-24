@@ -9,8 +9,8 @@
     "glooit": "dist/cli/index.js"
   },
   "scripts": {
-    "build": "bun run typecheck && bun run lint && bun build src/index.ts --outdir dist --target node && tsc --project tsconfig.build.json",
-    "build:cli": "bun build src/cli/index.ts --outdir dist/cli --target node",
+    "build": "bun run typecheck && bun run lint && bun build src/index.ts --outdir dist --target node && bun build src/cli/index.ts --outdir dist/cli --target node --external jiti && tsc --project tsconfig.build.json",
+    "build:cli": "bun build src/cli/index.ts --outdir dist/cli --target node --external jiti",
     "build:binary": "bun build src/cli/index.ts --compile --outfile bin/glooit",
     "build:binary:linux": "bun build src/cli/index.ts --compile --target=bun-linux-x64 --outfile bin/glooit-linux",
     "build:binary:macos": "bun build src/cli/index.ts --compile --target=bun-darwin-arm64 --outfile bin/glooit-macos",
@@ -24,7 +24,7 @@
     "format": "oxlint src tests --fix",
     "check": "bun run typecheck && bun run lint && bun run test",
     "taze": "bunx taze",
-    "prepublishOnly": "bun run check && bun run build && bun run build:cli",
+    "prepublishOnly": "bun run check && bun run build",
     "install:local": "bun run build:binary && sudo mv bin/glooit /usr/local/bin/"
   },
   "files": [
@@ -69,6 +69,7 @@
   },
   "dependencies": {
     "commander": "^14.0.1",
+    "jiti": "^2.6.0",
     "package-manager-detector": "^1.3.0"
   }
 }
