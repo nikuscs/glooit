@@ -29,17 +29,37 @@ glooit init
 This creates a `glooit.config.ts` file:
 
 ```typescript
-import { Config } from 'glooit';
+import { defineRules } from 'glooit';
 
-export default {
+export default defineRules({
+  configDir: '.glooit',
   rules: [
     {
-      file: 'main.md',
+      name: 'main',
+      file: '.glooit/main.md',
       to: './',
       targets: ['claude', 'cursor', 'codex']
-    }
-  ]
-} satisfies Config;
+    },
+    {
+      name: 'frontend',
+      file: '.glooit/frontend.md',
+      to: './apps/frontend',
+      globs: './apps/frontend/{src,tests}/**/*.{ts,tsx,js,jsx,md}',
+      targets: [
+        'claude',
+        'codex',
+      ]
+    },
+    {
+      name: 'server',
+      file: '.glooit/server.md',
+      to: './apps/server',
+      globs: './apps/server/{src,tests}/**/*.{ts,tsx,js,jsx,md}',
+      targets: ['claude', 'codex']
+    },
+  ],
+  mcps: [],
+});
 ```
 
 ### 2. Sync Your Rules
