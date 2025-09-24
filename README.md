@@ -179,12 +179,14 @@ export default defineRules({
 ```
 
 **🕒 `addTimestamp`** - Replace `__TIMESTAMP__` with current date/time
+
 ```markdown
 Last updated: __TIMESTAMP__
 <!-- Becomes: Last updated: December 24, 2024, 03:30 PM -->
 ```
 
 **🌍 `replaceEnv`** - Replace `__ENV_VAR__` patterns with environment variables
+
 ```markdown
 Database: __ENV_DATABASE_URL__
 API Key: __ENV_API_KEY__
@@ -192,6 +194,7 @@ API Key: __ENV_API_KEY__
 ```
 
 **📁 `replaceStructure`** - Replace `__STRUCTURE__` with project tree
+
 ```markdown
 Project structure:
 __STRUCTURE__
@@ -199,6 +202,7 @@ __STRUCTURE__
 ```
 
 **🗜️ `compact`** - Clean up and compress your markdown
+
 ```typescript
 hooks.compact({
   maxConsecutiveNewlines: 2,
@@ -278,3 +282,11 @@ glooit backup list   # List backups
 ## License
 
 MIT
+
+## Credits
+
+Without these amazing projects, this project would not be possible.
+
+- [Antfu](https://antfu.me) for the amazing packages
+- [Ruler](https://github.com/intellectronica/ruler) Inspiration for the project & ideias
+- [Claude](https://www.anthropic.com/home/claude) for the amazing AI that made this project possible in a few hours.
