@@ -51,9 +51,19 @@ export class GitIgnoreManager {
   }
 
   private collectGeneratedPaths(): string[] {
+    // If global gitignore is disabled, return empty array
+    if (this.config.gitignore === false) {
+      return [];
+    }
+
     const paths = new Set<string>();
 
     for (const rule of this.config.rules) {
+      // Skip this rule if it has gitignore explicitly disabled
+      if (rule.gitignore === false) {
+        continue;
+      }
+
       for (const agent of rule.targets) {
         const agentName = this.getAgentName(agent);
         const customPath = this.getCustomPath(agent);
@@ -61,7 +71,8 @@ export class GitIgnoreManager {
         if (customPath) {
           paths.add(customPath);
         } else {
-          const ruleName = this.extractRuleName(rule.file);
+          const filePath = Array.isArray(rule.file) ? rule.file[0]! : rule.file;
+          const ruleName = this.extractRuleName(filePath);
           const agentPath = getAgentPath(agentName, ruleName);
           const fullPath = `${rule.to}/${agentPath}`.replace(/\/+/g, '/');
 

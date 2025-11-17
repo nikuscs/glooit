@@ -94,6 +94,72 @@ describe('ConfigValidator', () => {
       expect(errors[0]?.message).toContain('Invalid path format');
     });
 
+    it('should validate file arrays (merge feature)', async () => {
+      const file1 = `${testDir}/part1.md`;
+      const file2 = `${testDir}/part2.md`;
+
+      writeFileSync(file1, '# Part 1');
+      writeFileSync(file2, '# Part 2');
+
+      const config: Config = {
+        configDir: '.glooit',
+        rules: [{
+          file: [file1, file2],
+          to: './',
+          targets: [
+            { name: 'claude', to: './merged.md' }
+          ]
+        }],
+        mergeMcps: true
+      };
+
+      const errors = await ConfigValidator.validate(config);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('should detect missing files in file array', async () => {
+      const file1 = `${testDir}/exists.md`;
+      writeFileSync(file1, '# Exists');
+
+      const config: Config = {
+        configDir: '.glooit',
+        rules: [{
+          file: [file1, 'non-existent.md'],
+          to: './',
+          targets: [
+            { name: 'claude', to: './merged.md' }
+          ]
+        }],
+        mergeMcps: true
+      };
+
+      const errors = await ConfigValidator.validate(config);
+      expect(errors).toHaveLength(1);
+      expect(errors[0]?.field).toBe('rules[0].file');
+      expect(errors[0]?.message).toContain('not found');
+      expect(errors[0]?.path).toBe('non-existent.md');
+    });
+
+    it('should detect all missing files in file array', async () => {
+      const config: Config = {
+        configDir: '.glooit',
+        rules: [{
+          file: ['missing1.md', 'missing2.md', 'missing3.md'],
+          to: './',
+          targets: [
+            { name: 'claude', to: './merged.md' }
+          ]
+        }],
+        mergeMcps: true
+      };
+
+      const errors = await ConfigValidator.validate(config);
+      expect(errors).toHaveLength(3);
+      expect(errors[0]?.path).toBe('missing1.md');
+      expect(errors[1]?.path).toBe('missing2.md');
+      expect(errors[2]?.path).toBe('missing3.md');
+    });
+
     it('should validate commands', async () => {
       writeFileSync(testFile, '# Test command');
 

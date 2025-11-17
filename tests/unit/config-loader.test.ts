@@ -3,7 +3,7 @@ import { existsSync, writeFileSync, unlinkSync } from 'fs';
 import { ConfigLoader } from '../../src/core/config-loader';
 
 describe('ConfigLoader', () => {
-  const testConfigPath = 'test-config.ts';
+  const testConfigPath = 'test-config.js';
 
   afterEach(() => {
     if (existsSync(testConfigPath)) {
@@ -52,6 +52,76 @@ describe('ConfigLoader', () => {
         // Expected if rule files don't exist, but config structure is valid
         expect(String(error)).toContain('test.md');
       }
+    });
+
+    it('should accept file arrays with object targets', async () => {
+      const validConfig = `
+        export default {
+          rules: [{
+            file: ['.glooit/part1.md', '.glooit/part2.md'],
+            to: './',
+            targets: [
+              { name: 'claude', to: './merged.md' }
+            ]
+          }]
+        };
+      `;
+
+      writeFileSync(testConfigPath, validConfig);
+
+      try {
+        await ConfigLoader.load(testConfigPath);
+        expect(true).toBe(true);
+      } catch (error) {
+        // Expected if rule files don't exist, but config structure is valid
+        expect(String(error)).toContain('.md');
+      }
+    });
+
+    it('should reject file arrays with string targets', async () => {
+      const invalidConfigPath = 'test-invalid-config.js';
+
+      const invalidConfig = `
+        export default {
+          rules: [{
+            file: ['.glooit/part1.md', '.glooit/part2.md'],
+            to: './',
+            targets: ['claude']
+          }]
+        };
+      `;
+
+      writeFileSync(invalidConfigPath, invalidConfig);
+
+      try {
+        await expect(ConfigLoader.load(invalidConfigPath)).rejects.toThrow(/merge mode/);
+      } finally {
+        if (existsSync(invalidConfigPath)) {
+          unlinkSync(invalidConfigPath);
+        }
+      }
+    });
+
+    it('should accept file arrays with object targets and gitignore option', async () => {
+      const validConfig = `
+        export default {
+          gitignore: false,
+          rules: [{
+            file: ['.glooit/part1.md', '.glooit/part2.md'],
+            to: './',
+            targets: [
+              { name: 'claude', to: './merged.md' }
+            ]
+          }]
+        };
+      `;
+
+      writeFileSync(testConfigPath, validConfig);
+
+      // Should load without error
+      const config = await ConfigLoader.load(testConfigPath);
+      expect(config).toBeDefined();
+      expect(config.rules).toHaveLength(1);
     });
   });
 });

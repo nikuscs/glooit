@@ -92,6 +92,7 @@ export class ConfigLoader {
     // Apply defaults
     c.configDir = c.configDir || '.glooit';
     c.mergeMcps = c.mergeMcps ?? true;
+    c.gitignore = c.gitignore ?? true;
 
     if (c.backup) {
       const backup = c.backup as Record<string, unknown>;
@@ -114,9 +115,15 @@ export class ConfigLoader {
       throw new Error(`Rule at index ${index}: Rule must be an object`);
     }
     const r = rule as Record<string, unknown>;
-    if (typeof r.file !== 'string') {
-      throw new Error(`Rule at index ${index}: Rule.file must be a string`);
+
+    // Validate file - can be string or string array
+    const isFileString = typeof r.file === 'string';
+    const isFileArray = Array.isArray(r.file) && r.file.length > 0 && r.file.every((f: unknown) => typeof f === 'string');
+
+    if (!isFileString && !isFileArray) {
+      throw new Error(`Rule at index ${index}: Rule.file must be a string or a non-empty array of strings`);
     }
+
     if (typeof r.to !== 'string') {
       throw new Error(`Rule at index ${index}: Rule.to must be a string`);
     }
@@ -125,6 +132,8 @@ export class ConfigLoader {
     }
 
     const validAgentNames = ['claude', 'cursor', 'codex', 'roocode', 'generic'];
+
+    // Check if all targets are valid agents
     if (!r.targets.every((agent: unknown) => {
       if (typeof agent === 'string') {
         return validAgentNames.includes(agent);
@@ -136,6 +145,17 @@ export class ConfigLoader {
       return false;
     })) {
       throw new Error(`Rule at index ${index}: Rule.targets must contain valid agents: ${validAgentNames.join(', ')}, or objects with {name, to?}`);
+    }
+
+    // When file is an array (merge mode), all targets must be objects with 'to' property
+    if (isFileArray) {
+      const allTargetsAreObjects = r.targets.every((agent: unknown) => {
+        return typeof agent === 'object' && agent !== null &&
+               'name' in agent && 'to' in agent;
+      });
+      if (!allTargetsAreObjects) {
+        throw new Error(`Rule at index ${index}: When using file array (merge mode), all targets must be objects with {name, to} properties`);
+      }
     }
   }
 
