@@ -11,7 +11,8 @@ export class AgentDistributor {
   constructor(private config: Config) {}
 
   async distributeRule(rule: Rule): Promise<void> {
-    const content = this.loadRuleContent(rule.file);
+    const filePath = Array.isArray(rule.file) ? rule.file : [rule.file];
+    const content = this.loadRuleContent(filePath);
 
     for (const agent of rule.targets) {
       await this.distributeToAgent(agent, rule, content);
@@ -37,7 +38,8 @@ export class AgentDistributor {
       targetPath = customPath;
     } else {
       // Use default path for the agent
-      const ruleName = this.extractRuleName(rule.file);
+      const firstFile = Array.isArray(rule.file) ? rule.file[0]! : rule.file;
+      const ruleName = this.extractRuleName(firstFile);
       const agentPath = getAgentPath(agentName, ruleName);
       targetPath = join(rule.to, agentPath);
     }
@@ -60,11 +62,33 @@ export class AgentDistributor {
     writeFileSync(targetPath, finalContent, 'utf-8');
   }
 
-  private loadRuleContent(filePath: string): string {
+  private loadRuleContent(filePaths: string[]): string {
     try {
-      return readFileSync(filePath, 'utf-8');
+      if (filePaths.length === 1) {
+        // Single file - read normally
+        return readFileSync(filePaths[0]!, 'utf-8');
+      }
+
+      // Multiple files - merge with separators and markers
+      const mergedContent: string[] = [];
+
+      for (let i = 0; i < filePaths.length; i++) {
+        const filePath = filePaths[i]!;
+        const content = readFileSync(filePath, 'utf-8');
+
+        // Add marker comment showing source file
+        mergedContent.push(`<!-- Source: ${filePath} -->`);
+        mergedContent.push(content);
+
+        // Add separator between files (but not after the last one)
+        if (i < filePaths.length - 1) {
+          mergedContent.push('\n---\n');
+        }
+      }
+
+      return mergedContent.join('\n');
     } catch (error) {
-      throw new Error(`Failed to read rule file ${filePath}: ${error}`);
+      throw new Error(`Failed to read rule file(s): ${error}`);
     }
   }
 

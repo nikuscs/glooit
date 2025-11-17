@@ -12,12 +12,17 @@ export class ConfigValidator {
     const errors: ValidationError[] = [];
 
     for (const [index, rule] of config.rules.entries()) {
-      if (!existsSync(rule.file)) {
-        errors.push({
-          field: `rules[${index}].file`,
-          message: `Rule file not found: ${rule.file}`,
-          path: rule.file
-        });
+      // Handle both single file and array of files
+      const files = Array.isArray(rule.file) ? rule.file : [rule.file];
+
+      for (const file of files) {
+        if (!existsSync(file)) {
+          errors.push({
+            field: `rules[${index}].file`,
+            message: `Rule file not found: ${file}`,
+            path: file
+          });
+        }
       }
 
       if (rule.targets.length === 0) {

@@ -93,8 +93,11 @@ export class AIRulesCore {
   async validate(): Promise<boolean> {
     try {
       for (const rule of this.config.rules) {
-        if (!existsSync(rule.file)) {
-          throw new Error(`Rule file not found: ${rule.file}`);
+        const files = Array.isArray(rule.file) ? rule.file : [rule.file];
+        for (const file of files) {
+          if (!existsSync(file)) {
+            throw new Error(`Rule file not found: ${file}`);
+          }
         }
       }
 
@@ -213,7 +216,8 @@ export class AIRulesCore {
         if (customPath) {
           paths.push(customPath);
         } else {
-          const ruleName = rule.file.split('/').pop()?.replace('.md', '') || 'rule';
+          const firstFile = Array.isArray(rule.file) ? rule.file[0]! : rule.file;
+          const ruleName = firstFile.split('/').pop()?.replace('.md', '') || 'rule';
           const agentPath = getAgentPath(agentName, ruleName);
           let fullPath = `${rule.to}/${agentPath}`.replace(/\/+/g, '/');
           if (fullPath.startsWith('./')) {

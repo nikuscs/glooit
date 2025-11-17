@@ -7,14 +7,29 @@ export interface AgentTarget {
 
 export type Agent = AgentName | AgentTarget;
 
-export interface Rule {
+// Base rule interface with common properties
+interface BaseRule {
   name?: string;
-  file: string;
   to: string;
   globs?: string;
-  targets: Agent[];
   hooks?: string[];
+  gitignore?: boolean;
 }
+
+// Single file rule - can use string or object targets
+export interface SingleFileRule extends BaseRule {
+  file: string;
+  targets: Agent[];
+}
+
+// Merged file rule - must use object targets only
+export interface MergedFileRule extends BaseRule {
+  file: string[];
+  targets: AgentTarget[];
+}
+
+// Union type for both rule types
+export type Rule = SingleFileRule | MergedFileRule;
 
 export interface Command {
   command: string;
@@ -64,6 +79,7 @@ export interface Config {
   mergeMcps?: boolean;
   hooks?: Hooks;
   backup?: BackupConfig;
+  gitignore?: boolean;
 }
 
 export interface AgentMapping {
@@ -110,9 +126,15 @@ function validateRule(rule: unknown): asserts rule is Rule {
     throw new Error('Rule must be an object');
   }
   const r = rule as Record<string, unknown>;
-  if (typeof r.file !== 'string') {
-    throw new Error('Rule.file must be a string');
+
+  // Validate file - can be string or string array
+  const isFileString = typeof r.file === 'string';
+  const isFileArray = Array.isArray(r.file) && r.file.length > 0 && r.file.every((f: unknown) => typeof f === 'string');
+
+  if (!isFileString && !isFileArray) {
+    throw new Error('Rule.file must be a string or a non-empty array of strings');
   }
+
   if (typeof r.to !== 'string') {
     throw new Error('Rule.to must be a string');
   }
@@ -121,6 +143,17 @@ function validateRule(rule: unknown): asserts rule is Rule {
   }
   if (!r.targets.every(isValidAgent)) {
     throw new Error('Rule.targets must contain valid agents: claude, cursor, codex, roocode, generic, or objects with {name, to?}');
+  }
+
+  // When file is an array (merge mode), all targets must be objects with 'to' property
+  if (isFileArray) {
+    const allTargetsAreObjects = r.targets.every((target: unknown) => {
+      return typeof target === 'object' && target !== null &&
+             'name' in target && 'to' in target;
+    });
+    if (!allTargetsAreObjects) {
+      throw new Error('When using file array (merge mode), all targets must be objects with {name, to} properties');
+    }
   }
 }
 
@@ -145,6 +178,7 @@ function validateConfig(config: unknown): asserts config is Config {
   // Apply defaults
   c.configDir = c.configDir || '.glooit';
   c.mergeMcps = c.mergeMcps ?? true;
+  c.gitignore = c.gitignore ?? true;
 
   if (c.backup) {
     const backup = c.backup as Record<string, unknown>;
