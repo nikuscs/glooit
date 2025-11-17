@@ -58,35 +58,22 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Version bump and publish
+      - name: Publish to NPM
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Configure git
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-          # Install bumpp for version management
-          npm install -g bumpp
-
-          # Bump version and create tag
-          bumpp patch --yes --no-verify
-
-          # Publish to NPM (without provenance for private repos)
-          npm publish --access public
+        run: npm publish --access public
 
       - name: Create GitHub Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Get the latest tag
-          TAG=$(git describe --tags --abbrev=0)
+          # Extract tag from ref (refs/tags/v0.5.5 -> v0.5.5)
+          TAG=${GITHUB_REF#refs/tags/}
 
           # Create release with binaries
           gh release create $TAG \
             --title "Release $TAG" \
-            --notes "Auto-generated release" \
+            --notes "Auto-generated release for $TAG" \
             --latest \
             bin/glooit-linux \
             bin/glooit-macos \
