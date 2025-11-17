@@ -1,6 +1,6 @@
 {
   "name": "glooit",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "🧴 Sync your AI agent configurations and rules across platforms with ease",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -24,6 +24,7 @@
     "format": "oxlint src tests --fix",
     "check": "bun run typecheck && bun run lint && bun run test",
     "taze": "bunx taze",
+    "release": "bun run check && npx bumpp && git push --follow-tags",
     "prepublishOnly": "bun run check && bun run build",
     "install:local": "bun run build:binary && sudo mv bin/glooit /usr/local/bin/"
   },
