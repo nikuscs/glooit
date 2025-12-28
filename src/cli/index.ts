@@ -462,7 +462,7 @@ async function upgradeCommand(forceGlobal: boolean, forceLocal: boolean): Promis
     } catch {
       // Ignore if version check fails
     }
-  } catch (error) {
+  } catch {
     throw new Error(`Upgrade failed. Try running manually: ${cmd}`);
   }
 }
