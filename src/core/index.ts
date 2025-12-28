@@ -1,6 +1,9 @@
 import type { Config, Agent, AgentName, McpConfig, DirectorySync } from '../types';
 import { KNOWN_DIRECTORY_TYPES, getAgentDirectoryPath } from '../agents';
 
+// All agents that support at least one directory type (commands, skills, agents)
+const ALL_DIRECTORY_AGENTS: AgentName[] = ['claude', 'cursor', 'opencode'];
+
 interface McpGroupItem {
   name: string;
   config: McpConfig;
@@ -142,15 +145,26 @@ export class AIRulesCore {
       }
 
       const targets = typeof dirConfig === 'string'
-        ? ['claude', 'cursor'] as AgentName[]
-        : (dirConfig.targets || ['claude', 'cursor']);
+        ? ALL_DIRECTORY_AGENTS
+        : (dirConfig.targets || ALL_DIRECTORY_AGENTS);
+
+      // Filter out agents that don't support this directory type
+      const supportedTargets = targets.filter(agent => {
+        const dirPath = getAgentDirectoryPath(agent, dirType);
+        return dirPath !== null;
+      });
+
+      // Skip if no agents support this directory type
+      if (supportedTargets.length === 0) {
+        continue;
+      }
 
       // Create a rule for the directory sync
       const rule = {
         name: dirType,
         file: path,
         to: './',
-        targets: targets.map(t => t as AgentName)
+        targets: supportedTargets.map(t => t as AgentName)
       };
 
       await this.distributor.distributeRule(rule);
@@ -276,8 +290,8 @@ export class AIRulesCore {
       if (!dirConfig) continue;
 
       const targets = typeof dirConfig === 'string'
-        ? ['claude', 'cursor'] as AgentName[]
-        : (dirConfig.targets || ['claude', 'cursor']);
+        ? ALL_DIRECTORY_AGENTS
+        : (dirConfig.targets || ALL_DIRECTORY_AGENTS);
 
       for (const agent of targets) {
         const dirPath = getAgentDirectoryPath(agent, dirType);

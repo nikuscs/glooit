@@ -15,6 +15,7 @@ export class AgentWriterFactory {
       case 'claude':
       case 'codex':
       case 'roocode':
+      case 'opencode':
       case 'generic':
         return new MarkdownWriter();
       default:

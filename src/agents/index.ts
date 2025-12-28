@@ -10,14 +10,17 @@ export const AGENT_DIRECTORY_MAPPINGS: Record<KnownDirectoryType, Partial<Record
   commands: {
     claude: '.claude/commands',
     cursor: '.cursor/commands',
+    opencode: '.opencode/command',
   },
   skills: {
     claude: '.claude/skills',
     cursor: '.cursor/skills',
+    opencode: '.claude/skills', // opencode uses Claude-compatible path
   },
   agents: {
     claude: '.claude/agents',
     cursor: '.cursor/agents',
+    opencode: '.opencode/agent',
   },
 };
 
@@ -54,6 +57,11 @@ export const AGENT_MAPPINGS: Record<AgentName, AgentMapping> = {
     format: 'markdown',
     directory: '.roo/rules',
     mcpPath: '.roo/mcp.json'
+  },
+  opencode: {
+    path: 'AGENTS.md',
+    format: 'markdown',
+    mcpPath: 'opencode.jsonc'
   },
   generic: {
     path: '{name}.md',

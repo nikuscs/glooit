@@ -1,6 +1,6 @@
 # glooit 🧴
 
-Sync AI coding assistant configurations across Claude Code, Cursor, Codex, and Roo Code/Cline.
+Sync AI coding assistant configurations across Claude Code, Cursor, Codex, OpenCode, and Roo Code/Cline.
 
 - **Rules** - Agent instructions and guidelines
 - **Commands** - Custom slash commands
@@ -11,10 +11,11 @@ Sync AI coding assistant configurations across Claude Code, Cursor, Codex, and R
 
 ## Why glooit?
 
-Teams today use different AI coding assistants - some prefer Claude Code, others use Cursor, and CI/CD might run on Codex. Each tool has its own config format and location:
+Teams today use different AI coding assistants - some prefer Claude Code, others use Cursor, OpenCode, and CI/CD might run on Codex. Each tool has its own config format and location:
 
-- Claude Code reads `CLAUDE.md`
-- Cursor uses `.cursor/rules/*.mdc` with frontmatter
+- Claude Code reads `CLAUDE.md`, commands in `.claude/commands/`, skills in `.claude/skills/`
+- Cursor uses `.cursor/rules/*.mdc` with frontmatter, commands in `.cursor/commands/`
+- OpenCode expects `AGENTS.md`, commands in `.opencode/command/`, agents in `.opencode/agent/`
 - Codex expects `AGENTS.md`
 - Roo Code/Cline looks in `.roo/rules/`
 
@@ -79,19 +80,22 @@ Run `glooit sync` (or `bunx glooit sync` / `npx glooit sync`) and it creates:
 | `claude` | `CLAUDE.md` | Markdown |
 | `cursor` | `.cursor/rules/{name}.mdc` | Frontmatter |
 | `codex` | `AGENTS.md` | Markdown |
+| `opencode` | `AGENTS.md` | Markdown |
 | `roocode` | `.roo/rules/{name}.md` | Markdown |
 | `generic` | `{name}.md` | Markdown |
 
 ### Feature Support Matrix
 
-| Feature     | Claude | Cursor | Codex | Roo Code/Cline | Generic |
-|-------------|--------|--------|-------|----------------|---------|
-| Rules       | ✓      | ✓      | ✓     | ✓              | ✓       |
-| Commands    | ✓      | ✓      | -     | -              | -       |
-| Skills      | ✓      | ✓      | -     | -              | -       |
-| Agents      | ✓      | ✓      | -     | -              | -       |
-| MCP Servers | ✓      | ✓      | ✓     | ✓              | ✓       |
-| Hooks       | ✓      | ✓      | -     | -              | -       |
+| Feature     | Claude | Cursor | OpenCode | Codex | Roo Code/Cline | Generic |
+|-------------|--------|--------|----------|-------|----------------|---------|
+| Rules       | ✓      | ✓      | ✓        | ✓     | ✓              | ✓       |
+| Commands    | ✓      | ✓      | ✓        | -     | -              | -       |
+| Skills      | ✓      | ✓      | ✓*       | -     | -              | -       |
+| Agents      | ✓      | ✓      | ✓        | -     | -              | -       |
+| MCP Servers | ✓      | ✓      | ✓        | ✓     | ✓              | ✓       |
+| Hooks       | ✓      | ✓      | -        | -     | -              | -       |
+
+*OpenCode uses Claude-compatible skills path (`.claude/skills/`)
 
 ## Features
 
@@ -118,7 +122,7 @@ Sync commands, skills, and agents directories at the top level:
 export default defineRules({
   rules: [...],
 
-  // Simple string path (defaults to claude + cursor)
+  // Simple string path (defaults to claude, cursor, opencode)
   commands: '.glooit/commands',
 
   // Or with explicit targets
@@ -135,9 +139,10 @@ export default defineRules({
 ```
 
 Output mappings:
-- `commands` → `.claude/commands`, `.cursor/commands`
-- `skills` → `.claude/skills`, `.cursor/skills`
-- `agents` → `.claude/agents`, `.cursor/agents`
+
+- `commands` → `.claude/commands`, `.cursor/commands`, `.opencode/command`
+- `skills` → `.claude/skills`, `.cursor/skills` (OpenCode uses `.claude/skills`)
+- `agents` → `.claude/agents`, `.cursor/agents`, `.opencode/agent`
 
 ### File Merging
 

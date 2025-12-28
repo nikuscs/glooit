@@ -1,4 +1,4 @@
-export type AgentName = 'claude' | 'cursor' | 'codex' | 'roocode' | 'generic';
+export type AgentName = 'claude' | 'cursor' | 'codex' | 'roocode' | 'opencode' | 'generic';
 
 export interface AgentTarget {
   name: AgentName;
@@ -151,7 +151,7 @@ export interface BackupEntry {
 
 // Simple validation functions
 function isValidAgentName(agentName: unknown): agentName is AgentName {
-  return ['claude', 'cursor', 'codex', 'roocode', 'generic'].includes(agentName as string);
+  return ['claude', 'cursor', 'codex', 'roocode', 'opencode', 'generic'].includes(agentName as string);
 }
 
 function isValidAgent(agent: unknown): agent is Agent {
@@ -186,7 +186,7 @@ function validateRule(rule: unknown): asserts rule is Rule {
     throw new Error('Rule.targets must be a non-empty array');
   }
   if (!r.targets.every(isValidAgent)) {
-    throw new Error('Rule.targets must contain valid agents: claude, cursor, codex, roocode, generic, or objects with {name, to?}');
+    throw new Error('Rule.targets must contain valid agents: claude, cursor, codex, roocode, opencode, generic, or objects with {name, to?}');
   }
 
   // When file is an array (merge mode), all targets must be objects with 'to' property
