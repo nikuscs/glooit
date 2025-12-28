@@ -29,17 +29,18 @@ Teams today use different AI coding assistants - some prefer Claude Code, others
 ## Install
 
 ```bash
+# Homebrew (macOS/Linux)
+brew tap nikuscs/glooit https://github.com/nikuscs/glooit
+brew install glooit
+
 # npm
 npm install -g glooit
-npx glooit init
 
 # bun
 bun install -g glooit
-bunx glooit init
 
 # pnpm
 pnpm install -g glooit
-pnpx glooit init
 ```
 
 ## Quick Start

@@ -50,7 +50,8 @@ jobs:
       - name: Build binaries
         run: |
           bun run build:binary:linux
-          bun run build:binary:macos
+          bun run build:binary:macos-arm64
+          bun run build:binary:macos-x64
           bun run build:binary:windows
 
       - name: Setup Node.js for NPM
@@ -74,6 +75,38 @@ jobs:
             --title "Release $TAG" \
             --notes "Auto-generated release for $TAG" \
             --latest \
-            bin/glooit-linux \
-            bin/glooit-macos \
-            bin/glooit-windows.exe
+            bin/glooit-linux-x64 \
+            bin/glooit-darwin-arm64 \
+            bin/glooit-darwin-x64 \
+            bin/glooit-windows-x64.exe
+
+      - name: Update Homebrew Formula
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=${{ github.ref_name }}
+          VERSION=${VERSION#v}  # Remove 'v' prefix
+
+          # Calculate SHA256 for each binary
+          SHA_ARM64=$(shasum -a 256 bin/glooit-darwin-arm64 | cut -d ' ' -f 1)
+          SHA_X64=$(shasum -a 256 bin/glooit-darwin-x64 | cut -d ' ' -f 1)
+          SHA_LINUX=$(shasum -a 256 bin/glooit-linux-x64 | cut -d ' ' -f 1)
+
+          # Update formula
+          sed -i "s/version \".*\"/version \"$VERSION\"/" HomebrewFormula/glooit.rb
+          sed -i "s/PLACEHOLDER_ARM64_SHA256/$SHA_ARM64/" HomebrewFormula/glooit.rb
+          sed -i "s/PLACEHOLDER_X64_SHA256/$SHA_X64/" HomebrewFormula/glooit.rb
+          sed -i "s/PLACEHOLDER_LINUX_SHA256/$SHA_LINUX/" HomebrewFormula/glooit.rb
+
+          # Also update existing SHA256 values for future releases
+          sed -i "s/sha256 \"[a-f0-9]\{64\}\" # arm64/sha256 \"$SHA_ARM64\" # arm64/" HomebrewFormula/glooit.rb
+          sed -i "s/sha256 \"[a-f0-9]\{64\}\" # x64/sha256 \"$SHA_X64\" # x64/" HomebrewFormula/glooit.rb
+          sed -i "s/sha256 \"[a-f0-9]\{64\}\" # linux/sha256 \"$SHA_LINUX\" # linux/" HomebrewFormula/glooit.rb
+
+          # Commit and push updated formula
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add HomebrewFormula/glooit.rb
+          git commit -m "chore: update Homebrew formula for $VERSION" || exit 0
+          git push origin HEAD:main
