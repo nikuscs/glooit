@@ -4,7 +4,7 @@
  *
  * @see https://github.com/jonschlinkert/glooit
  */
-import { defineRules, hooks } from 'glooit';
+import { defineRules, transforms } from 'glooit';
 
 export default defineRules({
   // ─────────────────────────────────────────────────────────────
@@ -152,10 +152,10 @@ export default defineRules({
   mergeMcps: true,
 
   // ─────────────────────────────────────────────────────────────
-  // HOOKS - Lifecycle hooks for sync process
+  // TRANSFORMS - Content transformations during sync
   // ─────────────────────────────────────────────────────────────
 
-  hooks: {
+  transforms: {
     // Run before sync starts
     before: [
       async ({ config }) => {
@@ -165,19 +165,19 @@ export default defineRules({
 
     // Run after each rule is synced (can modify content)
     after: [
-      // Built-in hooks
-      hooks.addTimestamp,      // Replace __TIMESTAMP__ with current date
-      hooks.replaceEnv,        // Replace __ENV_VAR__ with env values
-      hooks.replaceStructure,  // Replace __STRUCTURE__ with project tree
+      // Built-in transforms
+      transforms.addTimestamp,      // Replace __TIMESTAMP__ with current date
+      transforms.replaceEnv,        // Replace __ENV_VAR__ with env values
+      transforms.replaceStructure,  // Replace __STRUCTURE__ with project tree
 
-      // Compact hook with options
-      hooks.compact({
+      // Compact transform with options
+      transforms.compact({
         maxConsecutiveNewlines: 2,
         removeFillerWords: true,
         compactLists: true
       }),
 
-      // Custom hook
+      // Custom transform
       async (context) => {
         console.log(`Synced: ${context.targetPath}`);
         return context.content;  // Return modified content
@@ -191,6 +191,34 @@ export default defineRules({
       }
     ]
   },
+
+  // ─────────────────────────────────────────────────────────────
+  // AGENT HOOKS - Lifecycle hooks for Claude Code and Cursor
+  // ─────────────────────────────────────────────────────────────
+
+  hooks: [
+    // Auto-format files after edits
+    {
+      event: 'afterFileEdit',
+      command: 'npx prettier --write',
+      targets: ['claude', 'cursor']
+    },
+
+    // Run ESLint after TypeScript file edits
+    {
+      event: 'PostToolUse',
+      script: '.glooit/hooks/lint-ts.ts',
+      matcher: 'Edit|Write',
+      targets: ['claude']
+    },
+
+    // Validate shell commands before execution
+    {
+      event: 'beforeShellExecution',
+      script: '.glooit/hooks/validate-command.ts',
+      targets: ['claude', 'cursor']
+    }
+  ],
 
   // ─────────────────────────────────────────────────────────────
   // BACKUP - Automatic backup before sync

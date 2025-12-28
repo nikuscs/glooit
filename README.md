@@ -7,6 +7,7 @@ Sync AI coding assistant configurations across Claude Code, Cursor, Codex, and R
 - **Skills** - Reusable agent capabilities
 - **Agents** - Custom agent definitions
 - **MCP Servers** - Model Context Protocol configurations
+- **Agent Hooks** - Lifecycle hooks for Claude Code and Cursor
 
 ## Why glooit?
 
@@ -143,7 +144,7 @@ Limit rule scope to specific files:
 }
 ```
 
-### Hooks & Replacements
+### Transforms
 
 Transform content during sync using placeholders in your source files.
 
@@ -167,7 +168,7 @@ __STRUCTURE__
 **Config** (`glooit.config.ts`):
 
 ```typescript
-import { defineRules, hooks } from 'glooit';
+import { defineRules, transforms } from 'glooit';
 
 export default defineRules({
   rules: [
@@ -178,16 +179,16 @@ export default defineRules({
       hooks: ['replaceStructure', 'addTimestamp', 'replaceEnv']
     }
   ],
-  hooks: {
-    after: [hooks.compact({ removeFillerWords: true })]
+  transforms: {
+    after: [transforms.compact({ removeFillerWords: true })]
   }
 });
 ```
 
-**Built-in hooks:**
+**Built-in transforms:**
 
-| Hook | Placeholder | Description |
-|------|-------------|-------------|
+| Transform | Placeholder | Description |
+|-----------|-------------|-------------|
 | `addTimestamp` | `__TIMESTAMP__` | Replaced with current date/time |
 | `replaceEnv` | `__ENV_VAR__` | Replaced with `process.env.ENV_VAR` value |
 | `replaceStructure` | `__STRUCTURE__` | Replaced with project directory tree |
@@ -195,8 +196,57 @@ export default defineRules({
 
 **Usage:**
 
-- Per-rule hooks: Add `hooks: ['hookName']` to individual rules
-- Global hooks: Add to `hooks.after` array to run on all rules
+- Per-rule transforms: Add `hooks: ['transformName']` to individual rules
+- Global transforms: Add to `transforms.after` array to run on all rules
+
+### Agent Hooks
+
+Configure lifecycle hooks that run inside Claude Code and Cursor when the AI uses tools.
+
+```typescript
+export default defineRules({
+  rules: [...],
+  hooks: [
+    // Run prettier after file edits
+    {
+      event: 'afterFileEdit',
+      command: 'npx prettier --write',
+      targets: ['claude', 'cursor']
+    },
+
+    // Run a TypeScript script before shell commands
+    {
+      event: 'beforeShellExecution',
+      script: '.glooit/hooks/check-command.ts',
+      targets: ['claude']
+    },
+
+    // Block writes to sensitive files
+    {
+      event: 'PreToolUse',
+      script: '.glooit/hooks/block-env-writes.ts',
+      matcher: 'Edit|Write',  // Claude Code matcher
+      targets: ['claude']
+    }
+  ]
+});
+```
+
+**Supported events:**
+
+| Event | Claude Code | Cursor | Description |
+|-------|-------------|--------|-------------|
+| `PreToolUse` | ✓ | - | Before tool execution (can block) |
+| `PostToolUse` | ✓ | - | After tool completion |
+| `beforeShellExecution` | ✓ | ✓ | Before shell commands |
+| `afterFileEdit` | ✓ | ✓ | After file modifications |
+| `Stop` | ✓ | ✓ | When agent finishes |
+
+**Script types:**
+
+- `.ts` files: Run with `bun run`
+- `.js` files: Run with `node`
+- `.sh` files: Run directly
 
 ### MCP Configuration
 

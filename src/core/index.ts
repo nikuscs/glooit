@@ -11,6 +11,7 @@ interface McpConfigFile {
   mcpServers?: Record<string, unknown>;
 }
 import { AgentDistributor } from '../agents/distributor';
+import { AgentHooksDistributor } from '../agents/hooks-distributor';
 import { BackupManager } from './backup';
 import { GitIgnoreManager } from './gitignore';
 import { getAgentPath, getAgentMcpPath } from '../agents';
@@ -20,20 +21,22 @@ import { AgentWriterFactory } from '../agents/writers';
 
 export class AIRulesCore {
   private distributor: AgentDistributor;
+  private hooksDistributor: AgentHooksDistributor;
   private backupManager: BackupManager;
   private gitIgnoreManager: GitIgnoreManager;
 
   constructor(private config: Config) {
     this.distributor = new AgentDistributor(config);
+    this.hooksDistributor = new AgentHooksDistributor(config);
     this.backupManager = new BackupManager(config);
     this.gitIgnoreManager = new GitIgnoreManager(config);
   }
 
   async sync(): Promise<void> {
     try {
-      if (this.config.hooks?.before) {
-        for (const hook of this.config.hooks.before) {
-          await hook({ config: this.config });
+      if (this.config.transforms?.before) {
+        for (const transform of this.config.transforms.before) {
+          await transform({ config: this.config });
         }
       }
 
@@ -56,12 +59,17 @@ export class AIRulesCore {
         await this.distributeMcps();
       }
 
+      // Distribute agent lifecycle hooks (Claude Code, Cursor)
+      if (this.config.hooks) {
+        await this.hooksDistributor.distributeHooks();
+      }
+
       await this.gitIgnoreManager.updateGitIgnore();
 
     } catch (error) {
-      if (this.config.hooks?.error) {
-        for (const hook of this.config.hooks.error) {
-          await hook(error);
+      if (this.config.transforms?.error) {
+        for (const transform of this.config.transforms.error) {
+          await transform(error);
         }
       }
       throw error;
@@ -252,6 +260,14 @@ export class AIRulesCore {
             paths.push(outputPath);
           }
         }
+      }
+    }
+
+    // Add agent hook config paths
+    const hookPaths = this.hooksDistributor.getGeneratedPaths();
+    for (const hookPath of hookPaths) {
+      if (!paths.includes(hookPath)) {
+        paths.push(hookPath);
       }
     }
 

@@ -211,10 +211,10 @@ export class AgentDistributor {
       }
     }
 
-    if (this.config.hooks?.after) {
-      for (const hook of this.config.hooks.after) {
+    if (this.config.transforms?.after) {
+      for (const transform of this.config.transforms.after) {
         const updatedContext = { ...context, content };
-        const result = await hook(updatedContext);
+        const result = await transform(updatedContext);
         if (typeof result === 'string') {
           content = result;
         }
