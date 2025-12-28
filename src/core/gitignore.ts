@@ -71,7 +71,7 @@ export class GitIgnoreManager {
         if (customPath) {
           paths.add(customPath);
         } else {
-          const filePath = Array.isArray(rule.file) ? rule.file[0]! : rule.file;
+          const filePath = Array.isArray(rule.file) ? rule.file[0] ?? '' : rule.file;
           const ruleName = this.extractRuleName(filePath);
           const agentPath = getAgentPath(agentName, ruleName);
           const fullPath = `${rule.to}/${agentPath}`.replace(/\/+/g, '/');

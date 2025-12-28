@@ -242,7 +242,7 @@ export class AIRulesCore {
         if (customPath) {
           paths.push(customPath);
         } else {
-          const firstFile = Array.isArray(rule.file) ? rule.file[0]! : rule.file;
+          const firstFile = Array.isArray(rule.file) ? rule.file[0] ?? '' : rule.file;
           const ruleName = firstFile.split('/').pop()?.replace('.md', '') || 'rule';
           const agentPath = getAgentPath(agentName, ruleName);
           let fullPath = `${rule.to}/${agentPath}`.replace(/\/+/g, '/');

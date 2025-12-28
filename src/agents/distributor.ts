@@ -14,8 +14,9 @@ export class AgentDistributor {
     const filePath = Array.isArray(rule.file) ? rule.file : [rule.file];
 
     // Check if this is a directory rule (single path that's a directory)
-    if (filePath.length === 1 && this.isDirectory(filePath[0]!)) {
-      await this.distributeDirectory(rule, filePath[0]!);
+    const firstPath = filePath[0];
+    if (filePath.length === 1 && firstPath && this.isDirectory(firstPath)) {
+      await this.distributeDirectory(rule, firstPath);
       return;
     }
 
@@ -143,7 +144,7 @@ export class AgentDistributor {
       targetPath = customPath;
     } else {
       // Use default path for the agent
-      const firstFile = Array.isArray(rule.file) ? rule.file[0]! : rule.file;
+      const firstFile = Array.isArray(rule.file) ? rule.file[0] ?? '' : rule.file;
       const ruleName = this.extractRuleName(firstFile);
       const agentPath = getAgentPath(agentName, ruleName);
       targetPath = join(rule.to, agentPath);
@@ -169,16 +170,17 @@ export class AgentDistributor {
 
   private loadRuleContent(filePaths: string[]): string {
     try {
-      if (filePaths.length === 1) {
+      if (filePaths.length === 1 && filePaths[0]) {
         // Single file - read normally
-        return readFileSync(filePaths[0]!, 'utf-8');
+        return readFileSync(filePaths[0], 'utf-8');
       }
 
       // Multiple files - merge with separators and markers
       const mergedContent: string[] = [];
 
       for (let i = 0; i < filePaths.length; i++) {
-        const filePath = filePaths[i]!;
+        const filePath = filePaths[i];
+        if (!filePath) continue;
         const content = readFileSync(filePath, 'utf-8');
 
         // Add marker comment showing source file

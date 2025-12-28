@@ -117,7 +117,7 @@ export class AgentHooksDistributor {
       if (!hooksByEvent.has(claudeEvent)) {
         hooksByEvent.set(claudeEvent, []);
       }
-      hooksByEvent.get(claudeEvent)!.push(hook);
+      hooksByEvent.get(claudeEvent)?.push(hook);
     }
 
     // Build Claude hooks config

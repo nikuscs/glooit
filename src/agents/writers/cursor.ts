@@ -8,7 +8,7 @@ interface McpConfigFile {
 
 export class CursorWriter {
   formatContent(content: string, rule: Rule): string {
-    const firstFile = Array.isArray(rule.file) ? rule.file[0]! : rule.file;
+    const firstFile = Array.isArray(rule.file) ? rule.file[0] ?? '' : rule.file;
     const ruleName = this.extractRuleName(firstFile);
     const hasGlobs = rule.globs && rule.globs.length > 0;
 
