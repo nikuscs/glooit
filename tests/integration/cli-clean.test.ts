@@ -46,7 +46,7 @@ export default {
 
     // Verify files were created
     expect(existsSync('CLAUDE.md')).toBe(true);
-    expect(existsSync('.glooit')).toBe(true);
+    // configDir is only created when backup is enabled
 
     // Create a gitignore to test cleanup
     writeFileSync('.gitignore', 'some-file\n# glooit generated files\nCLAUDE.md\nother-file\n');
@@ -107,8 +107,8 @@ export default {
     const cliPath = `${originalCwd}/src/cli/index.ts`;
     execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
 
-    // Verify custom directory was created
-    expect(existsSync('custom-ai-rules')).toBe(true);
+    // configDir is only created when backup is enabled
+    expect(existsSync('CLAUDE.md')).toBe(true);
 
     const result = execSync(`bun run ${cliPath} clean`, {
       encoding: 'utf-8'

@@ -1,6 +1,37 @@
 import type { AgentName, AgentMapping } from '../types';
 import { homedir } from 'os';
 
+// Known directory types that can be synced without explicit 'to' path
+export const KNOWN_DIRECTORY_TYPES = ['commands', 'skills', 'agents'] as const;
+export type KnownDirectoryType = typeof KNOWN_DIRECTORY_TYPES[number];
+
+// Directory mappings for each agent - null means not supported
+export const AGENT_DIRECTORY_MAPPINGS: Record<KnownDirectoryType, Partial<Record<AgentName, string>>> = {
+  commands: {
+    claude: '.claude/commands',
+    cursor: '.cursor/commands',
+  },
+  skills: {
+    claude: '.claude/skills',
+    cursor: '.cursor/skills',
+  },
+  agents: {
+    claude: '.claude/agents',
+    cursor: '.cursor/agents',
+  },
+};
+
+export function getAgentDirectoryPath(agent: AgentName, dirType: string): string | null {
+  if (!KNOWN_DIRECTORY_TYPES.includes(dirType as KnownDirectoryType)) {
+    return null;
+  }
+  return AGENT_DIRECTORY_MAPPINGS[dirType as KnownDirectoryType][agent] ?? null;
+}
+
+export function isKnownDirectoryType(name: string): name is KnownDirectoryType {
+  return KNOWN_DIRECTORY_TYPES.includes(name as KnownDirectoryType);
+}
+
 export const AGENT_MAPPINGS: Record<AgentName, AgentMapping> = {
   claude: {
     path: 'CLAUDE.md',

@@ -135,7 +135,7 @@ export default {
     execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
 
     expect(existsSync('CLAUDE.md')).toBe(true);
-    expect(existsSync('custom-rules')).toBe(true);
+    // configDir is only created when backup is enabled or files are stored there
   });
 
   it('should fail sync with missing rule file', () => {

@@ -7,7 +7,7 @@ export class BackupManager {
 
   constructor(private config: Config) {
     this.backupDir = join(config.configDir || '.glooit', 'backups');
-    this.ensureBackupDir();
+    // Don't create backup dir in constructor - only when actually needed
   }
 
   async createBackup(filePaths: string[]): Promise<string> {
@@ -16,6 +16,9 @@ export class BackupManager {
       timestamp,
       files: []
     };
+
+    // Ensure backup directory exists before creating backup
+    this.ensureBackupDir();
 
     for (const filePath of filePaths) {
       if (existsSync(filePath)) {

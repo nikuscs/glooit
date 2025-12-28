@@ -1,6 +1,7 @@
-import { existsSync } from 'fs';
-import { join } from 'path';
+import { existsSync, statSync } from 'fs';
+import { join, basename } from 'path';
 import type { Config } from '../types';
+import { isKnownDirectoryType } from '../agents';
 
 export class ConfigLoader {
   private static readonly DEFAULT_CONFIG_PATHS = [
@@ -124,7 +125,15 @@ export class ConfigLoader {
       throw new Error(`Rule at index ${index}: Rule.file must be a string or a non-empty array of strings`);
     }
 
-    if (typeof r.to !== 'string') {
+    // Check if this is a directory rule with a known type
+    const isDirectoryRule = isFileString && this.isDirectoryPath(r.file as string);
+    const dirType = (typeof r.name === 'string' ? r.name : null) || (isFileString ? basename(r.file as string) : null);
+    const isKnownDirType = dirType && isKnownDirectoryType(dirType);
+
+    // 'to' is optional for known directory types, defaults to './'
+    if (r.to === undefined && isKnownDirType) {
+      r.to = './';
+    } else if (typeof r.to !== 'string') {
       throw new Error(`Rule at index ${index}: Rule.to must be a string`);
     }
     if (!Array.isArray(r.targets) || r.targets.length === 0) {
@@ -193,5 +202,13 @@ export default defineRules({
   ],
 };
 `;
+  }
+
+  private static isDirectoryPath(path: string): boolean {
+    try {
+      return existsSync(path) && statSync(path).isDirectory();
+    } catch {
+      return false;
+    }
   }
 }

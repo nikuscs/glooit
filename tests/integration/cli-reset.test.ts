@@ -47,7 +47,7 @@ export default {
     // Verify files were created
     expect(existsSync('CLAUDE.md')).toBe(true);
     expect(existsSync('.cursor/rules')).toBe(true);
-    expect(existsSync('.glooit')).toBe(true);
+    // .glooit is only created when backup is enabled
 
     // Now reset
     const result = execSync(`bun run ${cliPath} reset --force`, {
@@ -60,7 +60,6 @@ export default {
     expect(existsSync('CLAUDE.md')).toBe(false);
     expect(existsSync('.cursor/rules')).toBe(false);
     expect(existsSync('.cursor')).toBe(false); // Should be removed if empty
-    expect(existsSync('.glooit')).toBe(false);
     expect(existsSync('test.md')).toBe(true); // Source file should remain
     expect(existsSync('glooit.config.ts')).toBe(false); // Config file is removed by reset
   });
@@ -151,9 +150,9 @@ export default {
     const cliPath = `${originalCwd}/src/cli/index.ts`;
     execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
 
-    // Verify custom directory was created
-    expect(existsSync('custom-rules')).toBe(true);
+    // Verify output file was created
     expect(existsSync('CLAUDE.md')).toBe(true);
+    // configDir is only created when backup is enabled
 
     const result = execSync(`bun run ${cliPath} reset --force`, {
       encoding: 'utf-8'
@@ -163,8 +162,6 @@ export default {
 
     // Verify files are removed
     expect(existsSync('CLAUDE.md')).toBe(false);
-    // Custom config directory is removed if it matches known patterns
-    expect(existsSync('custom-rules')).toBe(false);
   });
 
   it('should prompt for confirmation when config file is missing', () => {
