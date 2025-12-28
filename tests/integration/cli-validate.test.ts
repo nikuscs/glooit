@@ -33,19 +33,11 @@ export default {
       to: './',
       targets: ['claude']
     }
-  ],
-  commands: [
-    {
-      command: 'build',
-      file: 'build.md',
-      targets: ['cursor']
-    }
   ]
 } satisfies Config;
 `;
     writeFileSync('glooit.config.ts', config);
     writeFileSync('test.md', '# Test content');
-    writeFileSync('build.md', '# Build command');
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
     const result = execSync(`bun run ${cliPath} validate`, {
@@ -79,20 +71,14 @@ export default {
     }).toThrow();
   });
 
-  it('should fail validation when command file is missing', () => {
+  it('should fail validation when commands directory is missing', () => {
     const config = `
 import { Config } from '@ai-rules/types';
 
 export default {
   configDir: '.glooit',
   rules: [],
-  commands: [
-    {
-      command: 'test',
-      file: 'missing-command.md',
-      targets: ['cursor']
-    }
-  ]
+  commands: '.glooit/commands'
 } satisfies Config;
 `;
     writeFileSync('glooit.config.ts', config);
@@ -123,7 +109,10 @@ export default {
     expect(result).toContain('Configuration is valid');
   });
 
-  it('should validate with multiple rules and commands', () => {
+  it('should validate with multiple rules and directory sync', () => {
+    mkdirSync('.glooit/commands', { recursive: true });
+    writeFileSync('.glooit/commands/deploy.md', '# Deploy');
+
     const config = `
 import { Config } from '@ai-rules/types';
 
@@ -141,25 +130,12 @@ export default {
       targets: ['cursor']
     }
   ],
-  commands: [
-    {
-      command: 'build',
-      file: 'build.md',
-      targets: ['claude']
-    },
-    {
-      command: 'test',
-      file: 'test-cmd.md',
-      targets: ['cursor']
-    }
-  ]
+  commands: '.glooit/commands'
 } satisfies Config;
 `;
     writeFileSync('glooit.config.ts', config);
     writeFileSync('rule1.md', '# Rule 1');
     writeFileSync('rule2.md', '# Rule 2');
-    writeFileSync('build.md', '# Build command');
-    writeFileSync('test-cmd.md', '# Test command');
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
     const result = execSync(`bun run ${cliPath} validate`, {

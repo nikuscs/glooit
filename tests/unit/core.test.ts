@@ -34,7 +34,7 @@ describe('AIRulesCore', () => {
           targets: ['claude']
         }],
         mergeMcps: true,
-        hooks: {
+        transforms: {
           before: [beforeHookExecuted]
         }
       };
@@ -60,7 +60,7 @@ describe('AIRulesCore', () => {
           targets: ['claude']
         }],
         mergeMcps: true,
-        hooks: {
+        transforms: {
           after: [afterHook]
         }
       };
@@ -118,7 +118,7 @@ describe('AIRulesCore', () => {
           targets: ['claude']
         }],
         mergeMcps: true,
-        hooks: {
+        transforms: {
           error: [errorHook]
         }
       };
@@ -320,16 +320,10 @@ describe('AIRulesCore', () => {
           to: './',
           targets: ['claude']
         }],
-        mergeMcps: true,
-        commands: [{
-          command: 'build',
-          file: 'build.md',
-          targets: ['cursor']
-        }]
+        mergeMcps: true
       };
 
       writeFileSync('test.md', '# Test content');
-      writeFileSync('build.md', '# Build command');
 
       const core = new AIRulesCore(config);
       const isValid = await core.validate();

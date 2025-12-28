@@ -1,7 +1,7 @@
-import { readFileSync, writeFileSync, mkdirSync } from 'fs';
-import { join, dirname, basename } from 'path';
+import { readFileSync, writeFileSync, mkdirSync, statSync, readdirSync } from 'fs';
+import { join, dirname, basename, relative } from 'path';
 import type { Agent, AgentName, Rule, Config, SyncContext } from '../types';
-import { getAgentPath } from './index';
+import { getAgentPath, getAgentDirectoryPath, isKnownDirectoryType } from './index';
 import { AgentWriterFactory } from './writers';
 import { replaceStructure } from '../hooks/project-structure';
 import { replaceEnv } from '../hooks/env-variables';
@@ -12,11 +12,116 @@ export class AgentDistributor {
 
   async distributeRule(rule: Rule): Promise<void> {
     const filePath = Array.isArray(rule.file) ? rule.file : [rule.file];
+
+    // Check if this is a directory rule (single path that's a directory)
+    if (filePath.length === 1 && this.isDirectory(filePath[0]!)) {
+      await this.distributeDirectory(rule, filePath[0]!);
+      return;
+    }
+
     const content = this.loadRuleContent(filePath);
 
     for (const agent of rule.targets) {
       await this.distributeToAgent(agent, rule, content);
     }
+  }
+
+  private isDirectory(path: string): boolean {
+    try {
+      return statSync(path).isDirectory();
+    } catch {
+      return false;
+    }
+  }
+
+  private async distributeDirectory(rule: Rule, sourceDirPath: string): Promise<void> {
+    const dirType = rule.name || basename(sourceDirPath);
+
+    for (const agent of rule.targets) {
+      const agentName = this.getAgentName(agent);
+      const customPath = this.getCustomPath(agent);
+
+      let targetDir: string;
+
+      if (customPath) {
+        // User provided custom path
+        targetDir = customPath;
+      } else if (isKnownDirectoryType(dirType)) {
+        // Use known directory mapping
+        const mappedPath = getAgentDirectoryPath(agentName, dirType);
+        if (!mappedPath) {
+          throw new Error(
+            `Agent '${agentName}' does not support directory type '${dirType}'. ` +
+            `Please provide an explicit 'to' path for this agent.`
+          );
+        }
+        targetDir = join(rule.to, mappedPath);
+      } else {
+        // Unknown directory type without custom path
+        throw new Error(
+          `Unknown directory type '${dirType}' for agent '${agentName}'. ` +
+          `Please provide an explicit 'to' path or use a known type: commands, skills, agents.`
+        );
+      }
+
+      await this.copyDirectoryToAgent(sourceDirPath, targetDir, agentName, rule);
+    }
+  }
+
+  private async copyDirectoryToAgent(
+    sourceDir: string,
+    targetDir: string,
+    agentName: AgentName,
+    rule: Rule
+  ): Promise<void> {
+    const files = this.walkDirectory(sourceDir);
+
+    for (const filePath of files) {
+      const relativePath = relative(sourceDir, filePath);
+      const targetPath = join(targetDir, relativePath);
+
+      // Read file content
+      const content = readFileSync(filePath, 'utf-8');
+
+      // Create directory structure
+      mkdirSync(dirname(targetPath), { recursive: true });
+
+      // Only apply hooks to markdown files
+      if (filePath.endsWith('.md')) {
+        const writer = AgentWriterFactory.createWriter(agentName);
+        const formattedContent = writer.formatContent(content, rule);
+
+        const context: SyncContext = {
+          config: this.config,
+          rule,
+          content: formattedContent,
+          targetPath,
+          agent: agentName
+        };
+
+        const finalContent = await this.applyHooks(context);
+        writeFileSync(targetPath, finalContent, 'utf-8');
+      } else {
+        // Non-markdown files: copy as-is
+        writeFileSync(targetPath, content, 'utf-8');
+      }
+    }
+  }
+
+  private walkDirectory(dir: string): string[] {
+    const files: string[] = [];
+    const entries = readdirSync(dir, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        files.push(...this.walkDirectory(fullPath));
+      } else {
+        files.push(fullPath);
+      }
+    }
+
+    return files;
   }
 
   private getAgentName(agent: Agent): AgentName {
@@ -106,10 +211,10 @@ export class AgentDistributor {
       }
     }
 
-    if (this.config.hooks?.after) {
-      for (const hook of this.config.hooks.after) {
+    if (this.config.transforms?.after) {
+      for (const transform of this.config.transforms.after) {
         const updatedContext = { ...context, content };
-        const result = await hook(updatedContext);
+        const result = await transform(updatedContext);
         if (typeof result === 'string') {
           content = result;
         }

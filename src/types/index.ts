@@ -31,11 +31,16 @@ export interface MergedFileRule extends BaseRule {
 // Union type for both rule types
 export type Rule = SingleFileRule | MergedFileRule;
 
-export interface Command {
-  command: string;
-  file: string;
-  targets: Agent[];
+// Directory sync config for commands, skills, agents
+export interface DirectorySyncConfig {
+  /** Source directory path */
+  path: string;
+  /** Target agents (default: ['claude', 'cursor']) */
+  targets?: AgentName[];
 }
+
+// Can be a simple string path or full config object
+export type DirectorySync = string | DirectorySyncConfig;
 
 export interface McpConfig {
   command?: string;
@@ -64,20 +69,59 @@ export interface BackupConfig {
   retention?: number;
 }
 
-export interface Hooks {
+// Content transforms - modify rule content during sync
+export interface Transforms {
   before?: ((context: { config: Config }) => Promise<void> | void)[];
   after?: ((context: SyncContext) => Promise<string | void> | string | void)[];
   error?: ((error: unknown) => Promise<void> | void)[];
+}
+
+// Agent lifecycle hooks (Claude Code, Cursor)
+export type AgentHookEvent =
+  | 'PreToolUse'
+  | 'PostToolUse'
+  | 'Stop'
+  | 'UserPromptSubmit'
+  // Cursor-specific events
+  | 'beforeShellExecution'
+  | 'afterShellExecution'
+  | 'beforeFileEdit'
+  | 'afterFileEdit'
+  | 'beforeReadFile';
+
+export interface AgentHook {
+  /** Unique name for this hook */
+  name?: string;
+  /** The lifecycle event to hook into */
+  event: AgentHookEvent;
+  /** Shell command to run */
+  command?: string;
+  /** Path to a script file (TS/JS/sh) - will be run with bun for TS/JS */
+  script?: string;
+  /** Tool matcher for Claude Code (e.g., 'Edit|Write', 'Bash') */
+  matcher?: string;
+  /** File pattern filter (e.g., '*.ts') */
+  filePattern?: string;
+  /** Which agents to configure this hook for */
+  targets: AgentName[];
 }
 
 export interface Config {
   configDir?: string;
   targets?: Agent[];
   rules: Rule[];
-  commands?: Command[];
+  /** Sync commands directory (e.g., '.glooit/commands') */
+  commands?: DirectorySync;
+  /** Sync skills directory (e.g., '.glooit/skills') */
+  skills?: DirectorySync;
+  /** Sync agents directory (e.g., '.glooit/agents') */
+  agents?: DirectorySync;
   mcps?: Mcp[];
   mergeMcps?: boolean;
-  hooks?: Hooks;
+  /** Content transforms - run during sync to modify rule content */
+  transforms?: Transforms;
+  /** Agent lifecycle hooks - configure Claude Code/Cursor hooks */
+  hooks?: AgentHook[];
   backup?: BackupConfig;
   gitignore?: boolean;
 }

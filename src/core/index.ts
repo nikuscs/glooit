@@ -1,4 +1,5 @@
-import type { Config, Agent, AgentName, McpConfig } from '../types';
+import type { Config, Agent, AgentName, McpConfig, DirectorySync } from '../types';
+import { KNOWN_DIRECTORY_TYPES, getAgentDirectoryPath } from '../agents';
 
 interface McpGroupItem {
   name: string;
@@ -11,6 +12,7 @@ interface McpConfigFile {
   mcpServers?: Record<string, unknown>;
 }
 import { AgentDistributor } from '../agents/distributor';
+import { AgentHooksDistributor } from '../agents/hooks-distributor';
 import { BackupManager } from './backup';
 import { GitIgnoreManager } from './gitignore';
 import { getAgentPath, getAgentMcpPath } from '../agents';
@@ -20,20 +22,22 @@ import { AgentWriterFactory } from '../agents/writers';
 
 export class AIRulesCore {
   private distributor: AgentDistributor;
+  private hooksDistributor: AgentHooksDistributor;
   private backupManager: BackupManager;
   private gitIgnoreManager: GitIgnoreManager;
 
   constructor(private config: Config) {
     this.distributor = new AgentDistributor(config);
+    this.hooksDistributor = new AgentHooksDistributor(config);
     this.backupManager = new BackupManager(config);
     this.gitIgnoreManager = new GitIgnoreManager(config);
   }
 
   async sync(): Promise<void> {
     try {
-      if (this.config.hooks?.before) {
-        for (const hook of this.config.hooks.before) {
-          await hook({ config: this.config });
+      if (this.config.transforms?.before) {
+        for (const transform of this.config.transforms.before) {
+          await transform({ config: this.config });
         }
       }
 
@@ -41,27 +45,24 @@ export class AIRulesCore {
         await this.distributor.distributeRule(rule);
       }
 
-      if (this.config.commands) {
-        for (const command of this.config.commands) {
-          const commandRule = {
-            file: command.file,
-            to: './',
-            targets: command.targets
-          };
-          await this.distributor.distributeRule(commandRule);
-        }
-      }
+      // Sync top-level directories (commands, skills, agents)
+      await this.syncDirectories();
 
       if (this.config.mcps) {
         await this.distributeMcps();
       }
 
+      // Distribute agent lifecycle hooks (Claude Code, Cursor)
+      if (this.config.hooks) {
+        await this.hooksDistributor.distributeHooks();
+      }
+
       await this.gitIgnoreManager.updateGitIgnore();
 
     } catch (error) {
-      if (this.config.hooks?.error) {
-        for (const hook of this.config.hooks.error) {
-          await hook(error);
+      if (this.config.transforms?.error) {
+        for (const transform of this.config.transforms.error) {
+          await transform(error);
         }
       }
       throw error;
@@ -101,10 +102,13 @@ export class AIRulesCore {
         }
       }
 
-      if (this.config.commands) {
-        for (const command of this.config.commands) {
-          if (!existsSync(command.file)) {
-            throw new Error(`Command file not found: ${command.file}`);
+      // Validate directory sync paths
+      for (const dirType of KNOWN_DIRECTORY_TYPES) {
+        const dirConfig = this.config[dirType as keyof Config] as DirectorySync | undefined;
+        if (dirConfig) {
+          const path = typeof dirConfig === 'string' ? dirConfig : dirConfig.path;
+          if (!existsSync(path)) {
+            throw new Error(`${dirType} directory not found: ${path}`);
           }
         }
       }
@@ -112,6 +116,28 @@ export class AIRulesCore {
       return true;
     } catch {
       return false;
+    }
+  }
+
+  private async syncDirectories(): Promise<void> {
+    for (const dirType of KNOWN_DIRECTORY_TYPES) {
+      const dirConfig = this.config[dirType as keyof Config] as DirectorySync | undefined;
+      if (!dirConfig) continue;
+
+      const path = typeof dirConfig === 'string' ? dirConfig : dirConfig.path;
+      const targets = typeof dirConfig === 'string'
+        ? ['claude', 'cursor'] as AgentName[]
+        : (dirConfig.targets || ['claude', 'cursor']);
+
+      // Create a rule for the directory sync
+      const rule = {
+        name: dirType,
+        file: path,
+        to: './',
+        targets: targets.map(t => t as AgentName)
+      };
+
+      await this.distributor.distributeRule(rule);
     }
   }
 
@@ -228,18 +254,19 @@ export class AIRulesCore {
       }
     }
 
-    if (this.config.commands) {
-      for (const command of this.config.commands) {
-        for (const agent of command.targets) {
-          const agentName = this.getAgentName(agent);
-          const customPath = this.getCustomPath(agent);
+    // Add paths for directory sync (commands, skills, agents)
+    for (const dirType of KNOWN_DIRECTORY_TYPES) {
+      const dirConfig = this.config[dirType as keyof Config] as DirectorySync | undefined;
+      if (!dirConfig) continue;
 
-          if (customPath) {
-            paths.push(customPath);
-          } else {
-            const agentPath = getAgentPath(agentName, command.command);
-            paths.push(agentPath);
-          }
+      const targets = typeof dirConfig === 'string'
+        ? ['claude', 'cursor'] as AgentName[]
+        : (dirConfig.targets || ['claude', 'cursor']);
+
+      for (const agent of targets) {
+        const dirPath = getAgentDirectoryPath(agent, dirType);
+        if (dirPath && !paths.includes(dirPath)) {
+          paths.push(dirPath);
         }
       }
     }
@@ -252,6 +279,14 @@ export class AIRulesCore {
             paths.push(outputPath);
           }
         }
+      }
+    }
+
+    // Add agent hook config paths
+    const hookPaths = this.hooksDistributor.getGeneratedPaths();
+    for (const hookPath of hookPaths) {
+      if (!paths.includes(hookPath)) {
+        paths.push(hookPath);
       }
     }
 

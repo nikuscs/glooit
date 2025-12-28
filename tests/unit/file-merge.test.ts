@@ -243,9 +243,7 @@ More text here.`;
 
       const distributor = new AgentDistributor(config);
 
-      await expect(async () => {
-        await distributor.distributeRule(rule);
-      }).rejects.toThrow();
+      await expect(distributor.distributeRule(rule)).rejects.toThrow();
     });
 
     it('should work with multiple targets for merged files', async () => {

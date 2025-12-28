@@ -341,8 +341,8 @@ other-file.txt`;
 
       const manager = new GitIgnoreManager(config);
 
-      // Should not throw
-      await expect(manager.cleanupGitIgnore()).resolves.not.toThrow();
+      // Should not throw - just resolves successfully
+      await expect(manager.cleanupGitIgnore()).resolves.toBeUndefined();
     });
   });
 });

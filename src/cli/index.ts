@@ -122,6 +122,20 @@ program
     }
   });
 
+program
+  .command('upgrade')
+  .description('Upgrade glooit to the latest version')
+  .option('-g, --global', 'force global upgrade')
+  .option('-l, --local', 'force local upgrade')
+  .action(async (options) => {
+    try {
+      await upgradeCommand(options.global, options.local);
+    } catch (error) {
+      console.error('Error:', error);
+      process.exit(1);
+    }
+  });
+
 // Command implementations
 
 function promptUser(question: string): Promise<boolean> {
@@ -375,7 +389,7 @@ async function resetCommand(force: boolean): Promise<void> {
 
   // Clean .gitignore
   try {
-    const config = { configDir: '.glooit', rules: [], commands: [], mcps: [], backup: { enabled: true, retention: 10 }, mergeMcps: false };
+    const config = { configDir: '.glooit', rules: [], mcps: [], backup: { enabled: true, retention: 10 }, mergeMcps: false };
     const gitIgnoreManager = new GitIgnoreManager(config);
     await gitIgnoreManager.cleanupGitIgnore();
     console.log('   Cleaned .gitignore');
@@ -384,6 +398,73 @@ async function resetCommand(force: boolean): Promise<void> {
   }
 
   console.log('✅ Reset completed! Run `glooit init` to start fresh.');
+}
+
+async function upgradeCommand(forceGlobal: boolean, forceLocal: boolean): Promise<void> {
+  const pm = await detect();
+  const agent = pm?.agent || 'npm';
+
+  // Determine if local or global
+  let isLocal = existsSync('node_modules/glooit') || existsSync('package.json');
+
+  if (forceGlobal) {
+    isLocal = false;
+  } else if (forceLocal) {
+    isLocal = true;
+  }
+
+  console.log(`🔍 Detected package manager: ${agent}`);
+  console.log(`📦 Upgrading glooit ${isLocal ? 'locally' : 'globally'}...`);
+
+  let cmd: string;
+
+  if (isLocal) {
+    // Local upgrade - use the package manager's update/upgrade command
+    const resolved = resolveCommand(agent, 'add', ['glooit@latest', '-D']);
+    if (resolved) {
+      cmd = `${resolved.command} ${resolved.args.join(' ')}`;
+    } else {
+      // Fallback
+      cmd = agent === 'npm' ? 'npm install glooit@latest --save-dev'
+        : agent === 'yarn' ? 'yarn add glooit@latest --dev'
+        : agent === 'pnpm' ? 'pnpm add glooit@latest -D'
+        : 'bun add glooit@latest -d';
+    }
+  } else {
+    // Global upgrade
+    const globalFlag = agent === 'npm' ? '-g'
+      : agent === 'yarn' ? 'global'
+      : agent === 'pnpm' ? '-g'
+      : '-g';
+
+    if (agent === 'yarn') {
+      cmd = 'yarn global add glooit@latest';
+    } else {
+      const resolved = resolveCommand(agent, 'add', ['glooit@latest', globalFlag]);
+      if (resolved) {
+        cmd = `${resolved.command} ${resolved.args.join(' ')}`;
+      } else {
+        cmd = `${agent} install ${globalFlag} glooit@latest`;
+      }
+    }
+  }
+
+  console.log(`🔄 Running: ${cmd}`);
+
+  try {
+    execSync(cmd, { stdio: 'inherit' });
+    console.log('✅ glooit upgraded successfully!');
+
+    // Show new version
+    try {
+      const newVersion = execSync('glooit -v', { encoding: 'utf-8' }).trim();
+      console.log(`📦 New version: ${newVersion}`);
+    } catch {
+      // Ignore if version check fails
+    }
+  } catch (error) {
+    throw new Error(`Upgrade failed. Try running manually: ${cmd}`);
+  }
 }
 
 program.parse();

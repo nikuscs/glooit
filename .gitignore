@@ -61,3 +61,6 @@ Thumbs.db
 ./CLAUDE.md
 .cursor/rules/cleanup.md
 CLAUDE.md
+
+# Claude Code local settings
+.claude/
