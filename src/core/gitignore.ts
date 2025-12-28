@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs';
-import type { Config, Agent, AgentName } from '../types';
-import { getAgentPath, getAgentDirectory } from '../agents';
+import type { Config, Agent, AgentName, DirectorySync } from '../types';
+import { getAgentPath, getAgentDirectory, KNOWN_DIRECTORY_TYPES, getAgentDirectoryPath } from '../agents';
 
 export class GitIgnoreManager {
   private gitignorePath = '.gitignore';
@@ -87,18 +87,19 @@ export class GitIgnoreManager {
       }
     }
 
-    if (this.config.commands) {
-      for (const command of this.config.commands) {
-        for (const agent of command.targets) {
-          const agentName = this.getAgentName(agent);
-          const customPath = this.getCustomPath(agent);
+    // Add paths for directory sync (commands, skills, agents)
+    for (const dirType of KNOWN_DIRECTORY_TYPES) {
+      const dirConfig = this.config[dirType as keyof Config] as DirectorySync | undefined;
+      if (!dirConfig) continue;
 
-          if (customPath) {
-            paths.add(customPath);
-          } else {
-            const agentPath = getAgentPath(agentName, command.command);
-            paths.add(agentPath);
-          }
+      const targets = typeof dirConfig === 'string'
+        ? ['claude', 'cursor'] as AgentName[]
+        : (dirConfig.targets || ['claude', 'cursor']);
+
+      for (const agent of targets) {
+        const dirPath = getAgentDirectoryPath(agent, dirType);
+        if (dirPath) {
+          paths.add(dirPath + '/');
         }
       }
     }

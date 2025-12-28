@@ -1,5 +1,6 @@
-import { existsSync } from 'fs';
-import type { Config } from '../types';
+import { existsSync, statSync } from 'fs';
+import type { Config, DirectorySync } from '../types';
+import { KNOWN_DIRECTORY_TYPES } from '../agents';
 
 export interface ValidationError {
   field: string;
@@ -40,20 +41,22 @@ export class ConfigValidator {
       }
     }
 
-    if (config.commands) {
-      for (const [index, command] of config.commands.entries()) {
-        if (!existsSync(command.file)) {
+    // Validate directory sync configs (commands, skills, agents)
+    for (const dirType of KNOWN_DIRECTORY_TYPES) {
+      const dirConfig = config[dirType as keyof Config] as DirectorySync | undefined;
+      if (dirConfig) {
+        const path = typeof dirConfig === 'string' ? dirConfig : dirConfig.path;
+        if (!existsSync(path)) {
           errors.push({
-            field: `commands[${index}].file`,
-            message: `Command file not found: ${command.file}`,
-            path: command.file
+            field: dirType,
+            message: `${dirType} directory not found: ${path}`,
+            path
           });
-        }
-
-        if (command.targets.length === 0) {
+        } else if (!statSync(path).isDirectory()) {
           errors.push({
-            field: `commands[${index}].targets`,
-            message: 'At least one target must be specified'
+            field: dirType,
+            message: `${dirType} path is not a directory: ${path}`,
+            path
           });
         }
       }

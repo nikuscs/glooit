@@ -375,7 +375,7 @@ async function resetCommand(force: boolean): Promise<void> {
 
   // Clean .gitignore
   try {
-    const config = { configDir: '.glooit', rules: [], commands: [], mcps: [], backup: { enabled: true, retention: 10 }, mergeMcps: false };
+    const config = { configDir: '.glooit', rules: [], mcps: [], backup: { enabled: true, retention: 10 }, mergeMcps: false };
     const gitIgnoreManager = new GitIgnoreManager(config);
     await gitIgnoreManager.cleanupGitIgnore();
     console.log('   Cleaned .gitignore');

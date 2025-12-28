@@ -160,18 +160,15 @@ describe('ConfigValidator', () => {
       expect(errors[2]?.path).toBe('missing3.md');
     });
 
-    it('should validate commands', async () => {
-      writeFileSync(testFile, '# Test command');
+    it('should validate commands directory', async () => {
+      mkdirSync('.glooit/commands', { recursive: true });
+      writeFileSync('.glooit/commands/test.md', '# Test command');
 
       const config: Config = {
         configDir: '.glooit',
         rules: [],
         mergeMcps: true,
-        commands: [{
-          command: 'test',
-          file: testFile,
-          targets: ['claude']
-        }]
+        commands: '.glooit/commands'
       };
 
       const errors = await ConfigValidator.validate(config);

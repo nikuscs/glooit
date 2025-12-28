@@ -1,4 +1,5 @@
-import type { Config, Agent, AgentName, McpConfig } from '../types';
+import type { Config, Agent, AgentName, McpConfig, DirectorySync } from '../types';
+import { KNOWN_DIRECTORY_TYPES, getAgentDirectoryPath } from '../agents';
 
 interface McpGroupItem {
   name: string;
@@ -44,16 +45,8 @@ export class AIRulesCore {
         await this.distributor.distributeRule(rule);
       }
 
-      if (this.config.commands) {
-        for (const command of this.config.commands) {
-          const commandRule = {
-            file: command.file,
-            to: './',
-            targets: command.targets
-          };
-          await this.distributor.distributeRule(commandRule);
-        }
-      }
+      // Sync top-level directories (commands, skills, agents)
+      await this.syncDirectories();
 
       if (this.config.mcps) {
         await this.distributeMcps();
@@ -109,10 +102,13 @@ export class AIRulesCore {
         }
       }
 
-      if (this.config.commands) {
-        for (const command of this.config.commands) {
-          if (!existsSync(command.file)) {
-            throw new Error(`Command file not found: ${command.file}`);
+      // Validate directory sync paths
+      for (const dirType of KNOWN_DIRECTORY_TYPES) {
+        const dirConfig = this.config[dirType as keyof Config] as DirectorySync | undefined;
+        if (dirConfig) {
+          const path = typeof dirConfig === 'string' ? dirConfig : dirConfig.path;
+          if (!existsSync(path)) {
+            throw new Error(`${dirType} directory not found: ${path}`);
           }
         }
       }
@@ -120,6 +116,28 @@ export class AIRulesCore {
       return true;
     } catch {
       return false;
+    }
+  }
+
+  private async syncDirectories(): Promise<void> {
+    for (const dirType of KNOWN_DIRECTORY_TYPES) {
+      const dirConfig = this.config[dirType as keyof Config] as DirectorySync | undefined;
+      if (!dirConfig) continue;
+
+      const path = typeof dirConfig === 'string' ? dirConfig : dirConfig.path;
+      const targets = typeof dirConfig === 'string'
+        ? ['claude', 'cursor'] as AgentName[]
+        : (dirConfig.targets || ['claude', 'cursor']);
+
+      // Create a rule for the directory sync
+      const rule = {
+        name: dirType,
+        file: path,
+        to: './',
+        targets: targets.map(t => t as AgentName)
+      };
+
+      await this.distributor.distributeRule(rule);
     }
   }
 
@@ -236,18 +254,19 @@ export class AIRulesCore {
       }
     }
 
-    if (this.config.commands) {
-      for (const command of this.config.commands) {
-        for (const agent of command.targets) {
-          const agentName = this.getAgentName(agent);
-          const customPath = this.getCustomPath(agent);
+    // Add paths for directory sync (commands, skills, agents)
+    for (const dirType of KNOWN_DIRECTORY_TYPES) {
+      const dirConfig = this.config[dirType as keyof Config] as DirectorySync | undefined;
+      if (!dirConfig) continue;
 
-          if (customPath) {
-            paths.push(customPath);
-          } else {
-            const agentPath = getAgentPath(agentName, command.command);
-            paths.push(agentPath);
-          }
+      const targets = typeof dirConfig === 'string'
+        ? ['claude', 'cursor'] as AgentName[]
+        : (dirConfig.targets || ['claude', 'cursor']);
+
+      for (const agent of targets) {
+        const dirPath = getAgentDirectoryPath(agent, dirType);
+        if (dirPath && !paths.includes(dirPath)) {
+          paths.push(dirPath);
         }
       }
     }

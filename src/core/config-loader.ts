@@ -126,7 +126,6 @@ export class ConfigLoader {
     }
 
     // Check if this is a directory rule with a known type
-    const isDirectoryRule = isFileString && this.isDirectoryPath(r.file as string);
     const dirType = (typeof r.name === 'string' ? r.name : null) || (isFileString ? basename(r.file as string) : null);
     const isKnownDirType = dirType && isKnownDirectoryType(dirType);
 

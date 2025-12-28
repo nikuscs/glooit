@@ -320,16 +320,10 @@ describe('AIRulesCore', () => {
           to: './',
           targets: ['claude']
         }],
-        mergeMcps: true,
-        commands: [{
-          command: 'build',
-          file: 'build.md',
-          targets: ['cursor']
-        }]
+        mergeMcps: true
       };
 
       writeFileSync('test.md', '# Test content');
-      writeFileSync('build.md', '# Build command');
 
       const core = new AIRulesCore(config);
       const isValid = await core.validate();

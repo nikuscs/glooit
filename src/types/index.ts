@@ -31,11 +31,16 @@ export interface MergedFileRule extends BaseRule {
 // Union type for both rule types
 export type Rule = SingleFileRule | MergedFileRule;
 
-export interface Command {
-  command: string;
-  file: string;
-  targets: Agent[];
+// Directory sync config for commands, skills, agents
+export interface DirectorySyncConfig {
+  /** Source directory path */
+  path: string;
+  /** Target agents (default: ['claude', 'cursor']) */
+  targets?: AgentName[];
 }
+
+// Can be a simple string path or full config object
+export type DirectorySync = string | DirectorySyncConfig;
 
 export interface McpConfig {
   command?: string;
@@ -105,7 +110,12 @@ export interface Config {
   configDir?: string;
   targets?: Agent[];
   rules: Rule[];
-  commands?: Command[];
+  /** Sync commands directory (e.g., '.glooit/commands') */
+  commands?: DirectorySync;
+  /** Sync skills directory (e.g., '.glooit/skills') */
+  skills?: DirectorySync;
+  /** Sync agents directory (e.g., '.glooit/agents') */
+  agents?: DirectorySync;
   mcps?: Mcp[];
   mergeMcps?: boolean;
   /** Content transforms - run during sync to modify rule content */

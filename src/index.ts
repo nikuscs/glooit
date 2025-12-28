@@ -2,7 +2,8 @@ export { defineRules } from './types';
 export type {
   Config,
   Rule,
-  Command,
+  DirectorySync,
+  DirectorySyncConfig,
   Mcp,
   Agent,
   AgentHook,

@@ -72,32 +72,6 @@ export default defineRules({
       ]
     },
 
-    // Directory sync: copy entire directories (commands, skills, agents)
-    {
-      name: 'commands',
-      file: '.glooit/commands',  // Directory path
-      targets: ['claude', 'cursor']
-      // No 'to' needed - auto-maps to .claude/commands and .cursor/commands
-    },
-
-    // Directory sync with hooks
-    {
-      name: 'skills',
-      file: '.glooit/skills',
-      targets: ['claude'],
-      hooks: ['addTimestamp']  // Applied to all .md files in directory
-    },
-
-    // Custom directory path for unsupported agents
-    {
-      name: 'agents',
-      file: '.glooit/agents',
-      targets: [
-        'claude',  // Auto: .claude/agents
-        { name: 'codex', to: './custom-agents' }  // Codex doesn't support agents dir
-      ]
-    },
-
     // Disable gitignore for specific rule
     {
       name: 'public-docs',
@@ -107,6 +81,29 @@ export default defineRules({
       gitignore: false  // Don't add to .gitignore
     }
   ],
+
+  // ─────────────────────────────────────────────────────────────
+  // DIRECTORY SYNC - Commands, Skills, Agents
+  // ─────────────────────────────────────────────────────────────
+
+  // Simple string path (uses default targets: claude, cursor)
+  // commands: '.glooit/commands',
+
+  // Or with explicit config (same result as above, but explicit)
+  commands: {
+    path: '.glooit/commands',
+    targets: ['claude', 'cursor']
+  },
+
+  skills: {
+    path: '.glooit/skills',
+    targets: ['claude']
+  },
+
+  agents: {
+    path: '.glooit/agents',
+    targets: ['claude', 'cursor']
+  },
 
   // ─────────────────────────────────────────────────────────────
   // MCP - Model Context Protocol server configurations

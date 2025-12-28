@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { dirname, extname } from 'path';
-import type { Config, AgentHook, AgentName, AgentHookEvent } from '../types';
+import type { Config, AgentHook, AgentHookEvent } from '../types';
 
 // Claude Code hook event names
 type ClaudeHookEvent = 'PreToolUse' | 'PostToolUse' | 'Stop' | 'UserPromptSubmit';

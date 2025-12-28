@@ -487,4 +487,83 @@ export default {
     expect(content).not.toContain('__TIMESTAMP__');
     expect(content).toMatch(/Version: \w+ \d{1,2}, \d{4}/);
   });
+
+  // Tests for new top-level directory sync config
+  it('should sync using top-level commands config (string)', () => {
+    mkdirSync('.glooit/commands', { recursive: true });
+    writeFileSync('.glooit/commands/build.md', '# Build Command');
+
+    const config = `
+export default {
+  configDir: '.glooit',
+  rules: [],
+  commands: '.glooit/commands'
+};
+`;
+    writeFileSync('glooit.config.ts', config);
+
+    const cliPath = `${originalCwd}/src/cli/index.ts`;
+    execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
+
+    expect(existsSync('.claude/commands/build.md')).toBe(true);
+    expect(existsSync('.cursor/commands/build.md')).toBe(true);
+  });
+
+  it('should sync using top-level commands config (object with targets)', () => {
+    mkdirSync('.glooit/commands', { recursive: true });
+    writeFileSync('.glooit/commands/deploy.md', '# Deploy');
+
+    const config = `
+export default {
+  configDir: '.glooit',
+  rules: [],
+  commands: {
+    path: '.glooit/commands',
+    targets: ['claude']
+  }
+};
+`;
+    writeFileSync('glooit.config.ts', config);
+
+    const cliPath = `${originalCwd}/src/cli/index.ts`;
+    execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
+
+    expect(existsSync('.claude/commands/deploy.md')).toBe(true);
+    expect(existsSync('.cursor/commands/deploy.md')).toBe(false); // Not in targets
+  });
+
+  it('should sync multiple top-level directories', () => {
+    mkdirSync('.glooit/commands', { recursive: true });
+    mkdirSync('.glooit/skills', { recursive: true });
+    mkdirSync('.glooit/agents', { recursive: true });
+    writeFileSync('.glooit/commands/cmd.md', '# Command');
+    writeFileSync('.glooit/skills/skill.md', '# Skill');
+    writeFileSync('.glooit/agents/agent.md', '# Agent');
+
+    const config = `
+export default {
+  configDir: '.glooit',
+  rules: [],
+  commands: '.glooit/commands',
+  skills: { path: '.glooit/skills', targets: ['claude'] },
+  agents: { path: '.glooit/agents', targets: ['cursor'] }
+};
+`;
+    writeFileSync('glooit.config.ts', config);
+
+    const cliPath = `${originalCwd}/src/cli/index.ts`;
+    execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
+
+    // Commands: both claude and cursor (default)
+    expect(existsSync('.claude/commands/cmd.md')).toBe(true);
+    expect(existsSync('.cursor/commands/cmd.md')).toBe(true);
+
+    // Skills: claude only
+    expect(existsSync('.claude/skills/skill.md')).toBe(true);
+    expect(existsSync('.cursor/skills/skill.md')).toBe(false);
+
+    // Agents: cursor only
+    expect(existsSync('.claude/agents/agent.md')).toBe(false);
+    expect(existsSync('.cursor/agents/agent.md')).toBe(true);
+  });
 });

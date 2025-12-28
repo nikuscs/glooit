@@ -101,18 +101,32 @@ Override output locations per-agent:
 
 ### Directory Sync
 
-Copy entire directories for commands, skills, or agents:
+Sync commands, skills, and agents directories at the top level:
 
 ```typescript
-{
-  name: 'commands',
-  file: '.glooit/commands',    // Directory path
-  targets: ['claude', 'cursor']
-  // Auto-maps to .claude/commands and .cursor/commands
-}
+export default defineRules({
+  rules: [...],
+
+  // Simple string path (defaults to claude + cursor)
+  commands: '.glooit/commands',
+
+  // Or with explicit targets
+  skills: {
+    path: '.glooit/skills',
+    targets: ['claude']
+  },
+
+  agents: {
+    path: '.glooit/agents',
+    targets: ['claude', 'cursor']
+  }
+});
 ```
 
-Supported directory types: `commands`, `skills`, `agents`
+Output mappings:
+- `commands` → `.claude/commands`, `.cursor/commands`
+- `skills` → `.claude/skills`, `.cursor/skills`
+- `agents` → `.claude/agents`, `.cursor/agents`
 
 ### File Merging
 
@@ -306,6 +320,33 @@ pnpx glooit sync
 ## Examples
 
 See [examples/full.config.ts](examples/full.config.ts) for a complete configuration with all features.
+
+## Development
+
+```bash
+# Install dependencies
+bun install
+
+# Run tests
+bun run test
+
+# Type check and lint
+bun run check
+
+# Build
+bun run build
+
+# Build local binary
+bun run install:local
+```
+
+### Releasing
+
+```bash
+bun run release
+```
+
+This runs checks, prompts for version bump, creates a git tag, and pushes. CI handles npm publish and GitHub release automatically.
 
 ## Credits
 
