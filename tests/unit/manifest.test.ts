@@ -109,7 +109,7 @@ describe('ManifestManager', () => {
       writeFileSync('.cursor/rules/user-file.md', '# User content');
       manager.updateManifest(['.cursor/rules/']);
 
-      const removed = manager.pruneStaleFiles([]);
+      manager.pruneStaleFiles([]);
 
       // Directory should remain because it has content not managed by glooit
       expect(existsSync('.cursor/rules')).toBe(true);

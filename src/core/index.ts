@@ -99,9 +99,8 @@ export class AIRulesCore {
   }
 
   async clean(): Promise<void> {
-    // Prune all tracked files
-    const currentPaths = this.manifestManager.getGeneratedFiles();
-    this.manifestManager.pruneStaleFiles([]); // Pass empty array to remove all tracked files
+    // Prune all tracked files (pass empty array to remove everything tracked)
+    this.manifestManager.pruneStaleFiles([]);
 
     // Clean .gitignore
     await this.gitIgnoreManager.cleanupGitIgnore();
