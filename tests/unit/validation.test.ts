@@ -161,14 +161,15 @@ describe('ConfigValidator', () => {
     });
 
     it('should validate commands directory', async () => {
-      mkdirSync('.glooit/commands', { recursive: true });
-      writeFileSync('.glooit/commands/test.md', '# Test command');
+      const commandsDir = `${testDir}/commands`;
+      mkdirSync(commandsDir, { recursive: true });
+      writeFileSync(`${commandsDir}/test.md`, '# Test command');
 
       const config: Config = {
         configDir: '.glooit',
         rules: [],
         mergeMcps: true,
-        commands: '.glooit/commands'
+        commands: commandsDir
       };
 
       const errors = await ConfigValidator.validate(config);

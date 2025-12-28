@@ -1,6 +1,6 @@
 # glooit 🧴
 
-Sync AI coding assistant configurations across Claude Code, Cursor, Codex, and Roo Code.
+Sync AI coding assistant configurations across Claude Code, Cursor, Codex, and Roo Code/Cline.
 
 - **Rules** - Agent instructions and guidelines
 - **Commands** - Custom slash commands
@@ -16,7 +16,7 @@ Teams today use different AI coding assistants - some prefer Claude Code, others
 - Claude Code reads `CLAUDE.md`
 - Cursor uses `.cursor/rules/*.mdc` with frontmatter
 - Codex expects `AGENTS.md`
-- Roo Code looks in `.roo/rules/`
+- Roo Code/Cline looks in `.roo/rules/`
 
 **glooit** lets you write your rules once and sync them everywhere. Perfect for:
 
@@ -81,6 +81,17 @@ Run `glooit sync` (or `bunx glooit sync` / `npx glooit sync`) and it creates:
 | `codex` | `AGENTS.md` | Markdown |
 | `roocode` | `.roo/rules/{name}.md` | Markdown |
 | `generic` | `{name}.md` | Markdown |
+
+### Feature Support Matrix
+
+| Feature     | Claude | Cursor | Codex | Roo Code/Cline | Generic |
+|-------------|--------|--------|-------|----------------|---------|
+| Rules       | ✓      | ✓      | ✓     | ✓              | ✓       |
+| Commands    | ✓      | ✓      | -     | -              | -       |
+| Skills      | ✓      | ✓      | -     | -              | -       |
+| Agents      | ✓      | ✓      | -     | -              | -       |
+| MCP Servers | ✓      | ✓      | ✓     | ✓              | ✓       |
+| Hooks       | ✓      | ✓      | -     | -              | -       |
 
 ## Features
 
@@ -305,8 +316,19 @@ glooit sync              # Sync rules and MCPs
 glooit validate          # Validate configuration
 glooit clean             # Clean .gitignore entries
 glooit reset --force     # Remove all generated files
+glooit upgrade           # Upgrade glooit to latest version
 glooit backup list       # List available backups
 glooit backup restore <timestamp>  # Restore from backup
+```
+
+### Upgrade
+
+The `upgrade` command auto-detects your package manager and whether glooit is installed locally or globally:
+
+```bash
+glooit upgrade           # Auto-detect and upgrade
+glooit upgrade -g        # Force global upgrade
+glooit upgrade -l        # Force local upgrade
 ```
 
 All commands work with `npx`, `bunx`, or `pnpx`:
