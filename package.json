@@ -1,6 +1,6 @@
 {
   "name": "glooit",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "🧴 Sync your AI agent configurations and rules across platforms with ease",
   "main": "dist/index.js",
   "module": "dist/index.js",
