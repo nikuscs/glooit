@@ -15,6 +15,7 @@ import { AgentDistributor } from '../agents/distributor';
 import { AgentHooksDistributor } from '../agents/hooks-distributor';
 import { BackupManager } from './backup';
 import { GitIgnoreManager } from './gitignore';
+import { ManifestManager } from './manifest';
 import { getAgentPath, getAgentMcpPath } from '../agents';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { dirname } from 'path';
@@ -25,12 +26,14 @@ export class AIRulesCore {
   private hooksDistributor: AgentHooksDistributor;
   private backupManager: BackupManager;
   private gitIgnoreManager: GitIgnoreManager;
+  private manifestManager: ManifestManager;
 
   constructor(private config: Config) {
     this.distributor = new AgentDistributor(config);
     this.hooksDistributor = new AgentHooksDistributor(config);
     this.backupManager = new BackupManager(config);
     this.gitIgnoreManager = new GitIgnoreManager(config);
+    this.manifestManager = new ManifestManager();
   }
 
   async sync(): Promise<void> {
@@ -40,6 +43,12 @@ export class AIRulesCore {
           await transform({ config: this.config });
         }
       }
+
+      // Collect expected paths before sync
+      const expectedPaths = this.collectAllGeneratedPaths();
+
+      // Prune stale files that are no longer in config
+      this.manifestManager.pruneStaleFiles(expectedPaths);
 
       for (const rule of this.config.rules) {
         await this.distributor.distributeRule(rule);
@@ -58,6 +67,9 @@ export class AIRulesCore {
       }
 
       await this.gitIgnoreManager.updateGitIgnore();
+
+      // Update manifest with current paths
+      this.manifestManager.updateManifest(expectedPaths);
 
     } catch (error) {
       if (this.config.transforms?.error) {
@@ -87,8 +99,15 @@ export class AIRulesCore {
   }
 
   async clean(): Promise<void> {
+    // Prune all tracked files
+    const currentPaths = this.manifestManager.getGeneratedFiles();
+    this.manifestManager.pruneStaleFiles([]); // Pass empty array to remove all tracked files
+
     // Clean .gitignore
     await this.gitIgnoreManager.cleanupGitIgnore();
+
+    // Clear the manifest
+    this.manifestManager.clearManifest();
   }
 
   async validate(): Promise<boolean> {
@@ -102,16 +121,8 @@ export class AIRulesCore {
         }
       }
 
-      // Validate directory sync paths
-      for (const dirType of KNOWN_DIRECTORY_TYPES) {
-        const dirConfig = this.config[dirType as keyof Config] as DirectorySync | undefined;
-        if (dirConfig) {
-          const path = typeof dirConfig === 'string' ? dirConfig : dirConfig.path;
-          if (!existsSync(path)) {
-            throw new Error(`${dirType} directory not found: ${path}`);
-          }
-        }
-      }
+      // Note: directory sync paths (commands, skills, agents) are optional
+      // If they don't exist, they're silently skipped during sync
 
       return true;
     } catch {
@@ -125,6 +136,12 @@ export class AIRulesCore {
       if (!dirConfig) continue;
 
       const path = typeof dirConfig === 'string' ? dirConfig : dirConfig.path;
+
+      // Skip if directory doesn't exist (graceful handling)
+      if (!existsSync(path)) {
+        continue;
+      }
+
       const targets = typeof dirConfig === 'string'
         ? ['claude', 'cursor'] as AgentName[]
         : (dirConfig.targets || ['claude', 'cursor']);

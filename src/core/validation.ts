@@ -42,17 +42,13 @@ export class ConfigValidator {
     }
 
     // Validate directory sync configs (commands, skills, agents)
+    // Note: missing directories are silently skipped during sync, not errors
     for (const dirType of KNOWN_DIRECTORY_TYPES) {
       const dirConfig = config[dirType as keyof Config] as DirectorySync | undefined;
       if (dirConfig) {
         const path = typeof dirConfig === 'string' ? dirConfig : dirConfig.path;
-        if (!existsSync(path)) {
-          errors.push({
-            field: dirType,
-            message: `${dirType} directory not found: ${path}`,
-            path
-          });
-        } else if (!statSync(path).isDirectory()) {
+        // Only validate if the path exists - if it doesn't, it's simply skipped during sync
+        if (existsSync(path) && !statSync(path).isDirectory()) {
           errors.push({
             field: dirType,
             message: `${dirType} path is not a directory: ${path}`,

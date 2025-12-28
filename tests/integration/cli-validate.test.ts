@@ -71,7 +71,8 @@ export default {
     }).toThrow();
   });
 
-  it('should fail validation when commands directory is missing', () => {
+  it('should pass validation when commands directory is missing (gracefully skipped)', () => {
+    // Missing directories are now silently skipped during sync, not errors
     const config = `
 import { Config } from '@ai-rules/types';
 
@@ -84,10 +85,10 @@ export default {
     writeFileSync('glooit.config.ts', config);
 
     const cliPath = `${originalCwd}/src/cli/index.ts`;
+    const result = execSync(`bun run ${cliPath} validate`, { encoding: 'utf-8' });
 
-    expect(() => {
-      execSync(`bun run ${cliPath} validate`, { encoding: 'utf-8' });
-    }).toThrow();
+    // Should pass - missing directories are gracefully skipped
+    expect(result).toContain('Configuration is valid');
   });
 
   it('should validate successfully with empty rules and commands', () => {

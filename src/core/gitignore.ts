@@ -50,6 +50,11 @@ export class GitIgnoreManager {
     writeFileSync(this.gitignorePath, cleanedContent, 'utf-8');
   }
 
+  private normalizeGitignorePath(path: string): string {
+    // Remove leading "./" as gitignore patterns don't use this syntax
+    return path.replace(/^\.\//, '');
+  }
+
   private collectGeneratedPaths(): string[] {
     // If global gitignore is disabled, return empty array
     if (this.config.gitignore === false) {
@@ -69,19 +74,19 @@ export class GitIgnoreManager {
         const customPath = this.getCustomPath(agent);
 
         if (customPath) {
-          paths.add(customPath);
+          paths.add(this.normalizeGitignorePath(customPath));
         } else {
           const filePath = Array.isArray(rule.file) ? rule.file[0] ?? '' : rule.file;
           const ruleName = this.extractRuleName(filePath);
           const agentPath = getAgentPath(agentName, ruleName);
           const fullPath = `${rule.to}/${agentPath}`.replace(/\/+/g, '/');
 
-          paths.add(fullPath);
+          paths.add(this.normalizeGitignorePath(fullPath));
 
           const agentDir = getAgentDirectory(agentName);
           if (agentDir) {
             const fullDir = `${rule.to}/${agentDir}`.replace(/\/+/g, '/');
-            paths.add(`${fullDir}/`);
+            paths.add(this.normalizeGitignorePath(`${fullDir}/`));
           }
         }
       }
@@ -99,7 +104,7 @@ export class GitIgnoreManager {
       for (const agent of targets) {
         const dirPath = getAgentDirectoryPath(agent, dirType);
         if (dirPath) {
-          paths.add(dirPath + '/');
+          paths.add(this.normalizeGitignorePath(dirPath + '/'));
         }
       }
     }
@@ -107,10 +112,13 @@ export class GitIgnoreManager {
     if (this.config.mcps) {
       for (const mcp of this.config.mcps) {
         if (mcp.outputPath) {
-          paths.add(mcp.outputPath);
+          paths.add(this.normalizeGitignorePath(mcp.outputPath));
         }
       }
     }
+
+    // Always add manifest file to gitignore
+    paths.add('.glooit/manifest.json');
 
     return Array.from(paths).sort();
   }

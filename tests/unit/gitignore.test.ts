@@ -40,7 +40,9 @@ describe('GitIgnoreManager', () => {
       const content = readFileSync('.gitignore', 'utf-8');
 
       expect(content).toContain('# glooit generated files');
-      expect(content).toContain('./CLAUDE.md');
+      expect(content).toContain('CLAUDE.md');
+      // Gitignore paths should NOT have "./" prefix
+      expect(content).not.toContain('./CLAUDE.md');
     });
 
     it('should not create .gitignore when global gitignore is false', async () => {
@@ -61,7 +63,7 @@ describe('GitIgnoreManager', () => {
 
       if (existsSync('.gitignore')) {
         const content = readFileSync('.gitignore', 'utf-8');
-        expect(content).not.toContain('./CLAUDE.md');
+        expect(content).not.toContain('CLAUDE.md');
       }
     });
 
@@ -91,7 +93,7 @@ describe('GitIgnoreManager', () => {
 
       const content = readFileSync('.gitignore', 'utf-8');
 
-      expect(content).toContain('./CLAUDE.md');
+      expect(content).toContain('CLAUDE.md');
       expect(content).not.toContain('custom-output.md');
     });
 
@@ -131,7 +133,7 @@ describe('GitIgnoreManager', () => {
 
       const content = readFileSync('.gitignore', 'utf-8');
 
-      expect(content).toContain('./CLAUDE.md');
+      expect(content).toContain('CLAUDE.md');
       expect(content).toContain('ignored.md');
       expect(content).not.toContain('not-ignored.md');
     });
@@ -162,7 +164,7 @@ describe('GitIgnoreManager', () => {
 
       // Should add new entries
       expect(content).toContain('# glooit generated files');
-      expect(content).toContain('./CLAUDE.md');
+      expect(content).toContain('CLAUDE.md');
     });
 
     it('should replace existing glooit section', async () => {
@@ -171,8 +173,8 @@ describe('GitIgnoreManager', () => {
 .env
 
 # glooit generated files
-./OLD_FILE.md
-./ANOTHER_OLD.md
+OLD_FILE.md
+ANOTHER_OLD.md
 
 other-file.txt`;
 
@@ -205,7 +207,7 @@ other-file.txt`;
 
       // Should add new glooit entries
       expect(content).toContain('# glooit generated files');
-      expect(content).toContain('./CLAUDE.md');
+      expect(content).toContain('CLAUDE.md');
     });
 
     it('should handle multiple targets for single rule', async () => {
@@ -225,9 +227,9 @@ other-file.txt`;
 
       const content = readFileSync('.gitignore', 'utf-8');
 
-      expect(content).toContain('./CLAUDE.md');
+      expect(content).toContain('CLAUDE.md');
       expect(content).toContain('.cursor/');
-      expect(content).toContain('./AGENTS.md'); // codex uses AGENTS.md
+      expect(content).toContain('AGENTS.md'); // codex uses AGENTS.md
     });
 
     it('should handle custom paths', async () => {
@@ -249,7 +251,7 @@ other-file.txt`;
 
       const content = readFileSync('.gitignore', 'utf-8');
 
-      expect(content).toContain('./custom/path/output.md');
+      expect(content).toContain('custom/path/output.md');
     });
 
     it('should handle merged files in gitignore', async () => {
@@ -305,8 +307,8 @@ other-file.txt`;
 .env
 
 # glooit generated files
-./CLAUDE.md
-./CURSOR.md
+CLAUDE.md
+.cursor/
 
 other-file.txt`;
 
@@ -329,8 +331,8 @@ other-file.txt`;
 
       // Should remove glooit section
       expect(content).not.toContain('# glooit generated files');
-      expect(content).not.toContain('./CLAUDE.md');
-      expect(content).not.toContain('./CURSOR.md');
+      expect(content).not.toContain('CLAUDE.md');
+      expect(content).not.toContain('.cursor/');
     });
 
     it('should handle missing .gitignore gracefully', async () => {

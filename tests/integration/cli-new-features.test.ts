@@ -44,7 +44,9 @@ export default {
       expect(existsSync('.gitignore')).toBe(true);
       const gitignoreContent = readFileSync('.gitignore', 'utf-8');
       expect(gitignoreContent).toContain('# glooit generated files');
-      expect(gitignoreContent).toContain('./CLAUDE.md');
+      expect(gitignoreContent).toContain('CLAUDE.md');
+      // Gitignore paths should NOT have "./" prefix
+      expect(gitignoreContent).not.toContain('./CLAUDE.md');
     });
 
     it('should respect global gitignore: false', () => {
@@ -69,7 +71,7 @@ export default {
       // .gitignore should not be created or should be empty
       if (existsSync('.gitignore')) {
         const gitignoreContent = readFileSync('.gitignore', 'utf-8');
-        expect(gitignoreContent).not.toContain('./CLAUDE.md');
+        expect(gitignoreContent).not.toContain('CLAUDE.md');
       }
     });
 
@@ -104,7 +106,7 @@ export default {
       const gitignoreContent = readFileSync('.gitignore', 'utf-8');
 
       // Should contain the ignored file
-      expect(gitignoreContent).toContain('./CLAUDE.md');
+      expect(gitignoreContent).toContain('CLAUDE.md');
 
       // Should NOT contain the not-ignored file
       expect(gitignoreContent).not.toContain('custom-output.md');
@@ -149,7 +151,7 @@ export default {
 
       const gitignoreContent = readFileSync('.gitignore', 'utf-8');
 
-      expect(gitignoreContent).toContain('./CLAUDE.md');
+      expect(gitignoreContent).toContain('CLAUDE.md');
       expect(gitignoreContent).toContain('rule3-output.md');
       expect(gitignoreContent).not.toContain('rule2-output.md');
     });
@@ -316,6 +318,78 @@ export default {
       const gitignoreContent = readFileSync('.gitignore', 'utf-8');
       expect(gitignoreContent).not.toContain('merged-no-ignore.md');
       expect(gitignoreContent).toContain('merged-ignored.md');
+    });
+  });
+
+  describe('Auto-Prune', () => {
+    it('should remove stale files when config changes', () => {
+      // First sync with claude target
+      const config1 = `
+export default {
+  rules: [
+    {
+      file: '.glooit/test.md',
+      to: './',
+      targets: ['claude']
+    }
+  ]
+};
+`;
+      writeFileSync('glooit.config.js', config1);
+      writeFileSync('.glooit/test.md', '# Test');
+
+      const cliPath = `${originalCwd}/src/cli/index.ts`;
+      execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
+
+      expect(existsSync('CLAUDE.md')).toBe(true);
+
+      // Now change config to cursor only
+      const config2 = `
+export default {
+  rules: [
+    {
+      file: '.glooit/test.md',
+      to: './',
+      targets: ['cursor']
+    }
+  ]
+};
+`;
+      writeFileSync('glooit.config.js', config2);
+      execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
+
+      // CLAUDE.md should be pruned, cursor file should exist
+      expect(existsSync('CLAUDE.md')).toBe(false);
+      expect(existsSync('.cursor/rules/test.mdc')).toBe(true);
+    });
+
+    it('should skip non-existent directories gracefully', () => {
+      const config = `
+export default {
+  skills: '.glooit/skills',
+  commands: '.glooit/commands',
+  rules: [
+    {
+      file: '.glooit/test.md',
+      to: './',
+      targets: ['claude']
+    }
+  ]
+};
+`;
+      writeFileSync('glooit.config.js', config);
+      writeFileSync('.glooit/test.md', '# Test');
+      // Note: .glooit/skills and .glooit/commands don't exist
+
+      const cliPath = `${originalCwd}/src/cli/index.ts`;
+
+      // Should NOT throw - just skip the missing directories
+      expect(() => {
+        execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
+      }).not.toThrow();
+
+      // Main rule should still work
+      expect(existsSync('CLAUDE.md')).toBe(true);
     });
   });
 });
