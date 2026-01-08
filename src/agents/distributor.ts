@@ -89,13 +89,14 @@ export class AgentDistributor {
 
       // Only apply hooks to markdown files
       if (filePath.endsWith('.md')) {
-        const writer = AgentWriterFactory.createWriter(agentName);
-        const formattedContent = writer.formatContent(content, rule);
+        // For directory sync (agents/skills/commands), keep original content with frontmatter
+        // No writer formatting - these aren't "rules" that need Cursor's globs frontmatter
+        const fileRule = { ...rule, file: filePath };
 
         const context: SyncContext = {
           config: this.config,
-          rule,
-          content: formattedContent,
+          rule: fileRule,
+          content,
           targetPath,
           agent: agentName
         };

@@ -566,4 +566,171 @@ export default {
     expect(existsSync('.claude/agents/agent.md')).toBe(false);
     expect(existsSync('.cursor/agents/agent.md')).toBe(true);
   });
+
+  it('should preserve agent frontmatter when syncing to Cursor (no Cursor rules frontmatter added)', () => {
+    mkdirSync('.glooit/agents', { recursive: true });
+    // Agent file with its own frontmatter (name, description, tools, model)
+    writeFileSync('.glooit/agents/api-contract-sync.md', `---
+name: api-contract-sync
+description: Align frontend API services with backend endpoints and error codes.
+tools: Read, Grep, Glob, Bash
+model: sonnet
+---
+
+# API Contract Sync Agent
+
+This agent helps synchronize frontend API services with backend endpoints.`);
+
+    const config = `
+export default {
+  configDir: '.glooit',
+  rules: [],
+  agents: { path: '.glooit/agents', targets: ['cursor'] }
+};
+`;
+    writeFileSync('glooit.config.ts', config);
+
+    const cliPath = `${originalCwd}/src/cli/index.ts`;
+    execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
+
+    expect(existsSync('.cursor/agents/api-contract-sync.md')).toBe(true);
+
+    const content = readFileSync('.cursor/agents/api-contract-sync.md', 'utf-8');
+
+    // Should have exactly one YAML frontmatter block (the original agent frontmatter)
+    const frontmatterDelimiters = content.match(/^---\r?\n/gm) || [];
+    expect(frontmatterDelimiters.length).toBe(2); // Opening and closing of single frontmatter block
+
+    // Should have the agent's original frontmatter (NOT Cursor's rules frontmatter)
+    expect(content).toContain('name: api-contract-sync');
+    expect(content).toContain('tools: Read, Grep, Glob, Bash');
+    expect(content).toContain('model: sonnet');
+
+    // Should NOT have Cursor's rules frontmatter
+    expect(content).not.toContain('globs:');
+    expect(content).not.toContain('alwaysApply:');
+
+    // Should have the actual content
+    expect(content).toContain('# API Contract Sync Agent');
+    expect(content).toContain('This agent helps synchronize frontend API services');
+  });
+
+  it('should preserve skill frontmatter when syncing to Cursor (no Cursor rules frontmatter added)', () => {
+    mkdirSync('.glooit/skills', { recursive: true });
+    // Skill file with its own frontmatter
+    writeFileSync('.glooit/skills/code-review.md', `---
+name: code-review
+description: Review code for best practices and potential issues.
+tools: Read, Grep
+---
+
+# Code Review Skill
+
+This skill performs code review analysis.`);
+
+    const config = `
+export default {
+  configDir: '.glooit',
+  rules: [],
+  skills: { path: '.glooit/skills', targets: ['cursor'] }
+};
+`;
+    writeFileSync('glooit.config.ts', config);
+
+    const cliPath = `${originalCwd}/src/cli/index.ts`;
+    execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
+
+    expect(existsSync('.cursor/skills/code-review.md')).toBe(true);
+
+    const content = readFileSync('.cursor/skills/code-review.md', 'utf-8');
+
+    // Should have exactly one YAML frontmatter block (the original skill frontmatter)
+    const frontmatterDelimiters = content.match(/^---\r?\n/gm) || [];
+    expect(frontmatterDelimiters.length).toBe(2); // Opening and closing of single frontmatter block
+
+    // Should have the skill's original frontmatter
+    expect(content).toContain('name: code-review');
+    expect(content).toContain('tools: Read, Grep');
+
+    // Should NOT have Cursor's rules frontmatter
+    expect(content).not.toContain('globs:');
+    expect(content).not.toContain('alwaysApply:');
+
+    // Should have the actual content
+    expect(content).toContain('# Code Review Skill');
+    expect(content).toContain('This skill performs code review analysis.');
+  });
+
+  it('should handle agents without frontmatter syncing to Cursor', () => {
+    mkdirSync('.glooit/agents', { recursive: true });
+    // Agent file without frontmatter
+    writeFileSync('.glooit/agents/simple-agent.md', `# Simple Agent
+
+This is a simple agent without frontmatter.`);
+
+    const config = `
+export default {
+  configDir: '.glooit',
+  rules: [],
+  agents: { path: '.glooit/agents', targets: ['cursor'] }
+};
+`;
+    writeFileSync('glooit.config.ts', config);
+
+    const cliPath = `${originalCwd}/src/cli/index.ts`;
+    execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
+
+    expect(existsSync('.cursor/agents/simple-agent.md')).toBe(true);
+
+    const content = readFileSync('.cursor/agents/simple-agent.md', 'utf-8');
+
+    // Should NOT have any frontmatter added (agents don't get Cursor rules frontmatter)
+    expect(content).not.toContain('globs:');
+    expect(content).not.toContain('alwaysApply:');
+
+    // Should have the actual content as-is
+    expect(content).toContain('# Simple Agent');
+    expect(content).toContain('This is a simple agent without frontmatter.');
+  });
+
+  it('should preserve agent frontmatter for Claude', () => {
+    mkdirSync('.glooit/agents', { recursive: true });
+    // Agent file with its own frontmatter
+    writeFileSync('.glooit/agents/reviewer.md', `---
+name: reviewer
+description: Code reviewer agent.
+tools: Read, Grep
+model: opus
+---
+
+# Code Reviewer
+
+Reviews code for quality.`);
+
+    const config = `
+export default {
+  configDir: '.glooit',
+  rules: [],
+  agents: { path: '.glooit/agents', targets: ['claude'] }
+};
+`;
+    writeFileSync('glooit.config.ts', config);
+
+    const cliPath = `${originalCwd}/src/cli/index.ts`;
+    execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
+
+    expect(existsSync('.claude/agents/reviewer.md')).toBe(true);
+
+    const content = readFileSync('.claude/agents/reviewer.md', 'utf-8');
+
+    // Should preserve the original agent frontmatter
+    expect(content).toContain('name: reviewer');
+    expect(content).toContain('description: Code reviewer agent.');
+    expect(content).toContain('tools: Read, Grep');
+    expect(content).toContain('model: opus');
+
+    // Should have the actual content
+    expect(content).toContain('# Code Reviewer');
+    expect(content).toContain('Reviews code for quality.');
+  });
 });
