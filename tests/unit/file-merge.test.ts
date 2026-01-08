@@ -46,7 +46,7 @@ describe('AgentDistributor - File Merge', () => {
       expect(outputContent).not.toContain('---');
     });
 
-    it('should merge two files with markers and separator', async () => {
+    it('should merge two files with separator (no source markers)', async () => {
       const file1 = `${testDir}/part1.md`;
       const file2 = `${testDir}/part2.md`;
 
@@ -71,9 +71,8 @@ describe('AgentDistributor - File Merge', () => {
 
       const mergedContent = readFileSync(`${testDir}/merged.md`, 'utf-8');
 
-      // Check for source markers
-      expect(mergedContent).toContain(`<!-- Source: ${file1} -->`);
-      expect(mergedContent).toContain(`<!-- Source: ${file2} -->`);
+      // Should NOT have source markers (removed for cleaner output)
+      expect(mergedContent).not.toContain('<!-- Source:');
 
       // Check for separator
       expect(mergedContent).toContain('\n---\n');
@@ -117,10 +116,8 @@ describe('AgentDistributor - File Merge', () => {
 
       const mergedContent = readFileSync(`${testDir}/complete.md`, 'utf-8');
 
-      // Should have 3 source markers
-      expect(mergedContent).toContain(`<!-- Source: ${file1} -->`);
-      expect(mergedContent).toContain(`<!-- Source: ${file2} -->`);
-      expect(mergedContent).toContain(`<!-- Source: ${file3} -->`);
+      // Should NOT have source markers
+      expect(mergedContent).not.toContain('<!-- Source:');
 
       // Should have 2 separators (between 3 files)
       const separatorCount = (mergedContent.match(/\n---\n/g) || []).length;
@@ -216,9 +213,8 @@ More text here.`;
 
       const mergedContent = readFileSync(`${testDir}/with-empty.md`, 'utf-8');
 
-      // Should still have both markers
-      expect(mergedContent).toContain(`<!-- Source: ${file1} -->`);
-      expect(mergedContent).toContain(`<!-- Source: ${file2} -->`);
+      // Should NOT have source markers
+      expect(mergedContent).not.toContain('<!-- Source:');
 
       // Should have the content from file2
       expect(mergedContent).toContain('# Has Content');
@@ -284,6 +280,196 @@ More text here.`;
       // Cursor has different formatting (frontmatter), but should have the content
       expect(cursorContent).toContain('# Part 1');
       expect(cursorContent).toContain('# Part 2');
+    });
+
+    it('should strip YAML frontmatter from merged files', async () => {
+      const file1 = `${testDir}/with-frontmatter1.md`;
+      const file2 = `${testDir}/with-frontmatter2.md`;
+
+      writeFileSync(file1, `---
+description: First file description
+globs: "src/**/*"
+---
+
+# First File
+
+Content from first file.`);
+
+      writeFileSync(file2, `---
+description: Second file description
+globs: "lib/**/*"
+---
+
+# Second File
+
+Content from second file.`);
+
+      const config: Config = {
+        rules: [],
+        mergeMcps: true
+      };
+
+      const rule: MergedFileRule = {
+        file: [file1, file2],
+        to: testDir,
+        globs: '**/*',
+        targets: [
+          { name: 'claude', to: `${testDir}/merged-no-frontmatter.md` }
+        ]
+      };
+
+      const distributor = new AgentDistributor(config);
+      await distributor.distributeRule(rule);
+
+      const mergedContent = readFileSync(`${testDir}/merged-no-frontmatter.md`, 'utf-8');
+
+      // Should NOT contain the source files' frontmatter content
+      expect(mergedContent).not.toContain('description: First file description');
+      expect(mergedContent).not.toContain('description: Second file description');
+      expect(mergedContent).not.toContain('globs: "src/**/*"');
+      expect(mergedContent).not.toContain('globs: "lib/**/*"');
+
+      // Should contain the actual content
+      expect(mergedContent).toContain('# First File');
+      expect(mergedContent).toContain('Content from first file.');
+      expect(mergedContent).toContain('# Second File');
+      expect(mergedContent).toContain('Content from second file.');
+
+      // Should have separator between files
+      expect(mergedContent).toContain('\n---\n');
+
+      // The separator should be the ONLY --- in the output (appears once between files)
+      // Count occurrences of --- on its own line
+      const separatorMatches = mergedContent.match(/\n---\n/g) || [];
+      expect(separatorMatches.length).toBe(1);
+    });
+
+    it('should preserve frontmatter for single file (no merge)', async () => {
+      const testFile = `${testDir}/single-with-frontmatter.md`;
+      writeFileSync(testFile, `---
+description: Single file with frontmatter
+globs: "test/**/*"
+---
+
+# Single File
+
+This file has frontmatter that should be preserved.`);
+
+      const config: Config = {
+        rules: [],
+        mergeMcps: true
+      };
+
+      const rule: SingleFileRule = {
+        file: testFile,
+        to: testDir,
+        targets: [
+          { name: 'claude', to: `${testDir}/single-output.md` }
+        ]
+      };
+
+      const distributor = new AgentDistributor(config);
+      await distributor.distributeRule(rule);
+
+      const outputContent = readFileSync(`${testDir}/single-output.md`, 'utf-8');
+
+      // Single file should preserve its frontmatter (not stripped)
+      expect(outputContent).toContain('description: Single file with frontmatter');
+      expect(outputContent).toContain('globs: "test/**/*"');
+      expect(outputContent).toContain('# Single File');
+    });
+
+    it('should handle mixed files (some with frontmatter, some without)', async () => {
+      const file1 = `${testDir}/has-frontmatter.md`;
+      const file2 = `${testDir}/no-frontmatter.md`;
+
+      writeFileSync(file1, `---
+description: Has frontmatter
+---
+
+# With Frontmatter
+
+This file has frontmatter.`);
+
+      writeFileSync(file2, `# Without Frontmatter
+
+This file has no frontmatter.`);
+
+      const config: Config = {
+        rules: [],
+        mergeMcps: true
+      };
+
+      const rule: MergedFileRule = {
+        file: [file1, file2],
+        to: testDir,
+        targets: [
+          { name: 'claude', to: `${testDir}/mixed-merge.md` }
+        ]
+      };
+
+      const distributor = new AgentDistributor(config);
+      await distributor.distributeRule(rule);
+
+      const mergedContent = readFileSync(`${testDir}/mixed-merge.md`, 'utf-8');
+
+      // Frontmatter should be stripped
+      expect(mergedContent).not.toContain('description: Has frontmatter');
+
+      // Content from both files should be present
+      expect(mergedContent).toContain('# With Frontmatter');
+      expect(mergedContent).toContain('This file has frontmatter.');
+      expect(mergedContent).toContain('# Without Frontmatter');
+      expect(mergedContent).toContain('This file has no frontmatter.');
+    });
+
+    it('should use rule.globs for Cursor output when merging files with frontmatter', async () => {
+      const file1 = `${testDir}/cursor-test1.md`;
+      const file2 = `${testDir}/cursor-test2.md`;
+
+      writeFileSync(file1, `---
+description: File 1 for Cursor
+globs: "file1/**/*"
+---
+
+# File 1 Content`);
+
+      writeFileSync(file2, `---
+description: File 2 for Cursor
+globs: "file2/**/*"
+---
+
+# File 2 Content`);
+
+      const config: Config = {
+        rules: [],
+        mergeMcps: true
+      };
+
+      const rule: MergedFileRule = {
+        file: [file1, file2],
+        to: testDir,
+        globs: 'merged/**/*',
+        targets: [
+          { name: 'cursor', to: `${testDir}/cursor-merged.md` }
+        ]
+      };
+
+      const distributor = new AgentDistributor(config);
+      await distributor.distributeRule(rule);
+
+      const cursorContent = readFileSync(`${testDir}/cursor-merged.md`, 'utf-8');
+
+      // Should have Cursor's generated frontmatter with rule.globs
+      expect(cursorContent).toContain('globs: merged/**/*');
+
+      // Should NOT have the source files' globs
+      expect(cursorContent).not.toContain('globs: "file1/**/*"');
+      expect(cursorContent).not.toContain('globs: "file2/**/*"');
+
+      // Should have the content
+      expect(cursorContent).toContain('# File 1 Content');
+      expect(cursorContent).toContain('# File 2 Content');
     });
   });
 });

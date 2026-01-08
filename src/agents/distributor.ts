@@ -175,16 +175,17 @@ export class AgentDistributor {
         return readFileSync(filePaths[0], 'utf-8');
       }
 
-      // Multiple files - merge with separators and markers
+      // Multiple files - merge with separators (no source markers)
       const mergedContent: string[] = [];
 
       for (let i = 0; i < filePaths.length; i++) {
         const filePath = filePaths[i];
         if (!filePath) continue;
-        const content = readFileSync(filePath, 'utf-8');
+        let content = readFileSync(filePath, 'utf-8');
 
-        // Add marker comment showing source file
-        mergedContent.push(`<!-- Source: ${filePath} -->`);
+        // Strip YAML frontmatter when merging (it's agent-specific metadata)
+        content = this.stripFrontmatter(content);
+
         mergedContent.push(content);
 
         // Add separator between files (but not after the last one)
@@ -197,6 +198,15 @@ export class AgentDistributor {
     } catch (error) {
       throw new Error(`Failed to read rule file(s): ${error}`);
     }
+  }
+
+  /**
+   * Strips YAML frontmatter from markdown content.
+   * Frontmatter is the block between --- delimiters at the start of a file.
+   */
+  private stripFrontmatter(content: string): string {
+    const frontmatterRegex = /^---\r?\n[\s\S]*?\r?\n---\r?\n?/;
+    return content.replace(frontmatterRegex, '').trimStart();
   }
 
   private extractRuleName(filePath: string): string {

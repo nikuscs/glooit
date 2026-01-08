@@ -182,9 +182,8 @@ export default {
       expect(existsSync('./merged.md')).toBe(true);
       const mergedContent = readFileSync('./merged.md', 'utf-8');
 
-      // Should contain source markers
-      expect(mergedContent).toContain('<!-- Source: .glooit/part1.md -->');
-      expect(mergedContent).toContain('<!-- Source: .glooit/part2.md -->');
+      // Should NOT contain source markers (removed for cleaner output)
+      expect(mergedContent).not.toContain('<!-- Source:');
 
       // Should contain separator
       expect(mergedContent).toContain('---');
@@ -229,10 +228,8 @@ export default {
 
       const mergedContent = readFileSync('./complete.md', 'utf-8');
 
-      // Check all markers present
-      expect(mergedContent).toContain('<!-- Source: .glooit/intro.md -->');
-      expect(mergedContent).toContain('<!-- Source: .glooit/body.md -->');
-      expect(mergedContent).toContain('<!-- Source: .glooit/conclusion.md -->');
+      // Should NOT contain source markers (removed for cleaner output)
+      expect(mergedContent).not.toContain('<!-- Source:');
 
       // Check content order
       const introIdx = mergedContent.indexOf('# Introduction');
