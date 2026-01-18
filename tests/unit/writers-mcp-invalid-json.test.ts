@@ -53,7 +53,7 @@ describe('Writers handle invalid JSON', () => {
 
   it('CursorWriter uses first file in rule arrays', () => {
     const writer = new CursorWriter();
-    const rule: Rule = { file: ['rules/a.md', 'rules/b.md'], to: './', targets: ['cursor'] };
+    const rule: Rule = { file: ['rules/a.md', 'rules/b.md'], to: './', targets: [{ name: 'cursor', to: './merged.md' }] };
     const content = writer.formatContent('hello', rule);
 
     expect(content).toContain('AI Rules - a');

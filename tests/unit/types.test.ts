@@ -217,7 +217,7 @@ describe('defineRules', () => {
             file: ['a.md', 'b.md'],
             to: './',
             targets: ['claude']
-          }
+          } as any
         ]
       });
     }).toThrow('When using file array (merge mode), all targets must be objects with {name, to} properties');

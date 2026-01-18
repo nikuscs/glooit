@@ -186,7 +186,7 @@ describe('AIRulesCore coverage', () => {
     try {
       Map.prototype[Symbol.iterator] = function* () {
         yield ['mcp.json', []];
-      };
+      } as any;
 
       await (core as unknown as { distributeMcps: () => Promise<void> }).distributeMcps();
     } finally {

@@ -97,7 +97,7 @@ export class ConfigLoader {
     });
 
     // Apply defaults
-    c.configDir = resolveConfigDir(c.configDir);
+    c.configDir = resolveConfigDir(c.configDir as string | undefined);
     c.mergeMcps = c.mergeMcps ?? true;
     c.gitignore = c.gitignore ?? true;
     c.mode = c.mode ?? 'copy';
