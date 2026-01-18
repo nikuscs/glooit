@@ -4,8 +4,9 @@ import { Command } from 'commander';
 import { AIRulesCore } from '../core';
 import { ConfigLoader } from '../core/config-loader';
 import { ConfigValidator } from '../core/validation';
-import { existsSync, writeFileSync, rmSync, readdirSync, readFileSync } from 'fs';
-import { dirname } from 'path';
+import { existsSync, writeFileSync, rmSync, readdirSync, readFileSync, statSync } from 'fs';
+import { dirname, join } from 'path';
+import type { AgentName, Config, Rule } from '../types';
 import { GitIgnoreManager } from '../core/gitignore';
 import { ManifestManager } from '../core/manifest';
 import { detect } from 'package-manager-detector/detect';
@@ -130,6 +131,20 @@ program
   .action(async (options) => {
     try {
       await resetCommand(options.force);
+    } catch (error) {
+      console.error('Error:', error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('link')
+  .description('Zero-config symlink: auto-sync .agents/ to all supported agents')
+  .argument('[source]', 'source directory (default: .agents, fallback: .glooit)')
+  .option('-t, --targets <agents>', 'comma-separated list of agents')
+  .action(async (source, options) => {
+    try {
+      await linkCommand(source, options.targets);
     } catch (error) {
       console.error('Error:', error);
       process.exit(1);
@@ -475,6 +490,109 @@ async function replaceSymlinkWithFile(linkPath: string): Promise<void> {
   } catch (error) {
     console.warn(`⚠️  Failed to replace symlink: ${linkPath} (${error})`);
   }
+}
+
+async function linkCommand(source?: string, targetsArg?: string): Promise<void> {
+  // Resolve source directory
+  let sourceDir: string;
+  if (source) {
+    if (!existsSync(source)) {
+      throw new Error(`Source directory not found: ${source}`);
+    }
+    sourceDir = source;
+  } else if (existsSync('.agents')) {
+    sourceDir = '.agents';
+  } else if (existsSync('.glooit')) {
+    sourceDir = '.glooit';
+  } else {
+    throw new Error('No source directory found. Create .agents/ or specify a source directory.');
+  }
+
+  console.log(`🔗 Linking from ${sourceDir}/...`);
+
+  // Parse targets
+  const validAgents: AgentName[] = ['claude', 'cursor', 'codex', 'roocode', 'opencode', 'factory'];
+  let targets: AgentName[];
+
+  if (targetsArg) {
+    targets = targetsArg.split(',').map(t => t.trim()) as AgentName[];
+    for (const t of targets) {
+      if (!validAgents.includes(t)) {
+        throw new Error(`Invalid agent: ${t}. Valid agents: ${validAgents.join(', ')}`);
+      }
+    }
+  } else {
+    targets = validAgents;
+  }
+
+  // Build rules by scanning the source directory
+  const rules: Rule[] = [];
+
+  // Check for rule files (CLAUDE.md, AGENTS.md)
+  const claudeMdPath = join(sourceDir, 'CLAUDE.md');
+  const agentsMdPath = join(sourceDir, 'AGENTS.md');
+
+  if (existsSync(claudeMdPath)) {
+    const claudeTargets = targets.filter(t => t === 'claude');
+    if (claudeTargets.length > 0) {
+      rules.push({
+        name: 'claude-rules',
+        file: claudeMdPath,
+        to: './',
+        mode: 'symlink',
+        targets: claudeTargets
+      });
+    }
+  }
+
+  if (existsSync(agentsMdPath)) {
+    // AGENTS.md goes to codex, opencode, factory (agents that use AGENTS.md)
+    const agentsTargets = targets.filter(t => ['codex', 'opencode', 'factory'].includes(t));
+    if (agentsTargets.length > 0) {
+      rules.push({
+        name: 'agents-rules',
+        file: agentsMdPath,
+        to: './',
+        mode: 'symlink',
+        targets: agentsTargets
+      });
+    }
+  }
+
+  // Check for directories (commands, skills, agents)
+  const dirsToCheck = ['commands', 'skills', 'agents'];
+  for (const dirName of dirsToCheck) {
+    const dirPath = join(sourceDir, dirName);
+    if (existsSync(dirPath) && statSync(dirPath).isDirectory()) {
+      rules.push({
+        name: dirName,
+        file: dirPath,
+        to: './',
+        mode: 'symlink',
+        targets: targets
+      });
+    }
+  }
+
+  if (rules.length === 0) {
+    console.log(`⚠️  No files or directories found in ${sourceDir}/ to link.`);
+    console.log('Expected: CLAUDE.md, AGENTS.md, commands/, skills/, or agents/');
+    return;
+  }
+
+  // Build config and sync
+  const config: Config = {
+    configDir: sourceDir,
+    mode: 'symlink',
+    rules,
+    gitignore: true,
+    mergeMcps: true
+  };
+
+  const core = new AIRulesCore(config);
+  await core.sync();
+
+  console.log(`✅ Linked ${rules.length} item(s) to ${targets.length} agent(s)`);
 }
 
 async function upgradeCommand(forceGlobal: boolean, forceLocal: boolean): Promise<void> {

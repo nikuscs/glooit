@@ -66,6 +66,7 @@ export class AgentHooksDistributor {
     // Group hooks by target agent
     const claudeHooks: AgentHook[] = [];
     const cursorHooks: AgentHook[] = [];
+    const factoryHooks: AgentHook[] = [];
 
     for (const hook of this.config.hooks) {
       for (const target of hook.targets) {
@@ -73,8 +74,10 @@ export class AgentHooksDistributor {
           claudeHooks.push(hook);
         } else if (target === 'cursor') {
           cursorHooks.push(hook);
+        } else if (target === 'factory') {
+          factoryHooks.push(hook);
         }
-        // codex and roocode don't support hooks
+        // codex, roocode, opencode don't support hooks
       }
     }
 
@@ -84,6 +87,10 @@ export class AgentHooksDistributor {
 
     if (cursorHooks.length > 0) {
       await this.distributeCursorHooks(cursorHooks);
+    }
+
+    if (factoryHooks.length > 0) {
+      await this.distributeFactoryHooks(factoryHooks);
     }
   }
 
@@ -189,6 +196,71 @@ export class AgentHooksDistributor {
     writeFileSync(hooksPath, JSON.stringify(config, null, 2), 'utf-8');
   }
 
+  private async distributeFactoryHooks(hooks: AgentHook[]): Promise<void> {
+    // Factory uses the same hook format as Claude, stored in .factory/settings.json
+    const settingsPath = '.factory/settings.json';
+
+    // Load existing settings or create new
+    let settings: ClaudeSettings = {};
+    if (existsSync(settingsPath)) {
+      try {
+        settings = JSON.parse(readFileSync(settingsPath, 'utf-8'));
+      } catch {
+        // Invalid JSON, start fresh
+      }
+    }
+
+    if (!settings.hooks) {
+      settings.hooks = {};
+    }
+
+    // Group hooks by event (Factory uses same events as Claude)
+    const hooksByEvent = new Map<ClaudeHookEvent, AgentHook[]>();
+
+    for (const hook of hooks) {
+      const factoryEvent = CLAUDE_EVENT_MAP[hook.event]; // Factory uses same event names
+      if (!factoryEvent) {
+        console.warn(`Event '${hook.event}' is not supported by Factory, skipping...`);
+        continue;
+      }
+
+      if (!hooksByEvent.has(factoryEvent)) {
+        hooksByEvent.set(factoryEvent, []);
+      }
+      hooksByEvent.get(factoryEvent)?.push(hook);
+    }
+
+    // Build Factory hooks config (same format as Claude)
+    for (const [event, eventHooks] of hooksByEvent) {
+      if (!settings.hooks[event]) {
+        settings.hooks[event] = [];
+      }
+
+      for (const hook of eventHooks) {
+        const command = this.buildCommand(hook);
+        const matcher = hook.matcher || CLAUDE_DEFAULT_MATCHERS[hook.event] || '*';
+
+        // Check if we already have a hook with this matcher
+        const existingEntry = settings.hooks[event].find(h => h.matcher === matcher);
+
+        if (existingEntry) {
+          // Add to existing matcher's hooks
+          existingEntry.hooks.push({ type: 'command', command });
+        } else {
+          // Create new entry
+          settings.hooks[event].push({
+            matcher,
+            hooks: [{ type: 'command', command }]
+          });
+        }
+      }
+    }
+
+    // Write settings
+    mkdirSync(dirname(settingsPath), { recursive: true });
+    writeFileSync(settingsPath, JSON.stringify(settings, null, 2), 'utf-8');
+  }
+
   private buildCommand(hook: AgentHook): string {
     if (hook.command) {
       return hook.command;
@@ -223,12 +295,16 @@ export class AgentHooksDistributor {
 
     const hasClaudeHooks = this.config.hooks.some(h => h.targets.includes('claude'));
     const hasCursorHooks = this.config.hooks.some(h => h.targets.includes('cursor'));
+    const hasFactoryHooks = this.config.hooks.some(h => h.targets.includes('factory'));
 
     if (hasClaudeHooks) {
       paths.push('.claude/settings.json');
     }
     if (hasCursorHooks) {
       paths.push('.cursor/hooks.json');
+    }
+    if (hasFactoryHooks) {
+      paths.push('.factory/settings.json');
     }
 
     return paths;

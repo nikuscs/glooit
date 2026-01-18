@@ -1,6 +1,6 @@
 import { resolveConfigDir } from '../core/utils';
 
-export type AgentName = 'claude' | 'cursor' | 'codex' | 'roocode' | 'opencode' | 'generic';
+export type AgentName = 'claude' | 'cursor' | 'codex' | 'roocode' | 'opencode' | 'factory' | 'generic';
 
 export interface AgentTarget {
   name: AgentName;
@@ -155,7 +155,7 @@ export interface BackupEntry {
 
 // Simple validation functions
 function isValidAgentName(agentName: unknown): agentName is AgentName {
-  return ['claude', 'cursor', 'codex', 'roocode', 'opencode', 'generic'].includes(agentName as string);
+  return ['claude', 'cursor', 'codex', 'roocode', 'opencode', 'factory', 'generic'].includes(agentName as string);
 }
 
 function isValidAgent(agent: unknown): agent is Agent {
