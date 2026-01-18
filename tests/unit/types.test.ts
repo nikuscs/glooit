@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { defineRules, type Config } from '../../src/types';
+import { defineRules, type Config, type Rule } from '../../src/types';
 import { mkdirSync, rmSync, existsSync } from 'fs';
 
 const testDir = 'test-types';
