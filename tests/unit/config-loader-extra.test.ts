@@ -100,7 +100,7 @@ describe('ConfigLoader extra coverage', () => {
     );
 
     await expect(ConfigLoader.load('glooit.badmode.config.ts')).rejects.toThrow(
-      'Config.mode must be \"copy\" or \"symlink\"'
+      'Config.mode must be "copy" or "symlink"'
     );
   });
 

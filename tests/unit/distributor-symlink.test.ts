@@ -42,7 +42,7 @@ describe('AgentDistributor symlink mode', () => {
   });
 
   it('replaces existing target and warns', async () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 
     mkdirSync('.agents', { recursive: true });
     writeFileSync('.agents/main.md', '# Main');
@@ -90,7 +90,7 @@ describe('AgentDistributor symlink mode', () => {
   });
 
   it('falls back to copy on merge rules in symlink mode', async () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 
     writeFileSync('part1.md', '# Part 1');
     writeFileSync('part2.md', '# Part 2');
@@ -116,7 +116,7 @@ describe('AgentDistributor symlink mode', () => {
   });
 
   it('shows warning only once for the same rule across multiple distribute calls', async () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 
     mkdirSync('.agents', { recursive: true });
     writeFileSync('.agents/main.md', '# Main');

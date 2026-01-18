@@ -1,7 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
-const testDir = 'test-backup-read-error';
-
 describe('BackupManager read error path', () => {
   beforeEach(() => {
     vi.resetModules();
@@ -12,8 +10,8 @@ describe('BackupManager read error path', () => {
   });
 
   it('warns when readFileSync fails during backup', async () => {
-    vi.mock('fs', () => {
-      const actual = require('fs');
+    vi.mock('fs', async () => {
+      const actual = await vi.importActual<typeof import('fs')>('fs');
       return {
         ...actual,
         readFileSync: () => { throw new Error('read fail'); }
@@ -21,9 +19,9 @@ describe('BackupManager read error path', () => {
     });
 
     const { BackupManager } = await import('../../src/core/backup');
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 
-    const { writeFileSync, rmSync, existsSync } = require('fs');
+    const { writeFileSync, rmSync, existsSync } = await import('fs');
     writeFileSync('exists.md', 'content');
 
     const manager = new BackupManager({ rules: [], configDir: '.agents', backup: { enabled: true, retention: 10 } });

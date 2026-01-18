@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mkdirSync, rmSync, writeFileSync, existsSync } from 'fs';
-import * as fs from 'fs';
 import { BackupManager } from '../../src/core/backup';
 import type { Config } from '../../src/types';
 
@@ -20,7 +19,7 @@ afterEach(() => {
 
 describe('BackupManager error branches', () => {
   it('warns for missing file and returns empty timestamp', async () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const config: Config = { rules: [], configDir: '.agents', backup: { enabled: true, retention: 10 } };
     const manager = new BackupManager(config);
 

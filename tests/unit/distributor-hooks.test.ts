@@ -100,7 +100,7 @@ describe('AgentDistributor hooks and errors', () => {
   });
 
   it('warns when symlink mode has hooks and transforms', async () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     writeFileSync('rule.md', 'test');
 
     const distributor = new AgentDistributor({ rules: [], transforms: { after: [() => 'x'] } });
@@ -148,10 +148,10 @@ describe('AgentDistributor hooks and errors', () => {
   });
 
   it('warns for transforms.before in symlink mode', async () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     writeFileSync('rule.md', 'test');
 
-    const distributor = new AgentDistributor({ rules: [], transforms: { before: [() => {}] } });
+    const distributor = new AgentDistributor({ rules: [], transforms: { before: [() => undefined] } });
     const rule: Rule = {
       file: 'rule.md',
       to: './',

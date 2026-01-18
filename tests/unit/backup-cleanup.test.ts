@@ -36,7 +36,7 @@ describe('BackupManager cleanup', () => {
     writeFileSync('.agents/backups/t1.json', JSON.stringify(backup1));
     writeFileSync('.agents/backups/t2.json', JSON.stringify(backup2));
 
-    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
 
     await (manager as unknown as { cleanupOldBackups: () => Promise<void> }).cleanupOldBackups();
 

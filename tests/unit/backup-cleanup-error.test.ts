@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { mkdirSync, rmSync, writeFileSync, existsSync } from 'fs';
+import { mkdirSync, rmSync, existsSync } from 'fs';
 
 let throwExists = false;
 
@@ -35,7 +35,7 @@ describe('BackupManager cleanup error handling', () => {
     const { BackupManager } = await import('../../src/core/backup');
 
     const manager = new BackupManager({ rules: [], configDir: '.agents', backup: { retention: -1 } });
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 
     (manager as unknown as { logCleanupError: (timestamp: string, error: unknown) => void })
       .logCleanupError('bad-backup', new Error('boom'));
@@ -52,7 +52,7 @@ describe('BackupManager cleanup error handling', () => {
       { timestamp: 'forced', fileCount: 1 }
     ];
 
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     throwExists = true;
 
     await (manager as unknown as { cleanupOldBackups: () => Promise<void> }).cleanupOldBackups();
