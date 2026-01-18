@@ -5,9 +5,10 @@
 import { defineRules } from 'glooit';
 
 export default defineRules({
+  mode: 'copy',
   rules: [
     {
-      file: '.glooit/main.md',
+      file: '.agents/main.md',
       to: './',
       targets: ['claude', 'cursor']
     }

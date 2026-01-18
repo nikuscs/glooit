@@ -12,7 +12,7 @@ describe('CLI - New Features (Gitignore Control & File Merge)', () => {
     }
     mkdirSync(testDir, { recursive: true });
     process.chdir(testDir);
-    mkdirSync('.glooit', { recursive: true });
+    mkdirSync('.agents', { recursive: true });
   });
 
   afterEach(() => {
@@ -28,7 +28,7 @@ describe('CLI - New Features (Gitignore Control & File Merge)', () => {
 export default {
   rules: [
     {
-      file: '.glooit/test.md',
+      file: '.agents/test.md',
       to: './',
       targets: ['claude']
     }
@@ -36,7 +36,7 @@ export default {
 };
 `;
       writeFileSync('glooit.config.js', config);
-      writeFileSync('.glooit/test.md', '# Test');
+      writeFileSync('.agents/test.md', '# Test');
 
       const cliPath = `${originalCwd}/src/cli/index.ts`;
       execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
@@ -55,7 +55,7 @@ export default {
   gitignore: false,
   rules: [
     {
-      file: '.glooit/test.md',
+      file: '.agents/test.md',
       to: './',
       targets: ['claude']
     }
@@ -63,7 +63,7 @@ export default {
 };
 `;
       writeFileSync('glooit.config.js', config);
-      writeFileSync('.glooit/test.md', '# Test');
+      writeFileSync('.agents/test.md', '# Test');
 
       const cliPath = `${originalCwd}/src/cli/index.ts`;
       execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
@@ -80,12 +80,12 @@ export default {
 export default {
   rules: [
     {
-      file: '.glooit/ignored.md',
+      file: '.agents/ignored.md',
       to: './',
       targets: ['claude']
     },
     {
-      file: '.glooit/not-ignored.md',
+      file: '.agents/not-ignored.md',
       to: './',
       gitignore: false,
       targets: [
@@ -96,8 +96,8 @@ export default {
 };
 `;
       writeFileSync('glooit.config.js', config);
-      writeFileSync('.glooit/ignored.md', '# Ignored');
-      writeFileSync('.glooit/not-ignored.md', '# Not ignored');
+      writeFileSync('.agents/ignored.md', '# Ignored');
+      writeFileSync('.agents/not-ignored.md', '# Not ignored');
 
       const cliPath = `${originalCwd}/src/cli/index.ts`;
       execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
@@ -118,12 +118,12 @@ export default {
   gitignore: true,
   rules: [
     {
-      file: '.glooit/rule1.md',
+      file: '.agents/rule1.md',
       to: './',
       targets: ['claude']
     },
     {
-      file: '.glooit/rule2.md',
+      file: '.agents/rule2.md',
       to: './',
       gitignore: false,
       targets: [
@@ -131,7 +131,7 @@ export default {
       ]
     },
     {
-      file: '.glooit/rule3.md',
+      file: '.agents/rule3.md',
       to: './',
       gitignore: true,
       targets: [
@@ -142,9 +142,9 @@ export default {
 };
 `;
       writeFileSync('glooit.config.js', config);
-      writeFileSync('.glooit/rule1.md', '# Rule 1');
-      writeFileSync('.glooit/rule2.md', '# Rule 2');
-      writeFileSync('.glooit/rule3.md', '# Rule 3');
+      writeFileSync('.agents/rule1.md', '# Rule 1');
+      writeFileSync('.agents/rule2.md', '# Rule 2');
+      writeFileSync('.agents/rule3.md', '# Rule 3');
 
       const cliPath = `${originalCwd}/src/cli/index.ts`;
       execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
@@ -163,7 +163,7 @@ export default {
 export default {
   rules: [
     {
-      file: ['.glooit/part1.md', '.glooit/part2.md'],
+      file: ['.agents/part1.md', '.agents/part2.md'],
       to: './',
       targets: [
         { name: 'claude', to: './merged.md' }
@@ -173,8 +173,8 @@ export default {
 };
 `;
       writeFileSync('glooit.config.js', config);
-      writeFileSync('.glooit/part1.md', '# Part 1\n\nContent from part 1');
-      writeFileSync('.glooit/part2.md', '# Part 2\n\nContent from part 2');
+      writeFileSync('.agents/part1.md', '# Part 1\n\nContent from part 1');
+      writeFileSync('.agents/part2.md', '# Part 2\n\nContent from part 2');
 
       const cliPath = `${originalCwd}/src/cli/index.ts`;
       execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
@@ -206,9 +206,9 @@ export default {
   rules: [
     {
       file: [
-        '.glooit/intro.md',
-        '.glooit/body.md',
-        '.glooit/conclusion.md'
+        '.agents/intro.md',
+        '.agents/body.md',
+        '.agents/conclusion.md'
       ],
       to: './',
       targets: [
@@ -219,9 +219,9 @@ export default {
 };
 `;
       writeFileSync('glooit.config.js', config);
-      writeFileSync('.glooit/intro.md', '# Introduction');
-      writeFileSync('.glooit/body.md', '# Main Content');
-      writeFileSync('.glooit/conclusion.md', '# Conclusion');
+      writeFileSync('.agents/intro.md', '# Introduction');
+      writeFileSync('.agents/body.md', '# Main Content');
+      writeFileSync('.agents/conclusion.md', '# Conclusion');
 
       const cliPath = `${originalCwd}/src/cli/index.ts`;
       execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
@@ -249,7 +249,7 @@ export default {
 export default {
   rules: [
     {
-      file: ['.glooit/part1.md', '.glooit/part2.md'],
+      file: ['.agents/part1.md', '.agents/part2.md'],
       to: './',
       targets: ['claude']
     }
@@ -257,8 +257,8 @@ export default {
 };
 `;
       writeFileSync('glooit.config.js', config);
-      writeFileSync('.glooit/part1.md', '# Part 1');
-      writeFileSync('.glooit/part2.md', '# Part 2');
+      writeFileSync('.agents/part1.md', '# Part 1');
+      writeFileSync('.agents/part2.md', '# Part 2');
 
       const cliPath = `${originalCwd}/src/cli/index.ts`;
 
@@ -272,7 +272,7 @@ export default {
 export default {
   rules: [
     {
-      file: ['.glooit/part1.md', '.glooit/part2.md'],
+      file: ['.agents/part1.md', '.agents/part2.md'],
       to: './',
       gitignore: false,
       targets: [
@@ -280,7 +280,7 @@ export default {
       ]
     },
     {
-      file: ['.glooit/part3.md', '.glooit/part4.md'],
+      file: ['.agents/part3.md', '.agents/part4.md'],
       to: './',
       targets: [
         { name: 'cursor', to: './merged-ignored.md' }
@@ -290,10 +290,10 @@ export default {
 };
 `;
       writeFileSync('glooit.config.js', config);
-      writeFileSync('.glooit/part1.md', '# Part 1');
-      writeFileSync('.glooit/part2.md', '# Part 2');
-      writeFileSync('.glooit/part3.md', '# Part 3');
-      writeFileSync('.glooit/part4.md', '# Part 4');
+      writeFileSync('.agents/part1.md', '# Part 1');
+      writeFileSync('.agents/part2.md', '# Part 2');
+      writeFileSync('.agents/part3.md', '# Part 3');
+      writeFileSync('.agents/part4.md', '# Part 4');
 
       const cliPath = `${originalCwd}/src/cli/index.ts`;
       execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
@@ -325,7 +325,7 @@ export default {
 export default {
   rules: [
     {
-      file: '.glooit/test.md',
+      file: '.agents/test.md',
       to: './',
       targets: ['claude']
     }
@@ -333,7 +333,7 @@ export default {
 };
 `;
       writeFileSync('glooit.config.js', config1);
-      writeFileSync('.glooit/test.md', '# Test');
+      writeFileSync('.agents/test.md', '# Test');
 
       const cliPath = `${originalCwd}/src/cli/index.ts`;
       execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
@@ -345,7 +345,7 @@ export default {
 export default {
   rules: [
     {
-      file: '.glooit/test.md',
+      file: '.agents/test.md',
       to: './',
       targets: ['cursor']
     }
@@ -363,11 +363,11 @@ export default {
     it('should skip non-existent directories gracefully', () => {
       const config = `
 export default {
-  skills: '.glooit/skills',
-  commands: '.glooit/commands',
+  skills: '.agents/skills',
+  commands: '.agents/commands',
   rules: [
     {
-      file: '.glooit/test.md',
+      file: '.agents/test.md',
       to: './',
       targets: ['claude']
     }
@@ -375,8 +375,8 @@ export default {
 };
 `;
       writeFileSync('glooit.config.js', config);
-      writeFileSync('.glooit/test.md', '# Test');
-      // Note: .glooit/skills and .glooit/commands don't exist
+      writeFileSync('.agents/test.md', '# Test');
+      // Note: .agents/skills and .agents/commands don't exist
 
       const cliPath = `${originalCwd}/src/cli/index.ts`;
 

@@ -13,6 +13,12 @@ export class ConfigValidator {
     const errors: ValidationError[] = [];
 
     for (const [index, rule] of config.rules.entries()) {
+      if (rule.mode && rule.mode !== 'copy' && rule.mode !== 'symlink') {
+        errors.push({
+          field: `rules[${index}].mode`,
+          message: `Invalid mode: ${rule.mode}. Use "copy" or "symlink".`
+        });
+      }
       // Handle both single file and array of files
       const files = Array.isArray(rule.file) ? rule.file : [rule.file];
 
@@ -58,11 +64,18 @@ export class ConfigValidator {
       }
     }
 
-    const configDir = config.configDir || '.glooit';
+    const configDir = config.configDir || '.agents';
     if (!configDir.startsWith('.') && !configDir.startsWith('/')) {
       errors.push({
         field: 'configDir',
         message: `Invalid config directory format: ${configDir}`
+      });
+    }
+
+    if (config.mode && config.mode !== 'copy' && config.mode !== 'symlink') {
+      errors.push({
+        field: 'mode',
+        message: `Invalid mode: ${config.mode}. Use "copy" or "symlink".`
       });
     }
 

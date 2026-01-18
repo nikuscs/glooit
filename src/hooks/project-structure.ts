@@ -9,7 +9,6 @@ export const replaceStructure = async (context: SyncContext): Promise<string> =>
 
 async function getProjectStructure(maxDepth = 3): Promise<string> {
   try {
-
     const buildTree = (dir: string, depth = 0, prefix = ''): string[] => {
       if (depth > maxDepth) return [];
 
@@ -50,6 +49,7 @@ async function getProjectStructure(maxDepth = 3): Promise<string> {
     const tree = buildTree('.');
     return '```\n' + tree.join('\n') + '\n```';
   } catch {
+    /* istanbul ignore next -- defensive fallback */
     return '```\nProject structure unavailable\n```';
   }
 }

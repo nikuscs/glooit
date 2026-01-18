@@ -23,17 +23,17 @@ describe('CLI - Directory Sync', () => {
 
   it('should sync commands directory to claude and cursor', () => {
     // Create commands directory with files
-    mkdirSync('.glooit/commands', { recursive: true });
-    writeFileSync('.glooit/commands/deploy.md', '# Deploy Command\nDeploy the application');
-    writeFileSync('.glooit/commands/test.md', '# Test Command\nRun tests');
+    mkdirSync('.agents/commands', { recursive: true });
+    writeFileSync('.agents/commands/deploy.md', '# Deploy Command\nDeploy the application');
+    writeFileSync('.agents/commands/test.md', '# Test Command\nRun tests');
 
     const config = `
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       name: 'commands',
-      file: '.glooit/commands',
+      file: '.agents/commands',
       targets: ['claude', 'cursor']
     }
   ]
@@ -59,15 +59,15 @@ export default {
 
   it('should derive directory type from folder name when name is not specified', () => {
     // Create commands directory
-    mkdirSync('.glooit/commands', { recursive: true });
-    writeFileSync('.glooit/commands/hello.md', '# Hello');
+    mkdirSync('.agents/commands', { recursive: true });
+    writeFileSync('.agents/commands/hello.md', '# Hello');
 
     const config = `
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
-      file: '.glooit/commands',
+      file: '.agents/commands',
       to: './',
       targets: ['claude']
     }
@@ -84,18 +84,18 @@ export default {
 
   it('should preserve nested directory structure', () => {
     // Create nested commands
-    mkdirSync('.glooit/commands/dev', { recursive: true });
-    mkdirSync('.glooit/commands/prod', { recursive: true });
-    writeFileSync('.glooit/commands/dev/start.md', '# Dev Start');
-    writeFileSync('.glooit/commands/prod/deploy.md', '# Prod Deploy');
+    mkdirSync('.agents/commands/dev', { recursive: true });
+    mkdirSync('.agents/commands/prod', { recursive: true });
+    writeFileSync('.agents/commands/dev/start.md', '# Dev Start');
+    writeFileSync('.agents/commands/prod/deploy.md', '# Prod Deploy');
 
     const config = `
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       name: 'commands',
-      file: '.glooit/commands',
+      file: '.agents/commands',
       targets: ['claude']
     }
   ]
@@ -111,16 +111,16 @@ export default {
   });
 
   it('should apply hooks to markdown files in directory', () => {
-    mkdirSync('.glooit/commands', { recursive: true });
-    writeFileSync('.glooit/commands/info.md', '# Info\nTimestamp: __TIMESTAMP__');
+    mkdirSync('.agents/commands', { recursive: true });
+    writeFileSync('.agents/commands/info.md', '# Info\nTimestamp: __TIMESTAMP__');
 
     const config = `
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       name: 'commands',
-      file: '.glooit/commands',
+      file: '.agents/commands',
       targets: ['claude'],
       hooks: ['addTimestamp']
     }
@@ -139,17 +139,17 @@ export default {
   });
 
   it('should copy non-markdown files as-is', () => {
-    mkdirSync('.glooit/commands', { recursive: true });
-    writeFileSync('.glooit/commands/script.sh', '#!/bin/bash\necho "hello"');
-    writeFileSync('.glooit/commands/readme.txt', 'Some text file');
+    mkdirSync('.agents/commands', { recursive: true });
+    writeFileSync('.agents/commands/script.sh', '#!/bin/bash\necho "hello"');
+    writeFileSync('.agents/commands/readme.txt', 'Some text file');
 
     const config = `
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       name: 'commands',
-      file: '.glooit/commands',
+      file: '.agents/commands',
       targets: ['claude']
     }
   ]
@@ -166,16 +166,16 @@ export default {
   });
 
   it('should error when targeting unsupported agent without explicit to', () => {
-    mkdirSync('.glooit/commands', { recursive: true });
-    writeFileSync('.glooit/commands/test.md', '# Test');
+    mkdirSync('.agents/commands', { recursive: true });
+    writeFileSync('.agents/commands/test.md', '# Test');
 
     const config = `
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       name: 'commands',
-      file: '.glooit/commands',
+      file: '.agents/commands',
       targets: ['codex']
     }
   ]
@@ -191,16 +191,16 @@ export default {
   });
 
   it('should allow custom to path for unsupported agents', () => {
-    mkdirSync('.glooit/commands', { recursive: true });
-    writeFileSync('.glooit/commands/test.md', '# Test');
+    mkdirSync('.agents/commands', { recursive: true });
+    writeFileSync('.agents/commands/test.md', '# Test');
 
     const config = `
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       name: 'commands',
-      file: '.glooit/commands',
+      file: '.agents/commands',
       targets: [
         'claude',
         { name: 'codex', to: './custom-commands' }
@@ -219,16 +219,16 @@ export default {
   });
 
   it('should sync skills directory', () => {
-    mkdirSync('.glooit/skills', { recursive: true });
-    writeFileSync('.glooit/skills/coding.md', '# Coding Skill');
+    mkdirSync('.agents/skills', { recursive: true });
+    writeFileSync('.agents/skills/coding.md', '# Coding Skill');
 
     const config = `
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       name: 'skills',
-      file: '.glooit/skills',
+      file: '.agents/skills',
       targets: ['claude', 'cursor']
     }
   ]
@@ -244,16 +244,16 @@ export default {
   });
 
   it('should sync agents directory', () => {
-    mkdirSync('.glooit/agents', { recursive: true });
-    writeFileSync('.glooit/agents/reviewer.md', '# Code Reviewer Agent');
+    mkdirSync('.agents/agents', { recursive: true });
+    writeFileSync('.agents/agents/reviewer.md', '# Code Reviewer Agent');
 
     const config = `
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       name: 'agents',
-      file: '.glooit/agents',
+      file: '.agents/agents',
       targets: ['claude']
     }
   ]
@@ -268,16 +268,16 @@ export default {
   });
 
   it('should handle empty directories gracefully', () => {
-    mkdirSync('.glooit/commands', { recursive: true });
+    mkdirSync('.agents/commands', { recursive: true });
     // No files in the directory
 
     const config = `
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       name: 'commands',
-      file: '.glooit/commands',
+      file: '.agents/commands',
       targets: ['claude']
     }
   ]
@@ -292,17 +292,17 @@ export default {
   });
 
   it('should apply replaceEnv hook to all markdown files in directory', () => {
-    mkdirSync('.glooit/commands', { recursive: true });
-    writeFileSync('.glooit/commands/deploy.md', '# Deploy\nUser: __ENV_USER__');
-    writeFileSync('.glooit/commands/build.md', '# Build\nHome: __ENV_HOME__');
+    mkdirSync('.agents/commands', { recursive: true });
+    writeFileSync('.agents/commands/deploy.md', '# Deploy\nUser: __ENV_USER__');
+    writeFileSync('.agents/commands/build.md', '# Build\nHome: __ENV_HOME__');
 
     const config = `
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       name: 'commands',
-      file: '.glooit/commands',
+      file: '.agents/commands',
       targets: ['claude'],
       hooks: ['replaceEnv']
     }
@@ -329,17 +329,17 @@ export default {
     mkdirSync('src', { recursive: true });
     writeFileSync('src/index.ts', 'export {}');
 
-    mkdirSync('.glooit/commands', { recursive: true });
-    writeFileSync('.glooit/commands/info.md', '# Project Info\n\n__STRUCTURE__');
-    writeFileSync('.glooit/commands/overview.md', '# Overview\n\nStructure:\n__STRUCTURE__');
+    mkdirSync('.agents/commands', { recursive: true });
+    writeFileSync('.agents/commands/info.md', '# Project Info\n\n__STRUCTURE__');
+    writeFileSync('.agents/commands/overview.md', '# Overview\n\nStructure:\n__STRUCTURE__');
 
     const config = `
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       name: 'commands',
-      file: '.glooit/commands',
+      file: '.agents/commands',
       targets: ['claude'],
       hooks: ['replaceStructure']
     }
@@ -362,16 +362,16 @@ export default {
   });
 
   it('should apply multiple hooks to all markdown files in directory', () => {
-    mkdirSync('.glooit/commands', { recursive: true });
-    writeFileSync('.glooit/commands/full.md', '# Full Test\nTimestamp: __TIMESTAMP__\nUser: __ENV_USER__');
+    mkdirSync('.agents/commands', { recursive: true });
+    writeFileSync('.agents/commands/full.md', '# Full Test\nTimestamp: __TIMESTAMP__\nUser: __ENV_USER__');
 
     const config = `
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       name: 'commands',
-      file: '.glooit/commands',
+      file: '.agents/commands',
       targets: ['claude'],
       hooks: ['addTimestamp', 'replaceEnv']
     }
@@ -392,18 +392,18 @@ export default {
   });
 
   it('should apply hooks to nested directory markdown files', () => {
-    mkdirSync('.glooit/commands/dev', { recursive: true });
-    mkdirSync('.glooit/commands/prod', { recursive: true });
-    writeFileSync('.glooit/commands/dev/start.md', '# Dev Start\nTime: __TIMESTAMP__');
-    writeFileSync('.glooit/commands/prod/deploy.md', '# Prod Deploy\nTime: __TIMESTAMP__');
+    mkdirSync('.agents/commands/dev', { recursive: true });
+    mkdirSync('.agents/commands/prod', { recursive: true });
+    writeFileSync('.agents/commands/dev/start.md', '# Dev Start\nTime: __TIMESTAMP__');
+    writeFileSync('.agents/commands/prod/deploy.md', '# Prod Deploy\nTime: __TIMESTAMP__');
 
     const config = `
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       name: 'commands',
-      file: '.glooit/commands',
+      file: '.agents/commands',
       targets: ['claude'],
       hooks: ['addTimestamp']
     }
@@ -426,17 +426,17 @@ export default {
   });
 
   it('should apply hooks to all agents directory files', () => {
-    mkdirSync('.glooit/agents', { recursive: true });
-    writeFileSync('.glooit/agents/reviewer.md', '# Reviewer\nCreated: __TIMESTAMP__');
-    writeFileSync('.glooit/agents/tester.md', '# Tester\nCreated: __TIMESTAMP__');
+    mkdirSync('.agents/agents', { recursive: true });
+    writeFileSync('.agents/agents/reviewer.md', '# Reviewer\nCreated: __TIMESTAMP__');
+    writeFileSync('.agents/agents/tester.md', '# Tester\nCreated: __TIMESTAMP__');
 
     const config = `
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       name: 'agents',
-      file: '.glooit/agents',
+      file: '.agents/agents',
       targets: ['claude', 'cursor'],
       hooks: ['addTimestamp']
     }
@@ -462,16 +462,16 @@ export default {
   });
 
   it('should apply hooks to skills directory files', () => {
-    mkdirSync('.glooit/skills', { recursive: true });
-    writeFileSync('.glooit/skills/coding.md', '# Coding Skill\nVersion: __TIMESTAMP__');
+    mkdirSync('.agents/skills', { recursive: true });
+    writeFileSync('.agents/skills/coding.md', '# Coding Skill\nVersion: __TIMESTAMP__');
 
     const config = `
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       name: 'skills',
-      file: '.glooit/skills',
+      file: '.agents/skills',
       targets: ['claude'],
       hooks: ['addTimestamp']
     }
@@ -490,14 +490,14 @@ export default {
 
   // Tests for new top-level directory sync config
   it('should sync using top-level commands config (string)', () => {
-    mkdirSync('.glooit/commands', { recursive: true });
-    writeFileSync('.glooit/commands/build.md', '# Build Command');
+    mkdirSync('.agents/commands', { recursive: true });
+    writeFileSync('.agents/commands/build.md', '# Build Command');
 
     const config = `
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [],
-  commands: '.glooit/commands'
+  commands: '.agents/commands'
 };
 `;
     writeFileSync('glooit.config.ts', config);
@@ -510,15 +510,15 @@ export default {
   });
 
   it('should sync using top-level commands config (object with targets)', () => {
-    mkdirSync('.glooit/commands', { recursive: true });
-    writeFileSync('.glooit/commands/deploy.md', '# Deploy');
+    mkdirSync('.agents/commands', { recursive: true });
+    writeFileSync('.agents/commands/deploy.md', '# Deploy');
 
     const config = `
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [],
   commands: {
-    path: '.glooit/commands',
+    path: '.agents/commands',
     targets: ['claude']
   }
 };
@@ -533,20 +533,20 @@ export default {
   });
 
   it('should sync multiple top-level directories', () => {
-    mkdirSync('.glooit/commands', { recursive: true });
-    mkdirSync('.glooit/skills', { recursive: true });
-    mkdirSync('.glooit/agents', { recursive: true });
-    writeFileSync('.glooit/commands/cmd.md', '# Command');
-    writeFileSync('.glooit/skills/skill.md', '# Skill');
-    writeFileSync('.glooit/agents/agent.md', '# Agent');
+    mkdirSync('.agents/commands', { recursive: true });
+    mkdirSync('.agents/skills', { recursive: true });
+    mkdirSync('.agents/agents', { recursive: true });
+    writeFileSync('.agents/commands/cmd.md', '# Command');
+    writeFileSync('.agents/skills/skill.md', '# Skill');
+    writeFileSync('.agents/agents/agent.md', '# Agent');
 
     const config = `
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [],
-  commands: '.glooit/commands',
-  skills: { path: '.glooit/skills', targets: ['claude'] },
-  agents: { path: '.glooit/agents', targets: ['cursor'] }
+  commands: '.agents/commands',
+  skills: { path: '.agents/skills', targets: ['claude'] },
+  agents: { path: '.agents/agents', targets: ['cursor'] }
 };
 `;
     writeFileSync('glooit.config.ts', config);
@@ -568,9 +568,9 @@ export default {
   });
 
   it('should preserve agent frontmatter when syncing to Cursor (no Cursor rules frontmatter added)', () => {
-    mkdirSync('.glooit/agents', { recursive: true });
+    mkdirSync('.agents/agents', { recursive: true });
     // Agent file with its own frontmatter (name, description, tools, model)
-    writeFileSync('.glooit/agents/api-contract-sync.md', `---
+    writeFileSync('.agents/agents/api-contract-sync.md', `---
 name: api-contract-sync
 description: Align frontend API services with backend endpoints and error codes.
 tools: Read, Grep, Glob, Bash
@@ -583,9 +583,9 @@ This agent helps synchronize frontend API services with backend endpoints.`);
 
     const config = `
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [],
-  agents: { path: '.glooit/agents', targets: ['cursor'] }
+  agents: { path: '.agents/agents', targets: ['cursor'] }
 };
 `;
     writeFileSync('glooit.config.ts', config);
@@ -616,9 +616,9 @@ export default {
   });
 
   it('should preserve skill frontmatter when syncing to Cursor (no Cursor rules frontmatter added)', () => {
-    mkdirSync('.glooit/skills', { recursive: true });
+    mkdirSync('.agents/skills', { recursive: true });
     // Skill file with its own frontmatter
-    writeFileSync('.glooit/skills/code-review.md', `---
+    writeFileSync('.agents/skills/code-review.md', `---
 name: code-review
 description: Review code for best practices and potential issues.
 tools: Read, Grep
@@ -630,9 +630,9 @@ This skill performs code review analysis.`);
 
     const config = `
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [],
-  skills: { path: '.glooit/skills', targets: ['cursor'] }
+  skills: { path: '.agents/skills', targets: ['cursor'] }
 };
 `;
     writeFileSync('glooit.config.ts', config);
@@ -662,17 +662,17 @@ export default {
   });
 
   it('should handle agents without frontmatter syncing to Cursor', () => {
-    mkdirSync('.glooit/agents', { recursive: true });
+    mkdirSync('.agents/agents', { recursive: true });
     // Agent file without frontmatter
-    writeFileSync('.glooit/agents/simple-agent.md', `# Simple Agent
+    writeFileSync('.agents/agents/simple-agent.md', `# Simple Agent
 
 This is a simple agent without frontmatter.`);
 
     const config = `
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [],
-  agents: { path: '.glooit/agents', targets: ['cursor'] }
+  agents: { path: '.agents/agents', targets: ['cursor'] }
 };
 `;
     writeFileSync('glooit.config.ts', config);
@@ -694,9 +694,9 @@ export default {
   });
 
   it('should preserve agent frontmatter for Claude', () => {
-    mkdirSync('.glooit/agents', { recursive: true });
+    mkdirSync('.agents/agents', { recursive: true });
     // Agent file with its own frontmatter
-    writeFileSync('.glooit/agents/reviewer.md', `---
+    writeFileSync('.agents/agents/reviewer.md', `---
 name: reviewer
 description: Code reviewer agent.
 tools: Read, Grep
@@ -709,9 +709,9 @@ Reviews code for quality.`);
 
     const config = `
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [],
-  agents: { path: '.glooit/agents', targets: ['claude'] }
+  agents: { path: '.agents/agents', targets: ['claude'] }
 };
 `;
     writeFileSync('glooit.config.ts', config);

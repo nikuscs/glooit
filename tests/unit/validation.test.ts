@@ -24,7 +24,7 @@ describe('ConfigValidator', () => {
       writeFileSync(testFile, '# Test rule');
 
       const config: Config = {
-        configDir: '.glooit',
+        configDir: '.agents',
         rules: [{
           file: testFile,
           to: './',
@@ -40,7 +40,7 @@ describe('ConfigValidator', () => {
 
     it('should detect missing rule files', async () => {
       const config: Config = {
-        configDir: '.glooit',
+        configDir: '.agents',
         rules: [{
           file: 'non-existent-file.md',
           to: './',
@@ -60,7 +60,7 @@ describe('ConfigValidator', () => {
       writeFileSync(testFile, '# Test rule');
 
       const config: Config = {
-        configDir: '.glooit',
+        configDir: '.agents',
         rules: [{
           file: testFile,
           to: './',
@@ -79,7 +79,7 @@ describe('ConfigValidator', () => {
       writeFileSync(testFile, '# Test rule');
 
       const config: Config = {
-        configDir: '.glooit',
+        configDir: '.agents',
         rules: [{
           file: testFile,
           to: 'invalid-path',
@@ -102,7 +102,7 @@ describe('ConfigValidator', () => {
       writeFileSync(file2, '# Part 2');
 
       const config: Config = {
-        configDir: '.glooit',
+        configDir: '.agents',
         rules: [{
           file: [file1, file2],
           to: './',
@@ -122,7 +122,7 @@ describe('ConfigValidator', () => {
       writeFileSync(file1, '# Exists');
 
       const config: Config = {
-        configDir: '.glooit',
+        configDir: '.agents',
         rules: [{
           file: [file1, 'non-existent.md'],
           to: './',
@@ -142,7 +142,7 @@ describe('ConfigValidator', () => {
 
     it('should detect all missing files in file array', async () => {
       const config: Config = {
-        configDir: '.glooit',
+        configDir: '.agents',
         rules: [{
           file: ['missing1.md', 'missing2.md', 'missing3.md'],
           to: './',
@@ -166,7 +166,7 @@ describe('ConfigValidator', () => {
       writeFileSync(`${commandsDir}/test.md`, '# Test command');
 
       const config: Config = {
-        configDir: '.glooit',
+        configDir: '.agents',
         rules: [],
         mergeMcps: true,
         commands: commandsDir

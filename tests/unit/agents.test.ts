@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { AGENT_MAPPINGS, getAgentPath, getAgentDirectory } from '../../src/agents';
+import { AGENT_MAPPINGS, getAgentPath, getAgentDirectory, getAgentDirectoryPath, getAgentMcpPath } from '../../src/agents';
 
 describe('Agent Mappings', () => {
   describe('AGENT_MAPPINGS', () => {
@@ -51,6 +51,27 @@ describe('Agent Mappings', () => {
     it('should return undefined for agents without directories', () => {
       expect(getAgentDirectory('claude')).toBeUndefined();
       expect(getAgentDirectory('codex')).toBeUndefined();
+    });
+  });
+
+  describe('getAgentDirectoryPath', () => {
+    it('should return mapped directory paths for known types', () => {
+      expect(getAgentDirectoryPath('claude', 'commands')).toBe('.claude/commands');
+      expect(getAgentDirectoryPath('cursor', 'skills')).toBe('.cursor/skills');
+      expect(getAgentDirectoryPath('opencode', 'agents')).toBe('.opencode/agent');
+    });
+
+    it('should return null for unknown directory types', () => {
+      expect(getAgentDirectoryPath('claude', 'unknown')).toBeNull();
+    });
+  });
+
+  describe('getAgentMcpPath', () => {
+    it('should return project-relative path for cursor in tests', () => {
+      const originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'test';
+      expect(getAgentMcpPath('cursor')).toBe('./.cursor/mcp.json');
+      process.env.NODE_ENV = originalEnv;
     });
   });
 });

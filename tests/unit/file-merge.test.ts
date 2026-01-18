@@ -89,6 +89,30 @@ describe('AgentDistributor - File Merge', () => {
       expect(part1Index).toBeLessThan(part2Index);
     });
 
+    it('skips empty file paths in merge lists', async () => {
+      const file1 = `${testDir}/part1.md`;
+      writeFileSync(file1, '# Part 1');
+
+      const config: Config = {
+        rules: [],
+        mergeMcps: true
+      };
+
+      const rule: MergedFileRule = {
+        file: ['', file1],
+        to: testDir,
+        targets: [
+          { name: 'claude', to: `${testDir}/merged-skip.md` }
+        ]
+      };
+
+      const distributor = new AgentDistributor(config);
+      await distributor.distributeRule(rule);
+
+      const mergedContent = readFileSync(`${testDir}/merged-skip.md`, 'utf-8');
+      expect(mergedContent).toContain('# Part 1');
+    });
+
     it('should merge three files with correct separators', async () => {
       const file1 = `${testDir}/intro.md`;
       const file2 = `${testDir}/body.md`;

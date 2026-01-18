@@ -52,7 +52,9 @@ glooit sync              # Sync rules to all agents
 
 ## Configuration
 
-Create `.glooit/main.md` with your rules, then configure `glooit.config.ts`:
+Create `.agents/main.md` with your rules, then configure `glooit.config.ts`:
+
+> Legacy support: `.glooit` is still supported. If `configDir` is not set, glooit will use `.agents` when present, otherwise it falls back to `.glooit`.
 
 ```typescript
 import { defineRules } from 'glooit';
@@ -60,7 +62,7 @@ import { defineRules } from 'glooit';
 export default defineRules({
   rules: [
     {
-      file: '.glooit/main.md',
+      file: '.agents/main.md',
       to: './',
       targets: ['claude', 'cursor', 'codex']
     }
@@ -106,7 +108,7 @@ Override output locations per-agent:
 
 ```typescript
 {
-  file: '.glooit/backend.md',
+  file: '.agents/backend.md',
   to: './',
   targets: [
     'claude',
@@ -124,16 +126,16 @@ export default defineRules({
   rules: [...],
 
   // Simple string path (defaults to claude, cursor, opencode)
-  commands: '.glooit/commands',
+  commands: '.agents/commands',
 
   // Or with explicit targets
   skills: {
-    path: '.glooit/skills',
+    path: '.agents/skills',
     targets: ['claude']
   },
 
   agents: {
-    path: '.glooit/agents',
+    path: '.agents/agents',
     targets: ['claude', 'cursor']
   }
 });
@@ -145,6 +147,42 @@ Output mappings:
 - `skills` → `.claude/skills`, `.cursor/skills` (OpenCode uses `.claude/skills`)
 - `agents` → `.claude/agents`, `.cursor/agents`, `.opencode/agent`
 
+### Symlink Mode
+
+Use symlinks instead of copying. This keeps your source of truth in `.agents` and updates targets instantly.
+
+```typescript
+export default defineRules({
+  mode: 'symlink', // or 'copy'
+  rules: [
+    {
+      file: '.agents/main.md',
+      to: './',
+      targets: ['claude', 'cursor']
+    },
+    {
+      file: '.agents/codex.md',
+      to: './',
+      mode: 'copy', // per-rule override
+      targets: ['codex']
+    }
+  ]
+});
+```
+
+**Why use symlink mode?**
+- Changes to source files instantly reflect in all agent configs (no need to run `glooit sync`)
+- Single source of truth - edit once, all agents see the update
+- Useful for rapid iteration and development
+
+**Limitations:**
+Symlinks point directly to source files, so transformations cannot be applied:
+- Per-rule hooks and global transforms are skipped (hooks/transforms would modify the source file)
+- Merge rules (`file: string[]`) automatically fall back to copy mode (cannot symlink to multiple files)
+- Agent-specific formatting is not applied (each agent would need a different version)
+
+When limitations apply, glooit shows a warning and provides guidance. Use `glooit unlink` to convert symlinks back to regular files.
+
 ### File Merging
 
 Combine multiple files into one output:
@@ -152,8 +190,8 @@ Combine multiple files into one output:
 ```typescript
 {
   file: [
-    '.glooit/coding-standards.md',
-    '.glooit/testing-guidelines.md'
+    '.agents/coding-standards.md',
+    '.agents/testing-guidelines.md'
   ],
   to: './',
   targets: [
@@ -168,7 +206,7 @@ Limit rule scope to specific files:
 
 ```typescript
 {
-  file: '.glooit/frontend.md',
+  file: '.agents/frontend.md',
   to: './apps/frontend',
   globs: 'src/**/*.{ts,tsx}',
   targets: ['cursor']
@@ -179,7 +217,7 @@ Limit rule scope to specific files:
 
 Transform content during sync using placeholders in your source files.
 
-**Source file** (`.glooit/main.md`):
+**Source file** (`.agents/main.md`):
 
 ```markdown
 # Project Guidelines
@@ -204,7 +242,7 @@ import { defineRules, transforms } from 'glooit';
 export default defineRules({
   rules: [
     {
-      file: '.glooit/main.md',
+      file: '.agents/main.md',
       to: './',
       targets: ['claude'],
       hooks: ['replaceStructure', 'addTimestamp', 'replaceEnv']
@@ -248,14 +286,14 @@ export default defineRules({
     // Run a TypeScript script before shell commands
     {
       event: 'beforeShellExecution',
-      script: '.glooit/hooks/check-command.ts',
+      script: '.agents/hooks/check-command.ts',
       targets: ['claude']
     },
 
     // Block writes to sensitive files
     {
       event: 'PreToolUse',
-      script: '.glooit/hooks/block-env-writes.ts',
+      script: '.agents/hooks/block-env-writes.ts',
       matcher: 'Edit|Write',  // Claude Code matcher
       targets: ['claude']
     }
@@ -319,6 +357,7 @@ export default defineRules({
 ```bash
 glooit init              # Initialize configuration
 glooit sync              # Sync rules and MCPs
+glooit unlink            # Replace symlinked outputs with real files
 glooit validate          # Validate configuration
 glooit clean             # Clean .gitignore entries
 glooit reset --force     # Remove all generated files

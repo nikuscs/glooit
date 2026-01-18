@@ -27,7 +27,7 @@ describe('AIRulesCore', () => {
       const beforeHookExecuted = vi.fn();
 
       const config: Config = {
-        configDir: '.glooit',
+        configDir: '.agents',
         rules: [{
           file: 'test.md',
           to: './',
@@ -53,7 +53,7 @@ describe('AIRulesCore', () => {
       });
 
       const config: Config = {
-        configDir: '.glooit',
+        configDir: '.agents',
         rules: [{
           file: 'test.md',
           to: './',
@@ -79,7 +79,7 @@ describe('AIRulesCore', () => {
 
     it('should execute built-in hooks', async () => {
       const config: Config = {
-        configDir: '.glooit',
+        configDir: '.agents',
         rules: [{
           file: 'test.md',
           to: './',
@@ -111,7 +111,7 @@ describe('AIRulesCore', () => {
       const errorHook = vi.fn();
 
       const config: Config = {
-        configDir: '.glooit',
+        configDir: '.agents',
         rules: [{
           file: 'nonexistent.md', // This will cause an error
           to: './',
@@ -137,7 +137,7 @@ describe('AIRulesCore', () => {
   describe('MCP configuration', () => {
     it('should generate MCP configuration files', async () => {
       const config: Config = {
-        configDir: '.glooit',
+        configDir: '.agents',
         rules: [],
         mergeMcps: true,
         mcps: [
@@ -199,7 +199,7 @@ describe('AIRulesCore', () => {
       writeFileSync('.mcp.json', JSON.stringify(existingConfig, null, 2));
 
       const config: Config = {
-        configDir: '.glooit',
+        configDir: '.agents',
         rules: [],
         mergeMcps: true,
         mcps: [{
@@ -229,7 +229,7 @@ describe('AIRulesCore', () => {
   describe('backup functionality', () => {
     it('should create backups when enabled', async () => {
       const config: Config = {
-        configDir: '.glooit',
+        configDir: '.agents',
         rules: [{
           file: 'test.md',
           to: './',
@@ -252,12 +252,12 @@ describe('AIRulesCore', () => {
       const backupId = await core.createBackup();
 
       expect(backupId).toBeTruthy();
-      expect(existsSync('.glooit/backups')).toBe(true);
+      expect(existsSync('.agents/backups')).toBe(true);
     });
 
     it('should skip backups when disabled', async () => {
       const config: Config = {
-        configDir: '.glooit',
+        configDir: '.agents',
         rules: [],
         mergeMcps: true,
         backup: {
@@ -274,7 +274,7 @@ describe('AIRulesCore', () => {
 
     it('should list backups correctly', async () => {
       const config: Config = {
-        configDir: '.glooit',
+        configDir: '.agents',
         rules: [{
           file: 'test.md',
           to: './',
@@ -314,7 +314,7 @@ describe('AIRulesCore', () => {
   describe('validation', () => {
     it('should validate successfully with all files present', async () => {
       const config: Config = {
-        configDir: '.glooit',
+        configDir: '.agents',
         rules: [{
           file: 'test.md',
           to: './',
@@ -333,7 +333,7 @@ describe('AIRulesCore', () => {
 
     it('should fail validation with missing files', async () => {
       const config: Config = {
-        configDir: '.glooit',
+        configDir: '.agents',
         rules: [{
           file: 'missing.md',
           to: './',

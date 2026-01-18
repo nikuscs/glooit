@@ -27,7 +27,7 @@ describe('CLI - Backup Commands', () => {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       file: 'test.md',
@@ -69,7 +69,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: []
 } satisfies Config;
 `;
@@ -90,7 +90,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       file: 'test.md',
@@ -149,7 +149,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: []
 } satisfies Config;
 `;
@@ -169,7 +169,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: []
 } satisfies Config;
 `;

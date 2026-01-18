@@ -11,8 +11,10 @@ export default defineRules({
   // BASIC CONFIG
   // ─────────────────────────────────────────────────────────────
 
-  // Directory for source rule files (default: '.glooit')
-  configDir: '.glooit',
+  // Directory for source rule files (default: '.agents')
+  configDir: '.agents',
+  // Sync mode (default: 'copy')
+  mode: 'copy',
 
   // ─────────────────────────────────────────────────────────────
   // RULES - Define how rule files are distributed to agents
@@ -22,7 +24,7 @@ export default defineRules({
     // Simple rule: single file to multiple agents
     {
       name: 'main',
-      file: '.glooit/main.md',
+      file: '.agents/main.md',
       to: './',
       targets: ['claude', 'cursor', 'codex']
     },
@@ -30,7 +32,7 @@ export default defineRules({
     // Rule with globs: Cursor will only apply to matching files
     {
       name: 'frontend',
-      file: '.glooit/frontend.md',
+      file: '.agents/frontend.md',
       to: './apps/frontend',
       globs: 'src/**/*.{ts,tsx}',  // Cursor-specific: limits rule scope
       targets: ['claude', 'cursor']
@@ -39,7 +41,7 @@ export default defineRules({
     // Custom paths: override default output locations
     {
       name: 'backend',
-      file: '.glooit/backend.md',
+      file: '.agents/backend.md',
       to: './',
       targets: [
         'claude',  // Uses default: CLAUDE.md
@@ -51,7 +53,7 @@ export default defineRules({
     // Per-rule hooks: apply specific transformations
     {
       name: 'project-info',
-      file: '.glooit/project.md',
+      file: '.agents/project.md',
       to: './',
       targets: ['claude'],
       hooks: ['replaceStructure', 'addTimestamp', 'replaceEnv']
@@ -61,9 +63,9 @@ export default defineRules({
     {
       name: 'combined',
       file: [
-        '.glooit/coding-standards.md',
-        '.glooit/testing-guidelines.md',
-        '.glooit/review-checklist.md'
+        '.agents/coding-standards.md',
+        '.agents/testing-guidelines.md',
+        '.agents/review-checklist.md'
       ],
       to: './',
       targets: [
@@ -75,7 +77,7 @@ export default defineRules({
     // Disable gitignore for specific rule
     {
       name: 'public-docs',
-      file: '.glooit/public.md',
+      file: '.agents/public.md',
       to: './docs',
       targets: ['generic'],
       gitignore: false  // Don't add to .gitignore
@@ -87,21 +89,21 @@ export default defineRules({
   // ─────────────────────────────────────────────────────────────
 
   // Simple string path (uses default targets: claude, cursor)
-  // commands: '.glooit/commands',
+  // commands: '.agents/commands',
 
   // Or with explicit config (same result as above, but explicit)
   commands: {
-    path: '.glooit/commands',
+    path: '.agents/commands',
     targets: ['claude', 'cursor']
   },
 
   skills: {
-    path: '.glooit/skills',
+    path: '.agents/skills',
     targets: ['claude']
   },
 
   agents: {
-    path: '.glooit/agents',
+    path: '.agents/agents',
     targets: ['claude', 'cursor']
   },
 
@@ -204,7 +206,7 @@ export default defineRules({
     // Run ESLint after TypeScript file edits
     {
       event: 'PostToolUse',
-      script: '.glooit/hooks/lint-ts.ts',
+      script: '.agents/hooks/lint-ts.ts',
       matcher: 'Edit|Write',
       targets: ['claude']
     },
@@ -212,7 +214,7 @@ export default defineRules({
     // Validate shell commands before execution
     {
       event: 'beforeShellExecution',
-      script: '.glooit/hooks/validate-command.ts',
+      script: '.agents/hooks/validate-command.ts',
       targets: ['claude', 'cursor']
     }
   ],

@@ -26,7 +26,7 @@ describe('CLI - Validate Command', () => {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       file: 'test.md',
@@ -52,7 +52,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       file: 'missing.md',
@@ -77,9 +77,9 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [],
-  commands: '.glooit/commands'
+  commands: '.agents/commands'
 } satisfies Config;
 `;
     writeFileSync('glooit.config.ts', config);
@@ -96,7 +96,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: []
 } satisfies Config;
 `;
@@ -111,14 +111,14 @@ export default {
   });
 
   it('should validate with multiple rules and directory sync', () => {
-    mkdirSync('.glooit/commands', { recursive: true });
-    writeFileSync('.glooit/commands/deploy.md', '# Deploy');
+    mkdirSync('.agents/commands', { recursive: true });
+    writeFileSync('.agents/commands/deploy.md', '# Deploy');
 
     const config = `
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       file: 'rule1.md',
@@ -131,7 +131,7 @@ export default {
       targets: ['cursor']
     }
   ],
-  commands: '.glooit/commands'
+  commands: '.agents/commands'
 } satisfies Config;
 `;
     writeFileSync('glooit.config.ts', config);

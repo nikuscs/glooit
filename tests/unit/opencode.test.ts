@@ -12,7 +12,7 @@ describe('OpenCode Support', () => {
       mkdirSync(testDir, { recursive: true });
     }
     process.chdir(testDir);
-    mkdirSync('.glooit', { recursive: true });
+    mkdirSync('.agents', { recursive: true });
   });
 
   afterEach(() => {
@@ -47,11 +47,11 @@ describe('OpenCode Support', () => {
 
   describe('Rule Distribution', () => {
     it('should distribute rules to AGENTS.md', async () => {
-      writeFileSync('.glooit/test.md', '# Test Rule\n\nThis is a test.');
+      writeFileSync('.agents/test.md', '# Test Rule\n\nThis is a test.');
 
       const config: Config = {
         rules: [{
-          file: '.glooit/test.md',
+          file: '.agents/test.md',
           to: './',
           targets: ['opencode']
         }],
@@ -68,11 +68,11 @@ describe('OpenCode Support', () => {
     });
 
     it('should distribute to both opencode and codex (same AGENTS.md)', async () => {
-      writeFileSync('.glooit/test.md', '# Shared Rule');
+      writeFileSync('.agents/test.md', '# Shared Rule');
 
       const config: Config = {
         rules: [{
-          file: '.glooit/test.md',
+          file: '.agents/test.md',
           to: './',
           targets: ['opencode', 'codex']
         }],
@@ -89,11 +89,11 @@ describe('OpenCode Support', () => {
     });
 
     it('should distribute to opencode and claude separately', async () => {
-      writeFileSync('.glooit/test.md', '# Multi-Agent Rule');
+      writeFileSync('.agents/test.md', '# Multi-Agent Rule');
 
       const config: Config = {
         rules: [{
-          file: '.glooit/test.md',
+          file: '.agents/test.md',
           to: './',
           targets: ['opencode', 'claude']
         }],
@@ -116,13 +116,13 @@ describe('OpenCode Support', () => {
 
   describe('Directory Sync', () => {
     it('should sync commands to .opencode/command/', async () => {
-      mkdirSync('.glooit/commands', { recursive: true });
-      writeFileSync('.glooit/commands/test.md', '# Test Command');
+      mkdirSync('.agents/commands', { recursive: true });
+      writeFileSync('.agents/commands/test.md', '# Test Command');
 
       const config: Config = {
         rules: [],
         commands: {
-          path: '.glooit/commands',
+          path: '.agents/commands',
           targets: ['opencode']
         },
         mergeMcps: true
@@ -137,13 +137,13 @@ describe('OpenCode Support', () => {
     });
 
     it('should sync agents to .opencode/agent/', async () => {
-      mkdirSync('.glooit/agents', { recursive: true });
-      writeFileSync('.glooit/agents/reviewer.md', '# Reviewer Agent');
+      mkdirSync('.agents/agents', { recursive: true });
+      writeFileSync('.agents/agents/reviewer.md', '# Reviewer Agent');
 
       const config: Config = {
         rules: [],
         agents: {
-          path: '.glooit/agents',
+          path: '.agents/agents',
           targets: ['opencode']
         },
         mergeMcps: true
@@ -158,13 +158,13 @@ describe('OpenCode Support', () => {
     });
 
     it('should sync skills to Claude-compatible path for opencode', async () => {
-      mkdirSync('.glooit/skills', { recursive: true });
-      writeFileSync('.glooit/skills/test.md', '# Test Skill');
+      mkdirSync('.agents/skills', { recursive: true });
+      writeFileSync('.agents/skills/test.md', '# Test Skill');
 
       const config: Config = {
         rules: [],
         skills: {
-          path: '.glooit/skills',
+          path: '.agents/skills',
           targets: ['opencode']
         },
         mergeMcps: true
@@ -182,11 +182,11 @@ describe('OpenCode Support', () => {
 
   describe('Gitignore', () => {
     it('should add opencode files to gitignore', async () => {
-      writeFileSync('.glooit/test.md', '# Test');
+      writeFileSync('.agents/test.md', '# Test');
 
       const config: Config = {
         rules: [{
-          file: '.glooit/test.md',
+          file: '.agents/test.md',
           to: './',
           targets: ['opencode']
         }],
@@ -204,12 +204,12 @@ describe('OpenCode Support', () => {
 
   describe('Default Directory Sync Targets', () => {
     it('should sync to claude, cursor, and opencode by default when using string path', async () => {
-      mkdirSync('.glooit/commands', { recursive: true });
-      writeFileSync('.glooit/commands/test.md', '# Test Command');
+      mkdirSync('.agents/commands', { recursive: true });
+      writeFileSync('.agents/commands/test.md', '# Test Command');
 
       const config: Config = {
         rules: [],
-        commands: '.glooit/commands', // Simple string path - should default to all supported agents
+        commands: '.agents/commands', // Simple string path - should default to all supported agents
         mergeMcps: true
       };
 
@@ -223,12 +223,12 @@ describe('OpenCode Support', () => {
     });
 
     it('should sync skills to claude, cursor, and opencode (claude path) by default', async () => {
-      mkdirSync('.glooit/skills', { recursive: true });
-      writeFileSync('.glooit/skills/test.md', '# Test Skill');
+      mkdirSync('.agents/skills', { recursive: true });
+      writeFileSync('.agents/skills/test.md', '# Test Skill');
 
       const config: Config = {
         rules: [],
-        skills: '.glooit/skills',
+        skills: '.agents/skills',
         mergeMcps: true
       };
 
@@ -242,12 +242,12 @@ describe('OpenCode Support', () => {
     });
 
     it('should sync agents to claude, cursor, and opencode by default', async () => {
-      mkdirSync('.glooit/agents', { recursive: true });
-      writeFileSync('.glooit/agents/test.md', '# Test Agent');
+      mkdirSync('.agents/agents', { recursive: true });
+      writeFileSync('.agents/agents/test.md', '# Test Agent');
 
       const config: Config = {
         rules: [],
-        agents: '.glooit/agents',
+        agents: '.agents/agents',
         mergeMcps: true
       };
 

@@ -23,10 +23,11 @@ describe('ManifestManager', () => {
     it('should store and retrieve generated files', () => {
       const manager = new ManifestManager();
 
-      manager.updateManifest(['CLAUDE.md', 'AGENTS.md', '.cursor/rules/']);
+      manager.updateManifest(['CLAUDE.md', 'AGENTS.md', '.cursor/rules/'], ['linked.md']);
 
       expect(manager.getGeneratedFiles()).toEqual(['AGENTS.md', 'CLAUDE.md']);
       expect(manager.getGeneratedDirectories()).toEqual(['.cursor/rules']);
+      expect(manager.getGeneratedSymlinks()).toEqual(['linked.md']);
     });
 
     it('should normalize paths by removing ./ prefix', () => {
@@ -41,11 +42,12 @@ describe('ManifestManager', () => {
     it('should persist manifest to file', () => {
       const manager = new ManifestManager();
 
-      manager.updateManifest(['CLAUDE.md']);
+      manager.updateManifest(['CLAUDE.md'], ['linked.md']);
 
-      expect(existsSync('.glooit/manifest.json')).toBe(true);
-      const content = JSON.parse(readFileSync('.glooit/manifest.json', 'utf-8'));
+      expect(existsSync('.agents/manifest.json')).toBe(true);
+      const content = JSON.parse(readFileSync('.agents/manifest.json', 'utf-8'));
       expect(content.generatedFiles).toEqual(['CLAUDE.md']);
+      expect(content.generatedSymlinks).toEqual(['linked.md']);
     });
   });
 
@@ -122,10 +124,10 @@ describe('ManifestManager', () => {
       const manager = new ManifestManager();
 
       manager.updateManifest(['CLAUDE.md']);
-      expect(existsSync('.glooit/manifest.json')).toBe(true);
+      expect(existsSync('.agents/manifest.json')).toBe(true);
 
       manager.clearManifest();
-      expect(existsSync('.glooit/manifest.json')).toBe(false);
+      expect(existsSync('.agents/manifest.json')).toBe(false);
     });
 
     it('should handle missing manifest gracefully', () => {
@@ -138,8 +140,8 @@ describe('ManifestManager', () => {
 
   describe('edge cases - bulletproof handling', () => {
     it('should handle corrupted manifest JSON gracefully', () => {
-      mkdirSync('.glooit', { recursive: true });
-      writeFileSync('.glooit/manifest.json', '{ invalid json !!!');
+      mkdirSync('.agents', { recursive: true });
+      writeFileSync('.agents/manifest.json', '{ invalid json !!!');
 
       const manager = new ManifestManager();
 
@@ -156,7 +158,7 @@ describe('ManifestManager', () => {
       const manager = new ManifestManager();
 
       // No manifest exists yet
-      expect(existsSync('.glooit/manifest.json')).toBe(false);
+      expect(existsSync('.agents/manifest.json')).toBe(false);
 
       // Prune should work (nothing to prune)
       const removed = manager.pruneStaleFiles(['CLAUDE.md']);
@@ -164,7 +166,7 @@ describe('ManifestManager', () => {
 
       // Update should create manifest
       manager.updateManifest(['CLAUDE.md']);
-      expect(existsSync('.glooit/manifest.json')).toBe(true);
+      expect(existsSync('.agents/manifest.json')).toBe(true);
     });
 
     it('should recover if user deletes manifest between syncs', () => {
@@ -175,7 +177,7 @@ describe('ManifestManager', () => {
       manager.updateManifest(['CLAUDE.md']);
 
       // User deletes manifest
-      unlinkSync('.glooit/manifest.json');
+      unlinkSync('.agents/manifest.json');
 
       // Second sync with different config - won't prune because no history
       const removed = manager.pruneStaleFiles(['AGENTS.md']);

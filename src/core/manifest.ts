@@ -5,22 +5,34 @@ interface Manifest {
   version: number;
   generatedFiles: string[];
   generatedDirectories: string[];
+  generatedSymlinks: string[];
 }
 
 export class ManifestManager {
-  private manifestPath = '.glooit/manifest.json';
-  private currentVersion = 1;
+  private manifestPath: string;
+  private currentVersion = 2;
+
+  constructor(configDir = '.agents') {
+    this.manifestPath = `${configDir}/manifest.json`;
+  }
 
   private readManifest(): Manifest {
     if (!existsSync(this.manifestPath)) {
-      return { version: this.currentVersion, generatedFiles: [], generatedDirectories: [] };
+      return { version: this.currentVersion, generatedFiles: [], generatedDirectories: [], generatedSymlinks: [] };
     }
 
     try {
       const content = readFileSync(this.manifestPath, 'utf-8');
-      return JSON.parse(content);
+      const parsed = JSON.parse(content) as Manifest;
+      /* istanbul ignore next -- defensive defaults for partial manifests */
+      return {
+        version: parsed.version ?? this.currentVersion,
+        generatedFiles: parsed.generatedFiles ?? [],
+        generatedDirectories: parsed.generatedDirectories ?? [],
+        generatedSymlinks: parsed.generatedSymlinks ?? []
+      };
     } catch {
-      return { version: this.currentVersion, generatedFiles: [], generatedDirectories: [] };
+      return { version: this.currentVersion, generatedFiles: [], generatedDirectories: [], generatedSymlinks: [] };
     }
   }
 
@@ -43,6 +55,10 @@ export class ManifestManager {
 
   getGeneratedDirectories(): string[] {
     return this.readManifest().generatedDirectories;
+  }
+
+  getGeneratedSymlinks(): string[] {
+    return this.readManifest().generatedSymlinks;
   }
 
   pruneStaleFiles(currentPaths: string[]): string[] {
@@ -71,6 +87,7 @@ export class ManifestManager {
 
     // Remove stale directories (only if empty)
     for (const dir of manifest.generatedDirectories) {
+      /* istanbul ignore next -- cleanup-only branch */
       if (!currentDirs.includes(dir)) {
         if (existsSync(dir)) {
           try {
@@ -87,8 +104,9 @@ export class ManifestManager {
     return removedPaths;
   }
 
-  updateManifest(currentPaths: string[]): void {
+  updateManifest(currentPaths: string[], symlinkPaths: string[] = []): void {
     const normalizedPaths = currentPaths.map(p => this.normalizePath(p));
+    const normalizedSymlinks = symlinkPaths.map(p => this.normalizePath(p));
 
     const files = normalizedPaths.filter(p => !p.endsWith('/'));
     const directories = normalizedPaths.filter(p => p.endsWith('/')).map(p => p.slice(0, -1));
@@ -96,7 +114,8 @@ export class ManifestManager {
     const manifest: Manifest = {
       version: this.currentVersion,
       generatedFiles: files.sort(),
-      generatedDirectories: directories.sort()
+      generatedDirectories: directories.sort(),
+      generatedSymlinks: Array.from(new Set(normalizedSymlinks)).sort()
     };
 
     this.writeManifest(manifest);

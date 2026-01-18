@@ -26,7 +26,7 @@ describe('CLI - MCP Basic Configuration', () => {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [],
   mcps: [
     {
@@ -91,7 +91,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [],
   mcps: [
     {
@@ -138,7 +138,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [],
   mcps: [
     {
@@ -172,7 +172,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [],
   mcps: [
     {
@@ -216,7 +216,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [],
   mcps: [
     {
@@ -248,7 +248,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [],
   mcps: [
     {

@@ -7,6 +7,7 @@ import { ConfigValidator } from '../core/validation';
 import { existsSync, writeFileSync, rmSync, readdirSync, readFileSync } from 'fs';
 import { dirname } from 'path';
 import { GitIgnoreManager } from '../core/gitignore';
+import { ManifestManager } from '../core/manifest';
 import { detect } from 'package-manager-detector/detect';
 import { resolveCommand } from 'package-manager-detector/commands';
 import { execSync } from 'child_process';
@@ -110,6 +111,19 @@ program
   });
 
 program
+  .command('unlink')
+  .description('Replace symlinked outputs with real files')
+  .option('-c, --config <path>', 'path to configuration file')
+  .action(async (options) => {
+    try {
+      await unlinkCommand(options.config);
+    } catch (error) {
+      console.error('Error:', error);
+      process.exit(1);
+    }
+  });
+
+program
   .command('reset')
   .description('Remove all glooit generated files, backups, and config (start fresh)')
   .option('--force', 'skip confirmation prompt')
@@ -170,7 +184,7 @@ async function initCommand(force: boolean): Promise<void> {
     console.log('💡 For TypeScript support, create a package.json and add glooit to devDependencies');
     console.log('Next steps:');
     console.log('1. Edit the configuration file to match your project');
-    console.log('2. Create your rule files in .glooit/');
+    console.log('2. Create your rule files in .agents/ (or .glooit/ for legacy)');
     console.log('3. Run `glooit sync` to distribute rules');
     return;
   }
@@ -329,7 +343,7 @@ async function resetCommand(force: boolean): Promise<void> {
     generatedPaths = core.collectAllGeneratedPaths();
   } catch {
     // Config doesn't exist or can't be loaded, use default
-    generatedPaths = ['.glooit']; // Default config directory
+    generatedPaths = ['.agents', '.glooit']; // Default config directories
   }
 
   // Remove config files
@@ -389,7 +403,7 @@ async function resetCommand(force: boolean): Promise<void> {
 
   // Clean .gitignore
   try {
-    const config = { configDir: '.glooit', rules: [], mcps: [], backup: { enabled: true, retention: 10 }, mergeMcps: false };
+    const config = { configDir: '.agents', rules: [], mcps: [], backup: { enabled: true, retention: 10 }, mergeMcps: false };
     const gitIgnoreManager = new GitIgnoreManager(config);
     await gitIgnoreManager.cleanupGitIgnore();
     console.log('   Cleaned .gitignore');
@@ -398,6 +412,69 @@ async function resetCommand(force: boolean): Promise<void> {
   }
 
   console.log('✅ Reset completed! Run `glooit init` to start fresh.');
+}
+
+async function unlinkCommand(configPath?: string): Promise<void> {
+  const config = await ConfigLoader.load(configPath);
+  const core = new AIRulesCore(config);
+  const manifestManager = new ManifestManager(config.configDir);
+
+  const symlinkPaths = manifestManager.getGeneratedSymlinks();
+  if (symlinkPaths.length === 0) {
+    console.log('No symlinked outputs found in manifest.');
+    return;
+  }
+
+  console.log(`🔗 Replacing ${symlinkPaths.length} symlink(s) with real files...`);
+
+  for (const linkPath of symlinkPaths) {
+    await replaceSymlinkWithFile(linkPath);
+  }
+
+  const paths = core.collectAllGeneratedPaths();
+  manifestManager.updateManifest(paths, []);
+
+  console.log('✅ Symlinks replaced.');
+}
+
+async function replaceSymlinkWithFile(linkPath: string): Promise<void> {
+  const { lstatSync, readlinkSync, existsSync, rmSync, mkdirSync, copyFileSync, cpSync } = await import('fs');
+  const { dirname, resolve } = await import('path');
+
+  if (!existsSync(linkPath)) {
+    console.warn(`⚠️  Symlink not found: ${linkPath}`);
+    return;
+  }
+
+  try {
+    const stats = lstatSync(linkPath);
+    if (!stats.isSymbolicLink()) {
+      console.warn(`⚠️  Not a symlink, skipping: ${linkPath}`);
+      return;
+    }
+
+    const target = readlinkSync(linkPath);
+    const resolvedTarget = resolve(dirname(linkPath), target);
+
+    if (!existsSync(resolvedTarget)) {
+      console.warn(`⚠️  Symlink target not found: ${resolvedTarget}`);
+      return;
+    }
+
+    // Remove symlink
+    rmSync(linkPath, { recursive: true, force: true });
+
+    // Copy content from target
+    if (lstatSync(resolvedTarget).isDirectory()) {
+      mkdirSync(linkPath, { recursive: true });
+      cpSync(resolvedTarget, linkPath, { recursive: true });
+    } else {
+      mkdirSync(dirname(linkPath), { recursive: true });
+      copyFileSync(resolvedTarget, linkPath);
+    }
+  } catch (error) {
+    console.warn(`⚠️  Failed to replace symlink: ${linkPath} (${error})`);
+  }
 }
 
 async function upgradeCommand(forceGlobal: boolean, forceLocal: boolean): Promise<void> {
