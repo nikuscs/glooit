@@ -27,7 +27,7 @@ describe('CLI - Reset Command', () => {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       file: 'test.md',
@@ -47,7 +47,7 @@ export default {
     // Verify files were created
     expect(existsSync('CLAUDE.md')).toBe(true);
     expect(existsSync('.cursor/rules')).toBe(true);
-    // .glooit is only created when backup is enabled
+    // .agents is only created when backup is enabled
 
     // Now reset
     const result = execSync(`bun run ${cliPath} reset --force`, {
@@ -69,7 +69,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       file: 'test.md',
@@ -115,7 +115,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: []
 } satisfies Config;
 `;
@@ -176,7 +176,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       file: 'test.md',
@@ -198,7 +198,7 @@ export default {
 
     // Verify files and backup directory were created
     expect(existsSync('CLAUDE.md')).toBe(true);
-    expect(existsSync('.glooit')).toBe(true);
+    expect(existsSync('.agents')).toBe(true);
 
     const result = execSync(`bun run ${cliPath} reset --force`, {
       encoding: 'utf-8'
@@ -208,6 +208,6 @@ export default {
 
     // Verify all generated files are removed
     expect(existsSync('CLAUDE.md')).toBe(false);
-    expect(existsSync('.glooit')).toBe(false);
+    expect(existsSync('.agents')).toBe(false);
   });
 });

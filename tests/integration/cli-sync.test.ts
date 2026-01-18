@@ -27,7 +27,7 @@ describe('CLI - Sync Command', () => {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       file: 'test.md',
@@ -55,7 +55,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       file: 'shared.md',
@@ -88,7 +88,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       file: 'test.md',
@@ -110,7 +110,7 @@ export default {
     execSync(`bun run ${cliPath} sync`, { encoding: 'utf-8' });
 
     // Check that backup directory is created
-    expect(existsSync('.glooit/backups')).toBe(true);
+    expect(existsSync('.agents/backups')).toBe(true);
   });
 
   it('should sync with custom config directory', () => {
@@ -143,7 +143,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       file: 'missing.md',
@@ -167,7 +167,7 @@ export default {
 import { Config } from '@ai-rules/types';
 
 export default {
-  configDir: '.glooit',
+  configDir: '.agents',
   rules: [
     {
       file: 'test.md',

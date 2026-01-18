@@ -4,7 +4,7 @@ import type { SyncContext } from '../../src/types';
 
 describe('Compact Hook', () => {
   const mockContext: SyncContext = {
-    config: { configDir: '.glooit', rules: [], mergeMcps: true },
+    config: { configDir: '.agents', rules: [], mergeMcps: true },
     rule: { file: 'test.md', to: './', targets: ['claude'] },
     content: '',
     targetPath: './test.md',
@@ -60,6 +60,20 @@ describe('Compact Hook', () => {
       expect(result).toContain('Content with lots of spaces');
       expect(result).not.toContain('   \n');
       expect(result.split('\n\n\n').length).toBe(1); // No triple newlines
+    });
+
+    it('should preserve frontmatter and compact lists by default', () => {
+      const compactHook = compact();
+      const context = {
+        ...mockContext,
+        content: '---\ntitle: Test\n---\n\n- one\n\n\n- two\n\n\n\n## Heading'
+      };
+
+      const result = compactHook(context);
+
+      expect(result.startsWith('---\ntitle: Test\n---')).toBe(true);
+      expect(result).toContain('- one\n- two');
+      expect(result).toContain('\n\n## Heading');
     });
 
     it('should handle content without frontmatter', () => {

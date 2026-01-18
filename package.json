@@ -19,6 +19,7 @@
     "dev": "bun run src/cli/index.ts",
     "test": "vitest --run",
     "test:coverage": "vitest run --coverage",
+    "test:ui": "bun run test:coverage && vitest --ui",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint src tests",
     "lint:fix": "oxlint src tests --fix",
@@ -61,6 +62,7 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "^24.5.2",
+    "@vitest/coverage-istanbul": "3.2.4",
     "@vitest/ui": "^3.2.4",
     "bumpp": "^10.2.3",
     "oxlint": "^1.17.0",

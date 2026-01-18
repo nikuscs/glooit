@@ -53,7 +53,7 @@ describe('AgentHooksDistributor', () => {
         hooks: [
           {
             event: 'PreToolUse',
-            script: '.glooit/hooks/check.ts',
+            script: '.agents/hooks/check.ts',
             targets: ['claude']
           }
         ]
@@ -63,7 +63,7 @@ describe('AgentHooksDistributor', () => {
       await distributor.distributeHooks();
 
       const settings = JSON.parse(readFileSync('.claude/settings.json', 'utf-8'));
-      expect(settings.hooks.PreToolUse[0].hooks[0].command).toBe('bun run .glooit/hooks/check.ts');
+      expect(settings.hooks.PreToolUse[0].hooks[0].command).toBe('bun run .agents/hooks/check.ts');
     });
 
     it('should use node for .js scripts', async () => {
@@ -72,7 +72,7 @@ describe('AgentHooksDistributor', () => {
         hooks: [
           {
             event: 'PostToolUse',
-            script: '.glooit/hooks/format.js',
+            script: '.agents/hooks/format.js',
             targets: ['claude']
           }
         ]
@@ -82,7 +82,7 @@ describe('AgentHooksDistributor', () => {
       await distributor.distributeHooks();
 
       const settings = JSON.parse(readFileSync('.claude/settings.json', 'utf-8'));
-      expect(settings.hooks.PostToolUse[0].hooks[0].command).toBe('node .glooit/hooks/format.js');
+      expect(settings.hooks.PostToolUse[0].hooks[0].command).toBe('node .agents/hooks/format.js');
     });
 
     it('should map Cursor events to Claude equivalents', async () => {
@@ -184,7 +184,7 @@ describe('AgentHooksDistributor', () => {
         hooks: [
           {
             event: 'beforeShellExecution',
-            script: '.glooit/hooks/validate.ts',
+            script: '.agents/hooks/validate.ts',
             targets: ['cursor']
           }
         ]
@@ -194,7 +194,7 @@ describe('AgentHooksDistributor', () => {
       await distributor.distributeHooks();
 
       const hooksConfig = JSON.parse(readFileSync('.cursor/hooks.json', 'utf-8'));
-      expect(hooksConfig.hooks.beforeShellExecution[0].command).toBe('bun run .glooit/hooks/validate.ts');
+      expect(hooksConfig.hooks.beforeShellExecution[0].command).toBe('bun run .agents/hooks/validate.ts');
     });
   });
 

@@ -2,6 +2,7 @@ import { existsSync, statSync } from 'fs';
 import { join, basename } from 'path';
 import type { Config } from '../types';
 import { isKnownDirectoryType } from '../agents';
+import { resolveConfigDir } from './utils';
 
 export class ConfigLoader {
   private static readonly DEFAULT_CONFIG_PATHS = [
@@ -15,6 +16,7 @@ export class ConfigLoader {
     const configPath = customPath || this.findConfigFile();
 
     if (!configPath) {
+      /* istanbul ignore next -- CLI-only missing-config guard */
       throw new Error(
         `No configuration file found. Looking for: ${this.DEFAULT_CONFIG_PATHS.join(', ')}`
       );
@@ -63,6 +65,7 @@ export class ConfigLoader {
         return path;
       }
     }
+    /* istanbul ignore next -- only reached when no config files exist */
     return null;
   }
 
@@ -84,6 +87,9 @@ export class ConfigLoader {
     if (!Array.isArray(c.rules)) {
       throw new Error('Config.rules must be an array');
     }
+    if (c.mode !== undefined && c.mode !== 'copy' && c.mode !== 'symlink') {
+      throw new Error('Config.mode must be "copy" or "symlink"');
+    }
 
     // Validate each rule
     c.rules.forEach((rule: unknown, index: number) => {
@@ -91,9 +97,10 @@ export class ConfigLoader {
     });
 
     // Apply defaults
-    c.configDir = c.configDir || '.glooit';
+    c.configDir = resolveConfigDir(c.configDir as string | undefined);
     c.mergeMcps = c.mergeMcps ?? true;
     c.gitignore = c.gitignore ?? true;
+    c.mode = c.mode ?? 'copy';
 
     if (c.backup) {
       const backup = c.backup as Record<string, unknown>;
@@ -135,11 +142,14 @@ export class ConfigLoader {
     } else if (typeof r.to !== 'string') {
       throw new Error(`Rule at index ${index}: Rule.to must be a string`);
     }
+    if (r.mode !== undefined && r.mode !== 'copy' && r.mode !== 'symlink') {
+      throw new Error(`Rule at index ${index}: Rule.mode must be "copy" or "symlink"`);
+    }
     if (!Array.isArray(r.targets) || r.targets.length === 0) {
       throw new Error(`Rule at index ${index}: Rule.targets must be a non-empty array`);
     }
 
-    const validAgentNames = ['claude', 'cursor', 'codex', 'roocode', 'generic'];
+    const validAgentNames = ['claude', 'cursor', 'codex', 'roocode', 'opencode', 'generic'];
 
     // Check if all targets are valid agents
     if (!r.targets.every((agent: unknown) => {
@@ -175,11 +185,12 @@ export class ConfigLoader {
     return `import { defineRules } from 'glooit';
 
 export default defineRules({
-  configDir: '.glooit',
+  configDir: '.agents',
+  mode: 'copy',
   rules: [
     {
       name: 'main',
-      file: '.glooit/main.md',
+      file: '.agents/main.md',
       to: './',
       targets: ['claude', 'cursor']
     }
@@ -190,11 +201,12 @@ export default defineRules({
 
   static createPlainConfig(): string {
     return `export default {
-  configDir: '.glooit',
+  configDir: '.agents',
+  mode: 'copy',
   rules: [
     {
       name: 'main',
-      file: '.glooit/main.md',
+      file: '.agents/main.md',
       to: './',
       targets: ['claude', 'cursor']
     }
@@ -210,4 +222,5 @@ export default defineRules({
       return false;
     }
   }
+
 }

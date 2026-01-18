@@ -118,7 +118,8 @@ export class GitIgnoreManager {
     }
 
     // Always add manifest file to gitignore
-    paths.add('.glooit/manifest.json');
+    const manifestPath = `${this.config.configDir || '.agents'}/manifest.json`;
+    paths.add(this.normalizeGitignorePath(manifestPath));
 
     return Array.from(paths).sort();
   }

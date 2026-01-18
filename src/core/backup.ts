@@ -6,7 +6,7 @@ export class BackupManager {
   private backupDir: string;
 
   constructor(private config: Config) {
-    this.backupDir = join(config.configDir || '.glooit', 'backups');
+    this.backupDir = join(config.configDir || '.agents', 'backups');
     // Don't create backup dir in constructor - only when actually needed
   }
 
@@ -103,6 +103,7 @@ export class BackupManager {
     const retention = this.config.backup?.retention || 10;
     const backups = this.listBackups();
 
+    /* istanbul ignore next -- log-only cleanup path */
     if (backups.length > retention) {
       const toDelete = backups.slice(retention);
 
@@ -113,10 +114,15 @@ export class BackupManager {
             // TODO: Implement actual file deletion
             console.log(`Would delete old backup: ${backup.timestamp}`);
           }
+        /* istanbul ignore next -- defensive log-only path */
         } catch (error) {
-          console.warn(`Failed to delete backup ${backup.timestamp}: ${error}`);
+          this.logCleanupError(backup.timestamp, error);
         }
       }
     }
+  }
+
+  private logCleanupError(timestamp: string, error: unknown): void {
+    console.warn(`Failed to delete backup ${timestamp}: ${error}`);
   }
 }

@@ -1,3 +1,5 @@
+import { resolveConfigDir } from '../core/utils';
+
 export type AgentName = 'claude' | 'cursor' | 'codex' | 'roocode' | 'opencode' | 'generic';
 
 export interface AgentTarget {
@@ -10,6 +12,7 @@ export type Agent = AgentName | AgentTarget;
 // Base rule interface with common properties
 interface BaseRule {
   name?: string;
+  mode?: 'copy' | 'symlink';
   to: string;
   globs?: string;
   hooks?: string[];
@@ -108,13 +111,14 @@ export interface AgentHook {
 
 export interface Config {
   configDir?: string;
+  mode?: 'copy' | 'symlink';
   targets?: Agent[];
   rules: Rule[];
-  /** Sync commands directory (e.g., '.glooit/commands') */
+  /** Sync commands directory (e.g., '.agents/commands') */
   commands?: DirectorySync;
-  /** Sync skills directory (e.g., '.glooit/skills') */
+  /** Sync skills directory (e.g., '.agents/skills') */
   skills?: DirectorySync;
-  /** Sync agents directory (e.g., '.glooit/agents') */
+  /** Sync agents directory (e.g., '.agents/agents') */
   agents?: DirectorySync;
   mcps?: Mcp[];
   mergeMcps?: boolean;
@@ -182,6 +186,9 @@ function validateRule(rule: unknown): asserts rule is Rule {
   if (typeof r.to !== 'string') {
     throw new Error('Rule.to must be a string');
   }
+  if (r.mode !== undefined && r.mode !== 'copy' && r.mode !== 'symlink') {
+    throw new Error('Rule.mode must be "copy" or "symlink"');
+  }
   if (!Array.isArray(r.targets) || r.targets.length === 0) {
     throw new Error('Rule.targets must be a non-empty array');
   }
@@ -209,6 +216,9 @@ function validateConfig(config: unknown): asserts config is Config {
   if (!Array.isArray(c.rules)) {
     throw new Error('Config.rules must be an array');
   }
+  if (c.mode !== undefined && c.mode !== 'copy' && c.mode !== 'symlink') {
+    throw new Error('Config.mode must be "copy" or "symlink"');
+  }
 
   // Validate each rule
   c.rules.forEach((rule: unknown, index: number) => {
@@ -220,9 +230,10 @@ function validateConfig(config: unknown): asserts config is Config {
   });
 
   // Apply defaults
-  c.configDir = c.configDir || '.glooit';
+  c.configDir = resolveConfigDir(c.configDir as string | undefined);
   c.mergeMcps = c.mergeMcps ?? true;
   c.gitignore = c.gitignore ?? true;
+  c.mode = c.mode ?? 'copy';
 
   if (c.backup) {
     const backup = c.backup as Record<string, unknown>;

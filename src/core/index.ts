@@ -30,17 +30,19 @@ export class AIRulesCore {
   private backupManager: BackupManager;
   private gitIgnoreManager: GitIgnoreManager;
   private manifestManager: ManifestManager;
+  private symlinkPaths = new Set<string>();
 
   constructor(private config: Config) {
-    this.distributor = new AgentDistributor(config);
+    this.distributor = new AgentDistributor(config, this.symlinkPaths);
     this.hooksDistributor = new AgentHooksDistributor(config);
     this.backupManager = new BackupManager(config);
     this.gitIgnoreManager = new GitIgnoreManager(config);
-    this.manifestManager = new ManifestManager();
+    this.manifestManager = new ManifestManager(config.configDir);
   }
 
   async sync(): Promise<void> {
     try {
+      this.symlinkPaths.clear();
       if (this.config.transforms?.before) {
         for (const transform of this.config.transforms.before) {
           await transform({ config: this.config });
@@ -72,7 +74,7 @@ export class AIRulesCore {
       await this.gitIgnoreManager.updateGitIgnore();
 
       // Update manifest with current paths
-      this.manifestManager.updateManifest(expectedPaths);
+      this.manifestManager.updateManifest(expectedPaths, Array.from(this.symlinkPaths));
 
     } catch (error) {
       if (this.config.transforms?.error) {
@@ -164,7 +166,8 @@ export class AIRulesCore {
         name: dirType,
         file: path,
         to: './',
-        targets: supportedTargets.map(t => t as AgentName)
+        targets: supportedTargets.map(t => t as AgentName),
+        mode: this.config.mode
       };
 
       await this.distributor.distributeRule(rule);
