@@ -84,21 +84,24 @@ Run `glooit sync` (or `bunx glooit sync` / `npx glooit sync`) and it creates:
 | `cursor` | `.cursor/rules/{name}.mdc` | Frontmatter |
 | `codex` | `AGENTS.md` | Markdown |
 | `opencode` | `AGENTS.md` | Markdown |
+| `factory` | `AGENTS.md` | Markdown |
 | `roocode` | `.roo/rules/{name}.md` | Markdown |
 | `generic` | `{name}.md` | Markdown |
 
 ### Feature Support Matrix
 
-| Feature     | Claude | Cursor | OpenCode | Codex | Roo Code/Cline | Generic |
-|-------------|--------|--------|----------|-------|----------------|---------|
-| Rules       | ✓      | ✓      | ✓        | ✓     | ✓              | ✓       |
-| Commands    | ✓      | ✓      | ✓        | -     | -              | -       |
-| Skills      | ✓      | ✓      | ✓*       | -     | -              | -       |
-| Agents      | ✓      | ✓      | ✓        | -     | -              | -       |
-| MCP Servers | ✓      | ✓      | ✓        | ✓     | ✓              | ✓       |
-| Hooks       | ✓      | ✓      | -        | -     | -              | -       |
+| Feature     | Claude | Cursor | OpenCode | Codex | Factory | Roo Code/Cline | Generic |
+|-------------|--------|--------|----------|-------|---------|----------------|---------|
+| Rules       | ✓      | ✓      | ✓        | ✓     | ✓       | ✓              | ✓       |
+| Commands    | ✓      | ✓      | ✓        | ✓*    | -       | -              | -       |
+| Skills      | ✓      | ✓      | ✓**      | ✓     | ✓       | -              | -       |
+| Agents      | ✓      | ✓      | ✓        | -     | ✓***    | -              | -       |
+| MCP Servers | ✓      | ✓      | ✓        | ✓     | ✓       | ✓              | ✓       |
+| Hooks       | ✓      | ✓      | -        | -     | ✓       | -              | -       |
 
-*OpenCode uses Claude-compatible skills path (`.claude/skills/`)
+*Codex uses `.codex/prompts` for commands
+**OpenCode uses Claude-compatible skills path (`.claude/skills/`)
+***Factory uses "droids" (`.factory/droids/`) for agents
 
 ## Features
 
@@ -143,9 +146,9 @@ export default defineRules({
 
 Output mappings:
 
-- `commands` → `.claude/commands`, `.cursor/commands`, `.opencode/command`
-- `skills` → `.claude/skills`, `.cursor/skills` (OpenCode uses `.claude/skills`)
-- `agents` → `.claude/agents`, `.cursor/agents`, `.opencode/agent`
+- `commands` → `.claude/commands`, `.cursor/commands`, `.opencode/command`, `.codex/prompts`
+- `skills` → `.claude/skills`, `.cursor/skills`, `.codex/skills`, `.factory/skills` (OpenCode uses `.claude/skills`)
+- `agents` → `.claude/agents`, `.cursor/agents`, `.opencode/agent`, `.factory/droids`
 
 ### Symlink Mode
 
@@ -171,12 +174,14 @@ export default defineRules({
 ```
 
 **Why use symlink mode?**
+
 - Changes to source files instantly reflect in all agent configs (no need to run `glooit sync`)
 - Single source of truth - edit once, all agents see the update
 - Useful for rapid iteration and development
 
 **Limitations:**
 Symlinks point directly to source files, so transformations cannot be applied:
+
 - Per-rule hooks and global transforms are skipped (hooks/transforms would modify the source file)
 - Merge rules (`file: string[]`) automatically fall back to copy mode (cannot symlink to multiple files)
 - Agent-specific formatting is not applied (each agent would need a different version)
@@ -357,6 +362,7 @@ export default defineRules({
 ```bash
 glooit init              # Initialize configuration
 glooit sync              # Sync rules and MCPs
+glooit link              # Zero-config symlink sync (no config file needed)
 glooit unlink            # Replace symlinked outputs with real files
 glooit validate          # Validate configuration
 glooit clean             # Clean .gitignore entries
@@ -365,6 +371,24 @@ glooit upgrade           # Upgrade glooit to latest version
 glooit backup list       # List available backups
 glooit backup restore <timestamp>  # Restore from backup
 ```
+
+### Link Command
+
+The `link` command provides zero-config symlink-based syncing without requiring a config file:
+
+```bash
+glooit link              # Auto-detect .agents/ or .glooit/ and sync to all agents
+glooit link .my-rules    # Use custom source directory
+glooit link -t claude,cursor  # Sync to specific agents only
+```
+
+It automatically discovers and symlinks:
+
+- `CLAUDE.md` → Claude Code
+- `AGENTS.md` → Codex, OpenCode, Factory
+- `commands/` → All agents that support commands
+- `skills/` → All agents that support skills
+- `agents/` → All agents that support agents/droids
 
 ### Upgrade
 

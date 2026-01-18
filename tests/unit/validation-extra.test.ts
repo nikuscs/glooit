@@ -40,10 +40,11 @@ describe('ConfigValidator extra cases', () => {
   });
 
   it('flags directory path that is not a directory', async () => {
-    writeFileSync('not-a-dir', 'content');
+    const notADirPath = `${testDir}/not-a-dir`;
+    writeFileSync(notADirPath, 'content');
     const config: Config = {
       rules: [],
-      commands: 'not-a-dir'
+      commands: notADirPath
     };
 
     const errors = await ConfigValidator.validate(config);
