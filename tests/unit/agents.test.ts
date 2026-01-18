@@ -50,7 +50,12 @@ describe('Agent Mappings', () => {
 
     it('should return undefined for agents without directories', () => {
       expect(getAgentDirectory('claude')).toBeUndefined();
-      expect(getAgentDirectory('codex')).toBeUndefined();
+      expect(getAgentDirectory('opencode')).toBeUndefined();
+    });
+
+    it('should return directories for codex and factory', () => {
+      expect(getAgentDirectory('codex')).toBe('.codex');
+      expect(getAgentDirectory('factory')).toBe('.factory');
     });
   });
 

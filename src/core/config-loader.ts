@@ -149,7 +149,7 @@ export class ConfigLoader {
       throw new Error(`Rule at index ${index}: Rule.targets must be a non-empty array`);
     }
 
-    const validAgentNames = ['claude', 'cursor', 'codex', 'roocode', 'opencode', 'generic'];
+    const validAgentNames = ['claude', 'cursor', 'codex', 'roocode', 'opencode', 'factory', 'generic'];
 
     // Check if all targets are valid agents
     if (!r.targets.every((agent: unknown) => {

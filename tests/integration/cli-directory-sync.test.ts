@@ -169,6 +169,7 @@ export default {
     mkdirSync('.agents/commands', { recursive: true });
     writeFileSync('.agents/commands/test.md', '# Test');
 
+    // roocode doesn't support commands directory
     const config = `
 export default {
   configDir: '.agents',
@@ -176,7 +177,7 @@ export default {
     {
       name: 'commands',
       file: '.agents/commands',
-      targets: ['codex']
+      targets: ['roocode']
     }
   ]
 };

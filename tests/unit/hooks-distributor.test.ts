@@ -129,4 +129,73 @@ describe('AgentHooksDistributor', () => {
     expect(paths).toContain('.claude/settings.json');
     expect(paths).toContain('.cursor/hooks.json');
   });
+
+  it('writes Factory hooks with same format as Claude', async () => {
+    const config: Config = {
+      rules: [],
+      hooks: [
+        { event: 'PreToolUse', command: 'echo pre', matcher: 'Bash', targets: ['factory'] },
+        { event: 'PostToolUse', script: 'scripts/format.ts', targets: ['factory'] },
+        { event: 'Stop', command: 'echo done', targets: ['factory'] }
+      ]
+    };
+
+    const distributor = new AgentHooksDistributor(config);
+    await distributor.distributeHooks();
+
+    expect(existsSync('.factory/settings.json')).toBe(true);
+    const factory = JSON.parse(readFileSync('.factory/settings.json', 'utf-8'));
+    expect(factory.hooks.PreToolUse[0].matcher).toBe('Bash');
+    expect(factory.hooks.PreToolUse[0].hooks[0].command).toBe('echo pre');
+    expect(factory.hooks.PostToolUse[0].hooks[0].command).toBe('bun run scripts/format.ts');
+    expect(factory.hooks.Stop[0].hooks[0].command).toBe('echo done');
+  });
+
+  it('skips unsupported events for Factory and handles invalid JSON', async () => {
+    mkdirSync('.factory', { recursive: true });
+    writeFileSync('.factory/settings.json', '{ invalid json');
+
+    const config: Config = {
+      rules: [],
+      hooks: [
+        { event: 'beforeReadFile', command: 'echo skip', targets: ['factory'] }, // Not supported
+        { event: 'UserPromptSubmit', command: 'echo ok', targets: ['factory'] }
+      ]
+    };
+
+    const distributor = new AgentHooksDistributor(config);
+    await distributor.distributeHooks();
+
+    const factory = JSON.parse(readFileSync('.factory/settings.json', 'utf-8'));
+    expect(factory.hooks.UserPromptSubmit[0].hooks[0].command).toBe('echo ok');
+  });
+
+  it('appends hooks with same matcher for Factory', async () => {
+    const config: Config = {
+      rules: [],
+      hooks: [
+        { event: 'PreToolUse', command: 'echo one', matcher: 'Edit', targets: ['factory'] },
+        { event: 'PreToolUse', command: 'echo two', matcher: 'Edit', targets: ['factory'] }
+      ]
+    };
+
+    const distributor = new AgentHooksDistributor(config);
+    await distributor.distributeHooks();
+
+    const factory = JSON.parse(readFileSync('.factory/settings.json', 'utf-8'));
+    expect(factory.hooks.PreToolUse[0].hooks.length).toBe(2);
+  });
+
+  it('getGeneratedPaths includes Factory when targeted', () => {
+    const config: Config = {
+      rules: [],
+      hooks: [
+        { event: 'Stop', command: 'echo ok', targets: ['factory'] }
+      ]
+    };
+
+    const distributor = new AgentHooksDistributor(config);
+    const paths = distributor.getGeneratedPaths();
+    expect(paths).toContain('.factory/settings.json');
+  });
 });

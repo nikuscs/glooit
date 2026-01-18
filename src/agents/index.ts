@@ -11,16 +11,20 @@ export const AGENT_DIRECTORY_MAPPINGS: Record<KnownDirectoryType, Partial<Record
     claude: '.claude/commands',
     cursor: '.cursor/commands',
     opencode: '.opencode/command',
+    codex: '.codex/prompts', // Codex uses "prompts" for commands
   },
   skills: {
     claude: '.claude/skills',
     cursor: '.cursor/skills',
     opencode: '.claude/skills', // opencode uses Claude-compatible path
+    codex: '.codex/skills',
+    factory: '.factory/skills',
   },
   agents: {
     claude: '.claude/agents',
     cursor: '.cursor/agents',
     opencode: '.opencode/agent',
+    factory: '.factory/droids', // Factory uses "droids" for agents
   },
 };
 
@@ -50,7 +54,8 @@ export const AGENT_MAPPINGS: Record<AgentName, AgentMapping> = {
   codex: {
     path: 'AGENTS.md',
     format: 'markdown',
-    mcpPath: 'codex_mcp.json'
+    directory: '.codex',
+    mcpPath: '.codex/config.toml'
   },
   roocode: {
     path: '.roo/rules/{name}.md',
@@ -62,6 +67,12 @@ export const AGENT_MAPPINGS: Record<AgentName, AgentMapping> = {
     path: 'AGENTS.md',
     format: 'markdown',
     mcpPath: 'opencode.jsonc'
+  },
+  factory: {
+    path: 'AGENTS.md',
+    format: 'markdown',
+    directory: '.factory',
+    mcpPath: '.factory/settings.json'
   },
   generic: {
     path: '{name}.md',
