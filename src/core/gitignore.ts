@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import type { Config, Agent, AgentName, DirectorySync } from '../types';
 import { getAgentPath, getAgentDirectory, KNOWN_DIRECTORY_TYPES, getAgentDirectoryPath } from '../agents';
+import { SETTINGS_PATHS, resolveSettingsTargets } from '../agents/settings-provider-map';
 
 export class GitIgnoreManager {
   private gitignorePath = '.gitignore';
@@ -113,6 +114,19 @@ export class GitIgnoreManager {
       for (const mcp of this.config.mcps) {
         if (mcp.outputPath) {
           paths.add(this.normalizeGitignorePath(mcp.outputPath));
+        }
+      }
+    }
+
+    if (this.config.settings) {
+      const hasEnvKeys = Array.isArray(this.config.settings.env) && this.config.settings.env.length > 0;
+      const p = this.config.settings.permissions;
+      const hasPermissions = typeof p === 'object' && p !== null && !Array.isArray(p) && Object.keys(p).length > 0;
+      if (hasEnvKeys || hasPermissions) {
+        const targets = resolveSettingsTargets(this.config.settings.targets);
+
+        for (const target of targets) {
+          paths.add(this.normalizeGitignorePath(SETTINGS_PATHS[target]));
         }
       }
     }

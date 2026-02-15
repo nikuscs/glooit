@@ -299,6 +299,62 @@ other-file.txt`;
         expect(content).not.toContain('merged-no-ignore.md');
       }
     });
+
+    it('should add settings-generated paths for default targets', async () => {
+      const config: Config = {
+        rules: [],
+        settings: {
+          env: ['GEMINI_API_KEY']
+        }
+      };
+
+      const manager = new GitIgnoreManager(config);
+      await manager.updateGitIgnore();
+
+      const content = readFileSync('.gitignore', 'utf-8');
+      expect(content).toContain('.claude/settings.local.json');
+      expect(content).toContain('.cursor/cli.json');
+      expect(content).toContain('.codex/config.toml');
+      expect(content).toContain('opencode.json');
+    });
+
+    it('should add settings paths only for selected targets', async () => {
+      const config: Config = {
+        rules: [],
+        settings: {
+          targets: ['claude', 'codex'],
+          permissions: { allow: ['Read'] }
+        }
+      };
+
+      const manager = new GitIgnoreManager(config);
+      await manager.updateGitIgnore();
+
+      const content = readFileSync('.gitignore', 'utf-8');
+      expect(content).toContain('.claude/settings.local.json');
+      expect(content).toContain('.codex/config.toml');
+      expect(content).not.toContain('.cursor/cli.json');
+      expect(content).not.toContain('opencode.json');
+    });
+
+    it('should not add settings paths for empty permissions object', async () => {
+      const config: Config = {
+        rules: [],
+        settings: {
+          permissions: {}
+        }
+      };
+
+      const manager = new GitIgnoreManager(config);
+      await manager.updateGitIgnore();
+
+      const content = readFileSync('.gitignore', 'utf-8');
+      expect(content).not.toContain('.claude/settings.local.json');
+      expect(content).not.toContain('.cursor/cli.json');
+      expect(content).not.toContain('.codex/config.toml');
+      expect(content).not.toContain('opencode.json');
+      expect(content).toContain('.agents/manifest.json');
+    });
   });
 
   describe('cleanupGitIgnore', () => {

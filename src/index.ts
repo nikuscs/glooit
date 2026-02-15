@@ -6,6 +6,8 @@ export type {
   DirectorySyncConfig,
   Mcp,
   Agent,
+  SettingsConfig,
+  SettingsTarget,
   AgentHook,
   AgentHookEvent,
   SyncContext,

@@ -8,6 +8,7 @@ Sync AI coding assistant configurations across Claude Code, Cursor, Codex, OpenC
 - **Agents** - Custom agent definitions
 - **MCP Servers** - Model Context Protocol configurations
 - **Agent Hooks** - Lifecycle hooks for Claude Code and Cursor
+- **Settings Merge** - Merge shared env/permissions into provider-native settings files
 
 ## Why glooit?
 
@@ -98,6 +99,7 @@ Run `glooit sync` (or `bunx glooit sync` / `npx glooit sync`) and it creates:
 | Agents      | ✓      | ✓      | ✓        | -     | ✓***    | -              | -       |
 | MCP Servers | ✓      | ✓      | ✓        | ✓     | ✓       | ✓              | ✓       |
 | Hooks       | ✓      | ✓      | -        | -     | ✓       | -              | -       |
+| Settings    | ✓      | ✓      | ✓        | ✓     | -       | -              | -       |
 
 *Codex uses `.codex/prompts` for commands
 **OpenCode uses Claude-compatible skills path (`.claude/skills/`)
@@ -321,6 +323,41 @@ export default defineRules({
 - `.ts` files: Run with `bun run`
 - `.js` files: Run with `node`
 - `.sh` files: Run directly
+
+### Settings Merge
+
+Merge shared settings into provider-native settings files:
+
+```typescript
+export default defineRules({
+  rules: [...],
+  settings: {
+    targets: ['claude', 'cursor', 'codex', 'opencode'],
+    env: ['GEMINI_API_KEY', 'OPENAI_API_KEY'],
+    envFiles: ['.env.agents', '.env.local', '.env'], // optional (default order shown)
+    permissions: {
+      allow: ['Read', 'Grep']
+    },
+    merge: true // optional; defaults to true
+  }
+});
+```
+
+Resolution and precedence rules:
+
+- `merge` defaults to `true` (set `merge: false` to overwrite instead of merge).
+- `envFiles` is optional; default lookup is `['.env.agents', '.env.local', '.env']`.
+- For each key in `settings.env`, the first matching file in `envFiles` order wins.
+- `.env.agents` is checked first, giving you a dedicated file for agent-specific secrets.
+- If a key is not found in any env file, `process.env` is used as a fallback (useful for CI and shell-exported vars).
+- Safety guard: if env values would be written to git-tracked settings files (for `claude`/`codex`), sync fails with a warning to prevent committing secrets.
+
+Default settings output files:
+
+- `claude` → `.claude/settings.local.json`
+- `cursor` → `.cursor/cli.json`
+- `codex` → `.codex/config.toml`
+- `opencode` → `opencode.json`
 
 ### MCP Configuration
 

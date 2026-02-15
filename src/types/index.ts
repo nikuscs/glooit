@@ -1,6 +1,8 @@
 import { resolveConfigDir } from '../core/utils';
 
 export type AgentName = 'claude' | 'cursor' | 'codex' | 'roocode' | 'opencode' | 'factory' | 'generic';
+export type SettingsTarget = 'claude' | 'cursor' | 'codex' | 'opencode';
+export const SETTINGS_TARGETS: SettingsTarget[] = ['claude', 'cursor', 'codex', 'opencode'];
 
 export interface AgentTarget {
   name: AgentName;
@@ -109,6 +111,57 @@ export interface AgentHook {
   targets: AgentName[];
 }
 
+export interface SettingsConfig {
+  /** Target agents for settings merge (default: claude, cursor, codex, opencode) */
+  targets?: SettingsTarget[];
+  /** Environment variable keys to resolve and merge */
+  env?: string[];
+  /** Optional env files used to resolve keys (default: ['.env.local', '.env']) */
+  envFiles?: string[];
+  /** Generic permissions payload mapped per provider format */
+  permissions?: Record<string, unknown>;
+  /** Merge with existing settings files (default: true) */
+  merge?: boolean;
+}
+
+export function validateSettingsConfig(settings: unknown): asserts settings is SettingsConfig {
+  if (!settings || typeof settings !== 'object' || Array.isArray(settings)) {
+    throw new Error('Config.settings must be an object');
+  }
+
+  const s = settings as Record<string, unknown>;
+
+  if (s.targets !== undefined) {
+    if (!Array.isArray(s.targets) || !s.targets.every((target: unknown) => {
+      return typeof target === 'string' && SETTINGS_TARGETS.includes(target as SettingsTarget);
+    })) {
+      throw new Error(`Config.settings.targets must contain valid agents: ${SETTINGS_TARGETS.join(', ')}`);
+    }
+  }
+
+  if (s.env !== undefined) {
+    if (!Array.isArray(s.env) || !s.env.every((key: unknown) => typeof key === 'string')) {
+      throw new Error('Config.settings.env must be an array of strings');
+    }
+  }
+
+  if (s.envFiles !== undefined) {
+    if (!Array.isArray(s.envFiles) || !s.envFiles.every((file: unknown) => typeof file === 'string')) {
+      throw new Error('Config.settings.envFiles must be an array of strings');
+    }
+  }
+
+  if (s.permissions !== undefined) {
+    if (!s.permissions || typeof s.permissions !== 'object' || Array.isArray(s.permissions)) {
+      throw new Error('Config.settings.permissions must be an object');
+    }
+  }
+
+  if (s.merge !== undefined && typeof s.merge !== 'boolean') {
+    throw new Error('Config.settings.merge must be a boolean');
+  }
+}
+
 export interface Config {
   configDir?: string;
   mode?: 'copy' | 'symlink';
@@ -126,6 +179,8 @@ export interface Config {
   transforms?: Transforms;
   /** Agent lifecycle hooks - configure Claude Code/Cursor hooks */
   hooks?: AgentHook[];
+  /** Generic settings merged into provider-native settings formats */
+  settings?: SettingsConfig;
   backup?: BackupConfig;
   gitignore?: boolean;
 }
@@ -248,6 +303,10 @@ function validateConfig(config: unknown): asserts config is Config {
         m.targets = ['claude'];
       }
     });
+  }
+
+  if (c.settings !== undefined) {
+    validateSettingsConfig(c.settings);
   }
 }
 

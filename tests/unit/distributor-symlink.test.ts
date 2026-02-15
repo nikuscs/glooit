@@ -194,4 +194,5 @@ describe('AgentDistributor symlink mode', () => {
 
     await expect(distributor.distributeRule(rule)).rejects.toThrow(/Failed to symlink directory/);
   });
+
 });

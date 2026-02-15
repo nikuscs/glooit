@@ -247,4 +247,95 @@ describe('defineRules', () => {
 
     expect(config.rules[0]?.targets.length).toBe(6);
   });
+
+  it('accepts valid settings config', () => {
+    const config = defineRules({
+      rules: [
+        { file: 'a.md', to: './', targets: ['claude'] }
+      ],
+      settings: {
+        targets: ['claude', 'codex'],
+        env: ['GEMINI_API_KEY'],
+        envFiles: ['.env', '.env.local'],
+        permissions: { allow: ['Read'] },
+        merge: true
+      }
+    });
+
+    expect(config.settings?.targets).toEqual(['claude', 'codex']);
+  });
+
+  it('rejects invalid settings targets', () => {
+    expect(() => {
+      defineRules({
+        rules: [
+          { file: 'a.md', to: './', targets: ['claude'] }
+        ],
+        settings: {
+          targets: ['factory'] as unknown as NonNullable<Config['settings']>['targets']
+        }
+      });
+    }).toThrow('Config.settings.targets must contain valid agents');
+  });
+
+  it('rejects invalid settings env and permissions shapes', () => {
+    expect(() => {
+      defineRules({
+        rules: [
+          { file: 'a.md', to: './', targets: ['claude'] }
+        ],
+        settings: {
+          env: [123] as unknown as string[]
+        }
+      });
+    }).toThrow('Config.settings.env must be an array of strings');
+
+    expect(() => {
+      defineRules({
+        rules: [
+          { file: 'a.md', to: './', targets: ['claude'] }
+        ],
+        settings: {
+          permissions: 'bad' as unknown as Record<string, unknown>
+        }
+      });
+    }).toThrow('Config.settings.permissions must be an object');
+  });
+
+  it('rejects non-object settings', () => {
+    expect(() => {
+      defineRules({
+        rules: [
+          { file: 'a.md', to: './', targets: ['claude'] }
+        ],
+        settings: 'bad' as unknown as NonNullable<Config['settings']>
+      });
+    }).toThrow('Config.settings must be an object');
+  });
+
+  it('rejects invalid settings envFiles', () => {
+    expect(() => {
+      defineRules({
+        rules: [
+          { file: 'a.md', to: './', targets: ['claude'] }
+        ],
+        settings: {
+          envFiles: [123] as unknown as string[]
+        }
+      });
+    }).toThrow('Config.settings.envFiles must be an array of strings');
+  });
+
+  it('rejects invalid settings merge value', () => {
+    expect(() => {
+      defineRules({
+        rules: [
+          { file: 'a.md', to: './', targets: ['claude'] }
+        ],
+        settings: {
+          merge: 'yes' as unknown as boolean
+        }
+      });
+    }).toThrow('Config.settings.merge must be a boolean');
+  });
 });

@@ -1,6 +1,6 @@
 import { existsSync, statSync } from 'fs';
 import { join, basename } from 'path';
-import type { Config } from '../types';
+import { validateSettingsConfig, type Config } from '../types';
 import { isKnownDirectoryType } from '../agents';
 import { resolveConfigDir } from './utils';
 
@@ -115,6 +115,10 @@ export class ConfigLoader {
           m.targets = ['claude'];
         }
       });
+    }
+
+    if (c.settings !== undefined) {
+      validateSettingsConfig(c.settings);
     }
   }
 

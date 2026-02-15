@@ -224,6 +224,142 @@ describe('ConfigLoader', () => {
       }
     });
 
+    it('should accept valid settings config', async () => {
+      const settingsConfigPath = 'test-config-settings.js';
+      const validConfig = `
+        export default {
+          rules: [{
+            file: '.agents/test.md',
+            to: './',
+            targets: ['claude']
+          }],
+          settings: {
+            targets: ['claude', 'codex'],
+            env: ['GEMINI_API_KEY'],
+            envFiles: ['.env'],
+            permissions: { allow: ['Read'] },
+            merge: true
+          }
+        };
+      `;
+
+      writeFileSync(settingsConfigPath, validConfig);
+      const config = await ConfigLoader.load(settingsConfigPath);
+      expect(config.settings?.targets).toEqual(['claude', 'codex']);
+      if (existsSync(settingsConfigPath)) {
+        unlinkSync(settingsConfigPath);
+      }
+    });
+
+    it('should reject invalid settings config', async () => {
+      const settingsConfigPath = 'test-config-settings-invalid.js';
+      const invalidConfig = `
+        export default {
+          rules: [{
+            file: '.agents/test.md',
+            to: './',
+            targets: ['claude']
+          }],
+          settings: {
+            targets: ['factory'],
+            env: [123]
+          }
+        };
+      `;
+
+      writeFileSync(settingsConfigPath, invalidConfig);
+      await expect(ConfigLoader.load(settingsConfigPath)).rejects.toThrow(/Config.settings/);
+      if (existsSync(settingsConfigPath)) {
+        unlinkSync(settingsConfigPath);
+      }
+    });
+
+    it('should reject non-object settings', async () => {
+      const settingsConfigPath = 'test-config-settings-not-object.js';
+      const invalidConfig = `
+        export default {
+          rules: [{
+            file: '.agents/test.md',
+            to: './',
+            targets: ['claude']
+          }],
+          settings: 'bad'
+        };
+      `;
+
+      writeFileSync(settingsConfigPath, invalidConfig);
+      await expect(ConfigLoader.load(settingsConfigPath)).rejects.toThrow('Config.settings must be an object');
+      if (existsSync(settingsConfigPath)) {
+        unlinkSync(settingsConfigPath);
+      }
+    });
+
+    it('should reject invalid settings envFiles', async () => {
+      const settingsConfigPath = 'test-config-settings-envfiles-invalid.js';
+      const invalidConfig = `
+        export default {
+          rules: [{
+            file: '.agents/test.md',
+            to: './',
+            targets: ['claude']
+          }],
+          settings: {
+            envFiles: [123]
+          }
+        };
+      `;
+
+      writeFileSync(settingsConfigPath, invalidConfig);
+      await expect(ConfigLoader.load(settingsConfigPath)).rejects.toThrow('Config.settings.envFiles must be an array of strings');
+      if (existsSync(settingsConfigPath)) {
+        unlinkSync(settingsConfigPath);
+      }
+    });
+
+    it('should reject invalid settings permissions', async () => {
+      const settingsConfigPath = 'test-config-settings-permissions-invalid.js';
+      const invalidConfig = `
+        export default {
+          rules: [{
+            file: '.agents/test.md',
+            to: './',
+            targets: ['claude']
+          }],
+          settings: {
+            permissions: ['bad']
+          }
+        };
+      `;
+
+      writeFileSync(settingsConfigPath, invalidConfig);
+      await expect(ConfigLoader.load(settingsConfigPath)).rejects.toThrow('Config.settings.permissions must be an object');
+      if (existsSync(settingsConfigPath)) {
+        unlinkSync(settingsConfigPath);
+      }
+    });
+
+    it('should reject invalid settings merge value', async () => {
+      const settingsConfigPath = 'test-config-settings-merge-invalid.js';
+      const invalidConfig = `
+        export default {
+          rules: [{
+            file: '.agents/test.md',
+            to: './',
+            targets: ['claude']
+          }],
+          settings: {
+            merge: 'yes'
+          }
+        };
+      `;
+
+      writeFileSync(settingsConfigPath, invalidConfig);
+      await expect(ConfigLoader.load(settingsConfigPath)).rejects.toThrow('Config.settings.merge must be a boolean');
+      if (existsSync(settingsConfigPath)) {
+        unlinkSync(settingsConfigPath);
+      }
+    });
+
     it('should load config from function export', async () => {
       const functionalConfig = `
         export default () => ({
