@@ -220,6 +220,20 @@ export default defineRules({
   ],
 
   // ─────────────────────────────────────────────────────────────
+  // SETTINGS - Shared env/permissions merged per provider format
+  // ─────────────────────────────────────────────────────────────
+
+  settings: {
+    targets: ['claude', 'cursor', 'codex', 'opencode'],
+    env: ['GEMINI_API_KEY', 'OPENAI_API_KEY'],
+    envFiles: ['.env.agents', '.env.local', '.env'], // Optional (default order shown)
+    permissions: {
+      allow: ['Read', 'Grep']
+    },
+    merge: true
+  },
+
+  // ─────────────────────────────────────────────────────────────
   // BACKUP - Automatic backup before sync
   // ─────────────────────────────────────────────────────────────
 

@@ -30,4 +30,25 @@ describe('replaceStructure', () => {
 
     expect(result).toContain('a');
   });
+
+  it('returns unavailable fallback when tree serialization throws', async () => {
+    const originalJoin = Array.prototype.join;
+    Array.prototype.join = function mockedJoin(this: unknown[]): string {
+      throw new Error('join-failed');
+    };
+
+    try {
+      const result = await replaceStructure({
+        config: { rules: [] },
+        rule: { file: 'a.md', to: './', targets: ['claude'] },
+        content: '__STRUCTURE__',
+        targetPath: 'x',
+        agent: 'claude'
+      });
+
+      expect(result).toContain('Project structure unavailable');
+    } finally {
+      Array.prototype.join = originalJoin;
+    }
+  });
 });

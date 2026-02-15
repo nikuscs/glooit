@@ -36,7 +36,11 @@ describe('AIRulesCore coverage', () => {
       ],
       hooks: [
         { event: 'beforeShellExecution', command: 'echo ok', targets: ['claude', 'cursor'] }
-      ]
+      ],
+      settings: {
+        targets: ['claude'],
+        permissions: { allow: ['Read'] }
+      }
     };
 
     const core = new AIRulesCore(config);
@@ -51,6 +55,7 @@ describe('AIRulesCore coverage', () => {
     expect(paths).toContain('.mcp.json');
     expect(paths).toContain('.claude/settings.json');
     expect(paths).toContain('.cursor/hooks.json');
+    expect(paths).toContain('.claude/settings.local.json');
   });
 
   it('sync handles directory sync with unsupported targets', async () => {

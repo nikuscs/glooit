@@ -16,6 +16,7 @@ interface McpConfigFile {
 }
 import { AgentDistributor } from '../agents/distributor';
 import { AgentHooksDistributor } from '../agents/hooks-distributor';
+import { AgentSettingsDistributor } from '../agents/settings-distributor';
 import { BackupManager } from './backup';
 import { GitIgnoreManager } from './gitignore';
 import { ManifestManager } from './manifest';
@@ -27,6 +28,7 @@ import { AgentWriterFactory } from '../agents/writers';
 export class AIRulesCore {
   private distributor: AgentDistributor;
   private hooksDistributor: AgentHooksDistributor;
+  private settingsDistributor: AgentSettingsDistributor;
   private backupManager: BackupManager;
   private gitIgnoreManager: GitIgnoreManager;
   private manifestManager: ManifestManager;
@@ -35,6 +37,7 @@ export class AIRulesCore {
   constructor(private config: Config) {
     this.distributor = new AgentDistributor(config, this.symlinkPaths);
     this.hooksDistributor = new AgentHooksDistributor(config);
+    this.settingsDistributor = new AgentSettingsDistributor(config);
     this.backupManager = new BackupManager(config);
     this.gitIgnoreManager = new GitIgnoreManager(config);
     this.manifestManager = new ManifestManager(config.configDir);
@@ -69,6 +72,10 @@ export class AIRulesCore {
       // Distribute agent lifecycle hooks (Claude Code, Cursor)
       if (this.config.hooks) {
         await this.hooksDistributor.distributeHooks();
+      }
+
+      if (this.config.settings) {
+        await this.settingsDistributor.distributeSettings();
       }
 
       await this.gitIgnoreManager.updateGitIgnore();
@@ -320,6 +327,13 @@ export class AIRulesCore {
     for (const hookPath of hookPaths) {
       if (!paths.includes(hookPath)) {
         paths.push(hookPath);
+      }
+    }
+
+    const settingsPaths = this.settingsDistributor.getGeneratedPaths();
+    for (const settingsPath of settingsPaths) {
+      if (!paths.includes(settingsPath)) {
+        paths.push(settingsPath);
       }
     }
 
