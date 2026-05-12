@@ -1,0 +1,10 @@
+/.github/ @nikuscs
+/package.json @nikuscs
+/bun.lock @nikuscs
+/tsconfig.json @nikuscs
+/tsconfig.build.json @nikuscs
+/vitest.config.ts @nikuscs
+/index.ts @nikuscs
+/src/ @nikuscs
+/tests/ @nikuscs
+/HomebrewFormula/ @nikuscs
